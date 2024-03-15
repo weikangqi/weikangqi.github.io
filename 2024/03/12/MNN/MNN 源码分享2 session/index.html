@@ -1,0 +1,701 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="klay">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="MNN 使用了ScheduleInfo，以及ScheduleConfig两个类来配置session。有几个变量需要注意。 allTensors 是mnn中的信息，也是计算图中，所有的中间结果需要的tensor。 schedule的创建在MNN中tensor，是模型有向图里面的上下OP的中间计算结果。在创建session时，首先会创建一个schedule，在schedule中初始化常量Tensor,">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MNN源码分析2 Session">
+<meta property="og:url" content="http://example.com/2024/03/12/MNN/MNN%20%E6%BA%90%E7%A0%81%E5%88%86%E4%BA%AB2%20session/index.html">
+<meta property="og:site_name" content="klay&#39;s blog">
+<meta property="og:description" content="MNN 使用了ScheduleInfo，以及ScheduleConfig两个类来配置session。有几个变量需要注意。 allTensors 是mnn中的信息，也是计算图中，所有的中间结果需要的tensor。 schedule的创建在MNN中tensor，是模型有向图里面的上下OP的中间计算结果。在创建session时，首先会创建一个schedule，在schedule中初始化常量Tensor,">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://s2.loli.net/2024/03/12/AUQ3MRt2ndakyup.png">
+<meta property="article:published_time" content="2024-03-12T10:42:30.000Z">
+<meta property="article:modified_time" content="2024-03-15T13:15:18.953Z">
+<meta property="article:author" content="klay">
+<meta property="article:tag" content="模型部署">
+<meta property="article:tag" content="MNN">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://s2.loli.net/2024/03/12/AUQ3MRt2ndakyup.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>MNN源码分析2 Session - klay&#39;s blog</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.7","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="MNN源码分析2 Session"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2024-03-12 18:42" pubdate>
+          2024年3月12日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          2.8k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          24 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">MNN源码分析2 Session</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>MNN 使用了ScheduleInfo，以及ScheduleConfig两个类来配置session。<br>有几个变量需要注意。</p>
+<p><code>allTensors</code> 是mnn中的信息，也是计算图中，所有的中间结果需要的tensor。</p>
+<h2 id="schedule的创建"><a href="#schedule的创建" class="headerlink" title="schedule的创建"></a>schedule的创建</h2><p>在MNN中tensor，是模型有向图里面的上下OP的中间计算结果。<br>在创建session时，首先会创建一个schedule，在schedule中初始化常量Tensor,创建Tensor，初始化他们的维度信息等。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br></pre></td><td class="code"><pre><code class="hljs Cpp"><span class="hljs-function"><span class="hljs-type">bool</span> <span class="hljs-title">Schedule::schedule</span><span class="hljs-params">(ScheduleInfo&amp; scheduleInfo, <span class="hljs-type">const</span> Net* net, <span class="hljs-type">const</span> std::vector&lt;ScheduleConfig&gt;&amp; configs, <span class="hljs-type">const</span> RuntimeInfo&amp; runtimeInfo)</span> </span>&#123;<br>    <span class="hljs-keyword">if</span> (<span class="hljs-literal">nullptr</span> == net-&gt;<span class="hljs-built_in">oplists</span>()) &#123;<br>        <span class="hljs-built_in">MNN_PRINT</span>(<span class="hljs-string">&quot;Empty net for schedule\n&quot;</span>);<br>        <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;<br>    &#125;<br>    <span class="hljs-keyword">if</span> (scheduleInfo.defaultBackend.<span class="hljs-built_in">get</span>() == <span class="hljs-literal">nullptr</span> &amp;&amp; scheduleInfo.allTensors.<span class="hljs-built_in">empty</span>()) &#123;<br>        <span class="hljs-comment">// Const not init, init it</span><br>        BackendConfig defaultConfig;<br>        defaultConfig.flags = <span class="hljs-number">4</span>;<br>        scheduleInfo.defaultBackend.<span class="hljs-built_in">reset</span>(runtimeInfo.second-&gt;<span class="hljs-built_in">onCreate</span>(&amp;defaultConfig));  <span class="hljs-comment">// 通过runtimeInfo.second 创建默认的backend 给scheduleInfo</span><br>        ErrorCode code = NO_ERROR;<br>        <span class="hljs-built_in">initConstTensors</span>(scheduleInfo.allTensors, net, scheduleInfo.defaultBackend.<span class="hljs-built_in">get</span>(), code); <span class="hljs-comment">//初始化常量Tensor，MNN.fbs 里面的OpType的Const</span><br>        <span class="hljs-keyword">if</span> (NO_ERROR != code) &#123;<br>            <span class="hljs-built_in">MNN_ERROR</span>(<span class="hljs-string">&quot;Schedule Const init errorcode = %d\n&quot;</span>, code);<br>            <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;<br>        &#125;<br>    &#125;<br>    <span class="hljs-type">bool</span> valid = <span class="hljs-built_in">initTensors</span>(scheduleInfo.allTensors, net); <span class="hljs-comment">//为所有的tensor其分配dim，初始化。MNN中每个tensor都会有一个index，方便操作</span><br>    scheduleInfo.validForResize = valid;<br>    std::vector&lt;std::shared_ptr&lt;Tensor&gt;&gt;&amp; allTensors = scheduleInfo.allTensors;<br>    std::vector&lt;std::pair&lt;Schedule::BackendCache, std::vector&lt;Schedule::OpCacheInfo&gt;&gt;&gt; result;  <span class="hljs-comment">//初始化 用来存op</span><br><br>    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">auto</span>&amp; config : configs) &#123;<br>        Backend::Info compute;<br>        compute.type      = <span class="hljs-built_in">getApprociateType</span>(config);<br>        compute.numThread = config.numThread;<br>        <span class="hljs-keyword">if</span>(config.type == MNN_FORWARD_AUTO) &#123;<br>            <span class="hljs-keyword">if</span>(compute.type == MNN_FORWARD_OPENCL || compute.type == MNN_FORWARD_METAL) &#123;<br>                <span class="hljs-comment">// AUTO set default gpu-mode MNN_GPU_TUNING_FAST</span><br>                compute.numThread = <span class="hljs-number">16</span>;<br>            &#125;<br>        &#125;<br>        compute.user      = config.backendConfig;<br>        <span class="hljs-keyword">auto</span> oplists      = _scheduleUnit(net, config, allTensors);  <span class="hljs-comment">//这里输出对应的op 执行顺序</span><br>        Schedule::BackendCache cache;<br>        cache.info = std::<span class="hljs-built_in">move</span>(compute);<br>        result.<span class="hljs-built_in">emplace_back</span>(std::<span class="hljs-built_in">make_pair</span>(cache, std::<span class="hljs-built_in">move</span>(oplists)));   <span class="hljs-comment">//转入result</span><br>    &#125;<br><br>    scheduleInfo.pipelineInfo = std::<span class="hljs-built_in">move</span>(result); <span class="hljs-comment">//存入pipline</span><br><br>    <span class="hljs-comment">// get all used op&#x27;s output, drop unused op, won&#x27;t change op order. always insert all Input Ops</span><br>    std::vector&lt;<span class="hljs-type">const</span> Op*&gt; oplists;<br>    &#123;<br>        <span class="hljs-keyword">for</span> (std::pair&lt;Schedule::BackendCache, vector&lt;Schedule::OpCacheInfo&gt;&gt;&amp; pipeline : scheduleInfo.pipelineInfo) &#123;<br>            <span class="hljs-keyword">for</span> (<span class="hljs-keyword">auto</span>&amp; info : pipeline.second) &#123;<br>                oplists.<span class="hljs-built_in">push_back</span>(info.op);<br>            &#125;<br>        &#125;<br>    &#125;<br>    <span class="hljs-comment">// set tensors&#x27; input/output usage by oplists info</span><br>    <span class="hljs-built_in">setInputOutputForOps</span>(allTensors, oplists, net-&gt;<span class="hljs-built_in">usage</span>() == Usage_INFERENCE_STATIC);<br><br>    <span class="hljs-comment">// add output index by config info and outputName</span><br>    std::unordered_map&lt;std::string, <span class="hljs-type">int</span>&gt; tensorNameIndexMap;<br>    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; net-&gt;<span class="hljs-built_in">tensorName</span>()-&gt;<span class="hljs-built_in">size</span>(); ++i) &#123;<br>        tensorNameIndexMap[net-&gt;<span class="hljs-built_in">tensorName</span>()-&gt;<span class="hljs-built_in">Get</span>(i)-&gt;<span class="hljs-built_in">str</span>()] = i;<br>    &#125;<br>    <span class="hljs-type">bool</span> userSetOutput = <span class="hljs-literal">false</span>;<br>    <span class="hljs-comment">//这里时对应着，比如你想打印一些中间tensor， 就需要在tensormap中根据name找到他们，并当成输出tensor。</span><br>    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">auto</span>&amp; config : configs) &#123;<br>        userSetOutput = userSetOutput || (!config.saveTensors.<span class="hljs-built_in">empty</span>());<br>        <span class="hljs-keyword">for</span> (<span class="hljs-type">const</span> <span class="hljs-keyword">auto</span>&amp; name : config.saveTensors) &#123;<br>            <span class="hljs-keyword">auto</span> iter = tensorNameIndexMap.<span class="hljs-built_in">find</span>(name);<br>            <span class="hljs-keyword">if</span> (iter != tensorNameIndexMap.<span class="hljs-built_in">end</span>()) &#123;<br>                <span class="hljs-keyword">auto</span> t = allTensors[iter-&gt;second].<span class="hljs-built_in">get</span>();<br>                <span class="hljs-keyword">if</span> (TensorUtils::<span class="hljs-built_in">getDescribe</span>(t)-&gt;usage == Tensor::InsideDescribe::NORMAL) &#123;<br>                    TensorUtils::<span class="hljs-built_in">getDescribe</span>(t)-&gt;usage = Tensor::InsideDescribe::OUTPUT;<br>                &#125;<br>                scheduleInfo.outputTensor.<span class="hljs-built_in">insert</span>(<br>                           std::<span class="hljs-built_in">make_pair</span>(net-&gt;<span class="hljs-built_in">tensorName</span>()-&gt;<span class="hljs-built_in">GetAsString</span>(iter-&gt;second)-&gt;<span class="hljs-built_in">c_str</span>(), t));<br>            &#125; <span class="hljs-keyword">else</span> &#123;<br>                <span class="hljs-built_in">MNN_PRINT</span>(<span class="hljs-string">&quot;Bad outputname: %s\n&quot;</span>, name.<span class="hljs-built_in">c_str</span>());<br>            &#125;<br>        &#125;<br>    &#125;<br>    <span class="hljs-keyword">if</span> (net-&gt;<span class="hljs-built_in">outputName</span>()) &#123;<br>        userSetOutput = userSetOutput || net-&gt;<span class="hljs-built_in">outputName</span>()-&gt;<span class="hljs-built_in">size</span>() &gt;= <span class="hljs-number">1</span>;<br>        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; net-&gt;<span class="hljs-built_in">outputName</span>()-&gt;<span class="hljs-built_in">size</span>(); ++i) &#123;<br>            std::string name = net-&gt;<span class="hljs-built_in">outputName</span>()-&gt;<span class="hljs-built_in">Get</span>(i)-&gt;<span class="hljs-built_in">str</span>();<br>            <span class="hljs-keyword">auto</span> iter = tensorNameIndexMap.<span class="hljs-built_in">find</span>(name);<br>            <span class="hljs-keyword">if</span> (iter != tensorNameIndexMap.<span class="hljs-built_in">end</span>()) &#123;<br>                <span class="hljs-keyword">auto</span> t = allTensors[iter-&gt;second].<span class="hljs-built_in">get</span>();<br>                <span class="hljs-keyword">if</span> (TensorUtils::<span class="hljs-built_in">getDescribe</span>(t)-&gt;usage == Tensor::InsideDescribe::NORMAL) &#123;<br>                    TensorUtils::<span class="hljs-built_in">getDescribe</span>(t)-&gt;usage = Tensor::InsideDescribe::OUTPUT;<br>                &#125;<br>                scheduleInfo.outputTensor.<span class="hljs-built_in">insert</span>(<br>                               std::<span class="hljs-built_in">make_pair</span>(net-&gt;<span class="hljs-built_in">tensorName</span>()-&gt;<span class="hljs-built_in">GetAsString</span>(iter-&gt;second)-&gt;<span class="hljs-built_in">c_str</span>(), t));<br>            &#125;<br>        &#125;<br>    &#125;<br>    <span class="hljs-keyword">if</span> (scheduleInfo.outputTensor.<span class="hljs-built_in">empty</span>()) &#123;<br>        userSetOutput = <span class="hljs-literal">false</span>;<br>    &#125;<br>    <span class="hljs-comment">// add input/output tensor to schedule&#x27;s input/output</span><br>    <span class="hljs-comment">//配置scheduleInfo 记录模型的输入 输出张量</span><br>    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> index = <span class="hljs-number">0</span>; index &lt; allTensors.<span class="hljs-built_in">size</span>(); index++) &#123;<br>        <span class="hljs-keyword">auto</span> t = allTensors[index].<span class="hljs-built_in">get</span>();<br>        <span class="hljs-keyword">auto</span> usage = TensorUtils::<span class="hljs-built_in">getDescribe</span>(t)-&gt;usage;  <span class="hljs-comment">//usage NORMAL ,INPUT </span><br>        <span class="hljs-keyword">if</span> (usage == Tensor::InsideDescribe::INPUT) &#123;<br>            scheduleInfo.inputTensors.<span class="hljs-built_in">insert</span>(std::<span class="hljs-built_in">make_pair</span>(net-&gt;<span class="hljs-built_in">tensorName</span>()-&gt;<span class="hljs-built_in">GetAsString</span>(index)-&gt;<span class="hljs-built_in">c_str</span>(), t));<br>        &#125;<br>        <span class="hljs-keyword">if</span> (usage == Tensor::InsideDescribe::OUTPUT &amp;&amp; (!userSetOutput)) &#123;<br>            scheduleInfo.outputTensor.<span class="hljs-built_in">insert</span>(<br>                       std::<span class="hljs-built_in">make_pair</span>(net-&gt;<span class="hljs-built_in">tensorName</span>()-&gt;<span class="hljs-built_in">GetAsString</span>(index)-&gt;<span class="hljs-built_in">c_str</span>(), t));<br>        &#125;<br>    &#125;<br>    <span class="hljs-comment">// 是否是静态推理</span><br>    <span class="hljs-keyword">if</span> (net-&gt;<span class="hljs-built_in">usage</span>() == Usage_INFERENCE_STATIC) &#123;  <br>        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">auto</span>&amp; pipInfo : scheduleInfo.pipelineInfo) &#123;<br>            pipInfo.first.needComputeGeometry = <span class="hljs-literal">false</span>;   <br>            pipInfo.first.needComputeShape = <span class="hljs-literal">false</span>;<br>        &#125;<br>    &#125;<br>    <span class="hljs-comment">// 设置flag needComputeGeometry需要计算 计算图buildConstantTensors</span><br><span class="hljs-meta">#<span class="hljs-keyword">ifndef</span> MNN_BUILD_MINI</span><br>    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">auto</span> iter = scheduleInfo.pipelineInfo.<span class="hljs-built_in">begin</span>(); iter != scheduleInfo.pipelineInfo.<span class="hljs-built_in">end</span>();) &#123;<br>        <span class="hljs-keyword">if</span> (!iter-&gt;first.needComputeGeometry) &#123;<br>            <span class="hljs-comment">// For static model don&#x27;t need check const</span><br>            iter++;<br>            <span class="hljs-keyword">continue</span>;<br>        &#125;<br>        <span class="hljs-keyword">auto</span> breakIndex = GeometryComputerUtils::<span class="hljs-built_in">buildConstantTensors</span>(iter-&gt;second);<br>        <span class="hljs-keyword">if</span> (breakIndex &gt;= <span class="hljs-number">0</span>) &#123;<br>            scheduleInfo.needInputContentForShape = <span class="hljs-literal">true</span>;<br>        &#125;<br><span class="hljs-meta">#<span class="hljs-keyword">ifdef</span> MNN_SEPERTE_SIZE</span><br>        <span class="hljs-keyword">if</span> (breakIndex &gt;= <span class="hljs-number">0</span> &amp;&amp; (breakIndex + <span class="hljs-number">1</span>) &lt; iter-&gt;second.<span class="hljs-built_in">size</span>()) &#123;<br>            <span class="hljs-comment">// Split oplist</span><br>            std::vector&lt;Schedule::PipelineInfo&gt; fuse;<br>            std::vector&lt;Schedule::PipelineInfo&gt; separate;<br>            fuse.<span class="hljs-built_in">insert</span>(fuse.<span class="hljs-built_in">begin</span>(), iter-&gt;second.<span class="hljs-built_in">begin</span>(), iter-&gt;second.<span class="hljs-built_in">begin</span>() + breakIndex + <span class="hljs-number">1</span>);<br>            separate.<span class="hljs-built_in">insert</span>(separate.<span class="hljs-built_in">begin</span>(), iter-&gt;second.<span class="hljs-built_in">begin</span>() + breakIndex + <span class="hljs-number">1</span>, iter-&gt;second.<span class="hljs-built_in">end</span>());<br>            oplists.<span class="hljs-built_in">clear</span>();<br>            iter-&gt;second = std::<span class="hljs-built_in">move</span>(separate);<br>            iter = scheduleInfo.pipelineInfo.<span class="hljs-built_in">insert</span>(iter, std::<span class="hljs-built_in">make_pair</span>(iter-&gt;first, fuse));<br>            iter++;<br>            iter++;<br>        &#125; <span class="hljs-keyword">else</span> &#123;<br>            iter++;<br>        &#125;<br><span class="hljs-meta">#<span class="hljs-keyword">else</span></span><br>        iter++;<br><span class="hljs-meta">#<span class="hljs-keyword">endif</span></span><br>    &#125;<br><span class="hljs-meta">#<span class="hljs-keyword">endif</span></span><br>    <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>配置scheduleInfo 配置模型的输入 输出张量的string，也就是在推理时，我们可以根据输入输出tensor的string来，初始化我们的输入，根据output的名字来读取结果。<br>从上面代码可以看到，如果输入是静态的化，也就是讲可以确定输入和输出的dim维度信息。那么就不需要在线计算你的中间tensor的大小。</p>
+<h2 id="initTensor"><a href="#initTensor" class="headerlink" title="initTensor"></a>initTensor</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br></pre></td><td class="code"><pre><code class="hljs Cpp"><span class="hljs-function"><span class="hljs-type">bool</span> <span class="hljs-title">initTensors</span><span class="hljs-params">(std::vector&lt;std::shared_ptr&lt;Tensor&gt;&gt;&amp; tensors, <span class="hljs-type">const</span> Net* net)</span> </span>&#123;<br>    <span class="hljs-type">bool</span> valid    = <span class="hljs-literal">true</span>;<br>    <span class="hljs-keyword">auto</span> describes = net-&gt;<span class="hljs-built_in">extraTensorDescribe</span>();<br>    <span class="hljs-function">std::vector&lt;<span class="hljs-type">const</span> TensorDescribe*&gt; <span class="hljs-title">des</span><span class="hljs-params">(tensors.size())</span></span>;<br>    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i=<span class="hljs-number">0</span>; i&lt;tensors.<span class="hljs-built_in">size</span>(); ++i) &#123;<br>        <span class="hljs-comment">// Init all tensor except for const</span><br>        <span class="hljs-keyword">if</span> (tensors[i].<span class="hljs-built_in">get</span>() == <span class="hljs-literal">nullptr</span>) &#123;<br>            tensors[i].<span class="hljs-built_in">reset</span>(<span class="hljs-keyword">new</span> Tensor);  <span class="hljs-comment">//虽然这里new 了一个tensor 但是 tensor 内部存储数据的内存 仍然没有分配</span><br>            TensorUtils::<span class="hljs-built_in">getDescribe</span>(tensors[i].<span class="hljs-built_in">get</span>())-&gt;index = i;<br>            <span class="hljs-comment">// MNN_PRINT(&quot;initTensors create tensor:%p, index:%d, backend:%d\n&quot;, tensors[i].get(), i, TensorUtils::getDescribe(tensors[i].get())-&gt;backend);</span><br>        &#125;<br>    &#125;<br>    <span class="hljs-keyword">if</span> (describes) &#123;<br>        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; describes-&gt;<span class="hljs-built_in">size</span>(); i++) &#123;<br>            <span class="hljs-type">int</span> index  = describes-&gt;<span class="hljs-built_in">GetAs</span>&lt;TensorDescribe&gt;(i)-&gt;<span class="hljs-built_in">index</span>();<br>            des[index] = describes-&gt;<span class="hljs-built_in">GetAs</span>&lt;TensorDescribe&gt;(i);<br>        &#125;<br>    &#125;<br>    <span class="hljs-comment">//设置Tensor的量化信息</span><br>    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; tensors.<span class="hljs-built_in">size</span>(); ++i) &#123;<br>        <span class="hljs-keyword">if</span> (des[i] != <span class="hljs-literal">nullptr</span> &amp;&amp; des[i]-&gt;<span class="hljs-built_in">quantInfo</span>()) &#123;    <br>            TensorUtils::<span class="hljs-built_in">getDescribe</span>(tensors[i].<span class="hljs-built_in">get</span>())-&gt;quantAttr.<span class="hljs-built_in">reset</span>(<span class="hljs-keyword">new</span> QuantAttr);<br>            <span class="hljs-keyword">auto</span> quant   = TensorUtils::<span class="hljs-built_in">getDescribe</span>(tensors[i].<span class="hljs-built_in">get</span>())-&gt;quantAttr.<span class="hljs-built_in">get</span>();<br>            quant-&gt;scale =  des[i]-&gt;<span class="hljs-built_in">quantInfo</span>()-&gt;<span class="hljs-built_in">scale</span>();<br>            quant-&gt;zero  =  des[i]-&gt;<span class="hljs-built_in">quantInfo</span>()-&gt;<span class="hljs-built_in">zero</span>();<br>            quant-&gt;min   =  des[i]-&gt;<span class="hljs-built_in">quantInfo</span>()-&gt;<span class="hljs-built_in">min</span>();<br>            quant-&gt;max   =  des[i]-&gt;<span class="hljs-built_in">quantInfo</span>()-&gt;<span class="hljs-built_in">max</span>();<br>            <span class="hljs-comment">// Don&#x27;t copy datatype, it can be set by backend</span><br>        &#125;<br>    &#125;<br>    <span class="hljs-comment">// Set Input Tensor, if the type of input is not the same with ExtraTensorDescribe, use input parameter</span><br>    <span class="hljs-comment">// 其实就是设置input 层的tensor，将input op的dim 维度信息 给Tensor</span><br>    <span class="hljs-comment">// 对于输入图片是动态的 dim的后的h,w是-1 （猜想）</span><br>    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> opIndex = <span class="hljs-number">0</span>; opIndex &lt; net-&gt;<span class="hljs-built_in">oplists</span>()-&gt;<span class="hljs-built_in">size</span>(); ++opIndex) &#123;<br>        <span class="hljs-keyword">auto</span> op = net-&gt;<span class="hljs-built_in">oplists</span>()-&gt;<span class="hljs-built_in">GetAs</span>&lt;Op&gt;(opIndex);<br>        <span class="hljs-keyword">if</span> (OpType_Input == op-&gt;<span class="hljs-built_in">type</span>()) &#123;<br>            <span class="hljs-built_in">MNN_ASSERT</span>(<span class="hljs-literal">nullptr</span> != op-&gt;<span class="hljs-built_in">outputIndexes</span>());<br>            <span class="hljs-built_in">MNN_ASSERT</span>(op-&gt;<span class="hljs-built_in">outputIndexes</span>()-&gt;<span class="hljs-built_in">size</span>() == <span class="hljs-number">1</span>);<br>            <span class="hljs-keyword">auto</span> index      = op-&gt;<span class="hljs-built_in">outputIndexes</span>()-&gt;<span class="hljs-built_in">data</span>()[<span class="hljs-number">0</span>];<br>            <span class="hljs-keyword">auto</span> tensor     = tensors[index].<span class="hljs-built_in">get</span>();<br>            <span class="hljs-keyword">auto</span>&amp; tb        = tensor-&gt;<span class="hljs-built_in">buffer</span>();<br>            <span class="hljs-keyword">auto</span> inputParam = op-&gt;<span class="hljs-built_in">main_as_Input</span>();<br>            <span class="hljs-keyword">if</span> (<span class="hljs-keyword">auto</span> idims = inputParam-&gt;<span class="hljs-built_in">dims</span>()) &#123;<br>                <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; idims-&gt;<span class="hljs-built_in">size</span>(); ++i) &#123;<br>                    <span class="hljs-type">int</span> extent = idims-&gt;<span class="hljs-built_in">data</span>()[i];<br>                    <span class="hljs-comment">// dim-0 is batch(when input batch is -1, set it to be 1, ignore other dim)</span><br>                    <span class="hljs-keyword">if</span> (i == <span class="hljs-number">0</span> &amp;&amp; extent == <span class="hljs-number">-1</span>) &#123;<br>                        extent = <span class="hljs-number">1</span>;<br>                    &#125;<br>                    <span class="hljs-keyword">if</span> (extent &lt; <span class="hljs-number">0</span>) &#123;<br>                        valid = <span class="hljs-literal">false</span>;<br>                    &#125;<br>                    tb.dim[i].extent = extent;<br>                &#125;<br>                tb.dimensions = idims-&gt;<span class="hljs-built_in">size</span>();<br>            &#125; <span class="hljs-keyword">else</span> &#123;<br>                tb.dimensions = <span class="hljs-number">0</span>;<br>            &#125;<br>            tensor-&gt;<span class="hljs-built_in">setType</span>(inputParam-&gt;<span class="hljs-built_in">dtype</span>());<br>            TensorUtils::<span class="hljs-built_in">getDescribe</span>(tensor)-&gt;dimensionFormat = inputParam-&gt;<span class="hljs-built_in">dformat</span>();<br>            TensorUtils::<span class="hljs-built_in">setLinearLayout</span>(tensor);<br>        &#125;<br>    &#125;<br>    <span class="hljs-keyword">if</span> (net-&gt;<span class="hljs-built_in">usage</span>() != Usage_INFERENCE_STATIC) &#123;<br>        <span class="hljs-keyword">return</span> valid;<br>    &#125;<br>    <span class="hljs-comment">//如果模型时静态的就直接初始化Tensor的shape</span><br>    <span class="hljs-comment">// static model will set all tensors&#x27; shape</span><br>    <span class="hljs-comment">//动态的话 resizeTensor中初始化，因为到那个时候Tensor的shape才能根据input来确定</span><br>    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; describes-&gt;<span class="hljs-built_in">size</span>(); i++) &#123;<br>        <span class="hljs-type">int</span> index  = describes-&gt;<span class="hljs-built_in">GetAs</span>&lt;TensorDescribe&gt;(i)-&gt;<span class="hljs-built_in">index</span>();<br>        des[index] = describes-&gt;<span class="hljs-built_in">GetAs</span>&lt;TensorDescribe&gt;(i);<br>    &#125;<br>    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; tensors.<span class="hljs-built_in">size</span>(); ++i) &#123;<br>        <span class="hljs-keyword">if</span> (TensorUtils::<span class="hljs-built_in">getDescribe</span>(tensors[i].<span class="hljs-built_in">get</span>())-&gt;usage != Tensor::InsideDescribe::NORMAL) &#123;<br>            <span class="hljs-comment">// Const / Trainable Shape has been inited</span><br>            <span class="hljs-keyword">continue</span>;<br>        &#125;<br>        <span class="hljs-keyword">auto</span> blob = des[i]-&gt;<span class="hljs-built_in">blob</span>();<br>        <span class="hljs-keyword">auto</span>&amp; tb = tensors[i]-&gt;<span class="hljs-built_in">buffer</span>();<br>        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">auto</span> idims = blob-&gt;<span class="hljs-built_in">dims</span>()) &#123;<br>            <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> d = <span class="hljs-number">0</span>; d &lt; idims-&gt;<span class="hljs-built_in">size</span>(); d++) &#123;<br>                tb.dim[d].extent = idims-&gt;<span class="hljs-built_in">Get</span>(d);<br>            &#125;<br>            tb.dimensions = idims-&gt;<span class="hljs-built_in">size</span>();<br>        &#125; <span class="hljs-keyword">else</span> &#123;<br>            tb.dimensions = <span class="hljs-number">0</span>;<br>        &#125;<br>        tensors[i]-&gt;<span class="hljs-built_in">setType</span>(blob-&gt;<span class="hljs-built_in">dataType</span>());<br>    &#125;<br>    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; tensors.<span class="hljs-built_in">size</span>(); ++i) &#123;<br>        <span class="hljs-keyword">auto</span> blob                                                   = des[i]-&gt;<span class="hljs-built_in">blob</span>();<br>        TensorUtils::<span class="hljs-built_in">getDescribe</span>(tensors[i].<span class="hljs-built_in">get</span>())-&gt;dimensionFormat = blob-&gt;<span class="hljs-built_in">dataFormat</span>();<br>        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">auto</span> regions = des[i]-&gt;<span class="hljs-built_in">regions</span>()) &#123;<br>            <span class="hljs-keyword">auto</span>&amp; regs = TensorUtils::<span class="hljs-built_in">getDescribe</span>(tensors[i].<span class="hljs-built_in">get</span>())-&gt;regions;<br>            TensorUtils::<span class="hljs-built_in">getDescribe</span>(tensors[i].<span class="hljs-built_in">get</span>())-&gt;memoryType = Tensor::InsideDescribe::MEMORY_BACKEND;<br>            regs.<span class="hljs-built_in">reserve</span>(regions-&gt;<span class="hljs-built_in">size</span>());<br>            <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> r = <span class="hljs-number">0</span>; r &lt; regions-&gt;<span class="hljs-built_in">size</span>(); r++) &#123;<br>                <span class="hljs-keyword">auto</span> region = regions-&gt;<span class="hljs-built_in">GetAs</span>&lt;Region&gt;(r);<br>                Tensor::InsideDescribe::Region reg;<br>                reg.origin     = tensors[region-&gt;<span class="hljs-built_in">origin</span>()].<span class="hljs-built_in">get</span>();<br>                reg.src.offset = region-&gt;<span class="hljs-built_in">src</span>()-&gt;<span class="hljs-built_in">offset</span>();<br>                reg.dst.offset = region-&gt;<span class="hljs-built_in">dst</span>()-&gt;<span class="hljs-built_in">offset</span>();<br>                <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> d = <span class="hljs-number">0</span>; d &lt; <span class="hljs-number">3</span>; d++) &#123;<br>                    reg.size[d]       = region-&gt;<span class="hljs-built_in">size</span>()-&gt;<span class="hljs-built_in">data</span>()[d];<br>                    reg.src.stride[d] = region-&gt;<span class="hljs-built_in">src</span>()-&gt;<span class="hljs-built_in">stride</span>()-&gt;<span class="hljs-built_in">data</span>()[d];<br>                    reg.dst.stride[d] = region-&gt;<span class="hljs-built_in">dst</span>()-&gt;<span class="hljs-built_in">stride</span>()-&gt;<span class="hljs-built_in">data</span>()[d];<br>                &#125;<br>                regs.<span class="hljs-built_in">emplace_back</span>(std::<span class="hljs-built_in">move</span>(reg));<br>            &#125;<br>        &#125;<br>    &#125;<br>    <span class="hljs-keyword">return</span> valid;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+<h2 id="计算图oplist的构建"><a href="#计算图oplist的构建" class="headerlink" title="计算图oplist的构建"></a>计算图oplist的构建</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs Cpp"><span class="hljs-type">static</span> vector&lt;Schedule::OpCacheInfo&gt; _scheduleUnit(<span class="hljs-type">const</span> Net* net, <span class="hljs-type">const</span> ScheduleConfig&amp; configs,<br>                                                    <span class="hljs-type">const</span> vector&lt;shared_ptr&lt;Tensor&gt;&gt;&amp; allTensors) &#123;<br>    vector&lt;Schedule::OpCacheInfo&gt; oplists;<br>    vector&lt;<span class="hljs-type">const</span> Op*&gt; ops;<br>    <span class="hljs-built_in">generateScheduleGraph</span>(ops, net, configs, allTensors); <span class="hljs-comment">//import 构建计算图</span><br>    <span class="hljs-built_in">initPipelineInfosFromOps</span>(oplists, ops, allTensors); <span class="hljs-comment">//import 初始化pipline 后续计算全部根据pipline</span><br>    <span class="hljs-keyword">return</span> oplists;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>schedle的构造函数中的，<code>_scheduleUnit</code>函数很重要。<code>generateScheduleGraph</code>用来生成<code>OPlists</code>,<code>OPlists</code>是个有向无环图，记录着<code>OP</code>的执行顺序。下面是<code>generateScheduleGraph</code>的一部分。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs Cpp"><span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">generateScheduleGraph</span><span class="hljs-params">(vector&lt;<span class="hljs-type">const</span> Op*&gt;&amp; ops, <span class="hljs-type">const</span> Net* net, <span class="hljs-type">const</span> ScheduleConfig&amp; configs,</span></span><br><span class="hljs-params"><span class="hljs-function">                                  <span class="hljs-type">const</span> vector&lt;shared_ptr&lt;Tensor&gt;&gt;&amp; allTensors)</span> </span>&#123;<br>    <span class="hljs-keyword">if</span> (configs.path.inputs.<span class="hljs-built_in">empty</span>() &amp;&amp; configs.path.outputs.<span class="hljs-built_in">empty</span>()) &#123;<br>        <span class="hljs-comment">// Use Default Linear schedule</span><br>        ops.<span class="hljs-built_in">clear</span>();<br>        ops.<span class="hljs-built_in">reserve</span>(net-&gt;<span class="hljs-built_in">oplists</span>()-&gt;<span class="hljs-built_in">size</span>());<br>        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; net-&gt;<span class="hljs-built_in">oplists</span>()-&gt;<span class="hljs-built_in">size</span>(); ++i) &#123;<br>            <span class="hljs-keyword">auto</span> op = net-&gt;<span class="hljs-built_in">oplists</span>()-&gt;<span class="hljs-built_in">GetAs</span>&lt;Op&gt;(i);<br>            ops.<span class="hljs-built_in">emplace_back</span>(op);  <span class="hljs-comment">//ops[4]-&gt;type()  MNN::OpType_ConvolutionDepthwise</span><br>        &#125;<br>        <span class="hljs-keyword">return</span>;<br>    &#125;<br></code></pre></td></tr></table></figure>
+<p>其中主要做的是，将mnn的flatbuffer中的net中的oplist，通过<code>net-&gt;oplists()-&gt;GetAs&lt;Op&gt;</code>读到程序里面。这样<code>OPlist</code>就基本构建好了。</p>
+<h2 id="初始化OP的输入，输出地址"><a href="#初始化OP的输入，输出地址" class="headerlink" title="初始化OP的输入，输出地址"></a>初始化OP的输入，输出地址</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs Cpp"><span class="hljs-type">static</span> vector&lt;Schedule::OpCacheInfo&gt; _scheduleUnit(<span class="hljs-type">const</span> Net* net, <span class="hljs-type">const</span> ScheduleConfig&amp; configs,<br>                                                    <span class="hljs-type">const</span> vector&lt;shared_ptr&lt;Tensor&gt;&gt;&amp; allTensors) &#123;<br>    vector&lt;Schedule::OpCacheInfo&gt; oplists;<br>    vector&lt;<span class="hljs-type">const</span> Op*&gt; ops;<br>    <span class="hljs-built_in">generateScheduleGraph</span>(ops, net, configs, allTensors); <span class="hljs-comment">//import 构建计算图</span><br>    <span class="hljs-built_in">initPipelineInfosFromOps</span>(oplists, ops, allTensors); <span class="hljs-comment">//import 初始化pipline 后续计算全部根据pipline</span><br>    <span class="hljs-keyword">return</span> oplists;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+<p>在<code>initPipelineInfosFromOps</code>中</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs Cpp"><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">initPipelineInfosFromOps</span><span class="hljs-params">(std::vector&lt;Schedule::OpCacheInfo&gt;&amp; infos, std::vector&lt;<span class="hljs-type">const</span> Op*&gt;&amp; ops, <span class="hljs-type">const</span> std::vector&lt;std::shared_ptr&lt;Tensor&gt;&gt;&amp; allTensors)</span> </span>&#123;<br>    <span class="hljs-keyword">for</span> (<span class="hljs-type">const</span> Op* op : ops) &#123;<br>        <span class="hljs-comment">// MNN_PRINT(&quot;initPipelineInfosFromOps, op type:%s, op name:%s\n&quot;, EnumNameOpType(op-&gt;type()), op-&gt;name()-&gt;c_str());</span><br><br>        Schedule::OpCacheInfo opInfo;<br>        opInfo.op = op;<br>        <span class="hljs-keyword">if</span> (<span class="hljs-literal">nullptr</span> != op-&gt;<span class="hljs-built_in">outputIndexes</span>()) &#123;<br>            <span class="hljs-keyword">auto</span> data = op-&gt;<span class="hljs-built_in">outputIndexes</span>()-&gt;<span class="hljs-built_in">data</span>();<br>            <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> j = <span class="hljs-number">0</span>; j &lt; op-&gt;<span class="hljs-built_in">outputIndexes</span>()-&gt;<span class="hljs-built_in">size</span>(); ++j) &#123;<br>                opInfo.outputs.<span class="hljs-built_in">push_back</span>(allTensors[data[j]].<span class="hljs-built_in">get</span>());  <span class="hljs-comment">// 这里设置OP 的输出tensor</span><br>            &#125;<br>        &#125;<br>        <span class="hljs-keyword">if</span> (<span class="hljs-literal">nullptr</span> != op-&gt;<span class="hljs-built_in">inputIndexes</span>()) &#123;<br>            <span class="hljs-keyword">auto</span> data = op-&gt;<span class="hljs-built_in">inputIndexes</span>()-&gt;<span class="hljs-built_in">data</span>();<br>            <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> j = <span class="hljs-number">0</span>; j &lt; op-&gt;<span class="hljs-built_in">inputIndexes</span>()-&gt;<span class="hljs-built_in">size</span>(); ++j) &#123;<br>                opInfo.inputs.<span class="hljs-built_in">push_back</span>(allTensors[data[j]].<span class="hljs-built_in">get</span>());  <span class="hljs-comment">// 这里设置OP 的输入tensor</span><br>            &#125;<br>        &#125;<br>        <span class="hljs-keyword">if</span> (<span class="hljs-built_in">needComputeOp</span>(op)) &#123;<br>            infos.<span class="hljs-built_in">emplace_back</span>(std::<span class="hljs-built_in">move</span>(opInfo));<br>        &#125;<br>    &#125;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+<p>从这个函数里面可以看出，<code>tensor</code>的<code>input</code>和<code>output</code>被存入到了<code>opinfo</code>里面。这样op就能找到他的输入地址，和输出地址。</p>
+<h2 id="资源的创建"><a href="#资源的创建" class="headerlink" title="资源的创建"></a>资源的创建</h2><p>需要强调的是，如果输入是动态的也就是input比如是图片，有的大有的小，务必在推理时，resizeTensor和resizeSession。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs Cpp">net-&gt;<span class="hljs-built_in">resizeTensor</span>(input_cpu,input_cpu-&gt;<span class="hljs-built_in">shape</span>());<br>net-&gt;<span class="hljs-built_in">resizeSession</span>(session);<br></code></pre></td></tr></table></figure>
+
+<p>在<code>session-&gt;resize()</code>其中最重要的是<code>iter-&gt;allocMemory(firstMalloc, forbidReplace)</code>,足足有两百行。<br>我们现在有了<code>oplist</code>，和<code>tensor</code>。 但是<code>tenor</code>的物理内存仍然没有创建，Op对应的实现也没有创建比如卷积类等。<br><code>allocMemory</code>就是实例化模型中卷积，等等操作，以及<code>tensor</code>的内存分配问题。</p>
+<h3 id="Executions的创建"><a href="#Executions的创建" class="headerlink" title="Executions的创建"></a>Executions的创建</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><code class="hljs Cpp"><span class="hljs-type">static</span> ErrorCode _createExecutions(Schedule::PipelineInfo &amp;mInfo) &#123;<br>  <span class="hljs-keyword">auto</span> &amp;mBackend = mInfo.first.cache.first;<br>  <span class="hljs-keyword">auto</span> &amp;mBackupBackend = mInfo.first.cache.second;<br>  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">auto</span> &amp;info : mInfo.second) &#123;<br>    <span class="hljs-keyword">auto</span> &amp;buffer = info.executeBuffer;<br>    <span class="hljs-comment">// MNN_PRINT(&quot;before resize, mInfo.second size:%lu, command size:%lu,op</span><br>    <span class="hljs-comment">// type:%s, op name:%s\n&quot;, mInfo.second.size(), buffer.command.size(),</span><br>    <span class="hljs-comment">// EnumNameOpType(info.op-&gt;type()), info.op-&gt;name()-&gt;c_str());</span><br>    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">auto</span> &amp;iterP : buffer.command) &#123;<br>      <span class="hljs-keyword">auto</span> &amp;iter = *iterP;<br>      <span class="hljs-comment">// Create exe</span><br>      <span class="hljs-comment">// Find Cache</span><br>      <span class="hljs-type">bool</span> cached = <span class="hljs-literal">false</span>;<br>      <span class="hljs-keyword">if</span> (<span class="hljs-literal">nullptr</span> == iter.execution) &#123;<br>        <span class="hljs-comment">/** Cache origin execution for fast resize*/</span><br>        <span class="hljs-keyword">auto</span> exeIter = info.executionCache.<span class="hljs-built_in">find</span>(iter.op);<br>        <span class="hljs-keyword">if</span> (exeIter != info.executionCache.<span class="hljs-built_in">end</span>()) &#123;<br>          iter.execution = exeIter-&gt;second;<br>          cached = <span class="hljs-literal">true</span>;<br>        &#125;<br>      &#125;<br>      <span class="hljs-comment">//在这个地方会根据OP类型和benckend的类型去实例化 卷积什么的OP</span><br>      <span class="hljs-keyword">if</span> (<span class="hljs-literal">nullptr</span> == iter.execution) &#123;  <br>        iter.execution.<span class="hljs-built_in">reset</span>(<br>            mBackend-&gt;<span class="hljs-built_in">onCreate</span>(iter.inputs, iter.outputs, iter.op));<br>      &#125;<br>      <span class="hljs-comment">//如果上面的代码没有成功，也就是说上面的代码不支持这个操作，则使用备用的banckend</span><br>      <span class="hljs-keyword">if</span> (<span class="hljs-literal">nullptr</span> == iter.execution) &#123;<br>        <span class="hljs-comment">// Try Backup</span><br>        iter.execution.<span class="hljs-built_in">reset</span>(<br>            mBackupBackend-&gt;<span class="hljs-built_in">onCreate</span>(iter.inputs, iter.outputs, iter.op));<br>        <span class="hljs-keyword">if</span> (<span class="hljs-literal">nullptr</span> == iter.execution) &#123;<br>          <span class="hljs-keyword">if</span> (mInfo.first.reportError) &#123;<br>            <span class="hljs-built_in">MNN_ERROR</span>(<span class="hljs-string">&quot;Create execution error : %d\n&quot;</span>, iter.op-&gt;<span class="hljs-built_in">type</span>());<br>          &#125;<br>          <span class="hljs-keyword">return</span> NOT_SUPPORT;<br>        &#125;<br>      &#125;<br>      <span class="hljs-comment">// invalid means memory alloc failed</span><br>      <span class="hljs-keyword">if</span> (!iter.execution-&gt;<span class="hljs-built_in">valid</span>()) &#123;<br>        iter.execution = <span class="hljs-literal">nullptr</span>;<br>        iter.execution = <span class="hljs-literal">nullptr</span>;<br>        <span class="hljs-keyword">return</span> OUT_OF_MEMORY;<br>      &#125;<br>      <span class="hljs-keyword">if</span> ((!cached) &amp;&amp; iter.buffer == <span class="hljs-literal">nullptr</span> &amp;&amp;<br>          (iter.op-&gt;<span class="hljs-built_in">type</span>() != OpType_Raster) &amp;&amp;<br>          (iter.op-&gt;<span class="hljs-built_in">type</span>() != OpType_BinaryOp)) &#123;<br>        info.executionCache.<span class="hljs-built_in">insert</span>(std::<span class="hljs-built_in">make_pair</span>(iter.op, iter.execution));<br>      &#125;<br>    &#125;<br>  &#125;<br>  <span class="hljs-keyword">return</span> NO_ERROR;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p> 在这个地方会根据OP类型和benckend的类型去实例化 卷积什么的OP，如果上面的代码没有成功，也就是说上面的代码不支持这个操作，则使用备用的banckend。<code>mBackend-&gt;onCreate()</code>是虚函数，根据OP类型来动态创建。</p>
+<h3 id="内存分配"><a href="#内存分配" class="headerlink" title="内存分配"></a>内存分配</h3><p>内存分配有三个步骤</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs Cpp">mBackend-&gt;<span class="hljs-built_in">onResizeBegin</span>();<br> <span class="hljs-keyword">auto</span> curBackend = iter.execution-&gt;<span class="hljs-built_in">backend</span>();<br><span class="hljs-keyword">if</span> (mAllocInput) &#123;<br>  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">auto</span> t : iter.workInputs) &#123;  <br>    <span class="hljs-keyword">auto</span> allocRes = _allocTensor(t, curBackend, mOutputStatic);<br>    <span class="hljs-keyword">if</span> (!allocRes) &#123;<br>      <span class="hljs-keyword">return</span> OUT_OF_MEMORY;<br>    &#125;<br>  &#125;<br>&#125;<br>&#123;<br>  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">auto</span> t : iter.workOutputs) &#123;<br>    <span class="hljs-keyword">auto</span> res = _allocTensor(t, curBackend, mOutputStatic);<br>    <span class="hljs-keyword">if</span> (!res) &#123;<br>      <span class="hljs-keyword">return</span> OUT_OF_MEMORY;<br>    &#125;<br>  &#125;<br>&#125;<br>mBackend-&gt;<span class="hljs-built_in">onResizeEnd</span>();<br></code></pre></td></tr></table></figure>
+<p><code>_allocTensor</code> 会分别调用backend的 <code>OnAccquire</code>来实现。比如<code>OpenCLBackend::onAcquire</code> 之后在介绍backend时再详细介绍。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/MNN-%E6%BA%90%E7%A0%81%E7%B3%BB%E5%88%97/" class="category-chain-item">MNN 源码系列</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E6%A8%A1%E5%9E%8B%E9%83%A8%E7%BD%B2/" class="print-no-link">#模型部署</a>
+      
+        <a href="/tags/MNN/" class="print-no-link">#MNN</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>MNN源码分析2 Session</div>
+      <div>http://example.com/2024/03/12/MNN/MNN 源码分享2 session/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>klay</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2024年3月12日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2024/03/13/MNN/MNN%20%E6%BA%90%E7%A0%81%E5%88%86%E4%BA%AB3%20bancked/" title="MNN源码分析3 Banckend">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">MNN源码分析3 Banckend</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2024/03/12/mali/mail%20gpu%20%E5%88%9D%E6%8E%A2/" title="Mali GPU 初探">
+                        <span class="hidden-mobile">Mali GPU 初探</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

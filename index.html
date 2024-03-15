@@ -1,0 +1,816 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="klay">
+  <meta name="keywords" content="">
+  
+    <meta property="og:type" content="website">
+<meta property="og:title" content="klay&#39;s blog">
+<meta property="og:url" content="http://example.com/index.html">
+<meta property="og:site_name" content="klay&#39;s blog">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:author" content="klay">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>klay&#39;s blog</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.7","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 100vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/bg1.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="An elegant Material-Design theme for Hexo"></span>
+          
+        </div>
+
+        
+      </div>
+
+      
+        <div class="scroll-down-bar">
+          <i class="iconfont icon-arrowdown"></i>
+        </div>
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      <div class="container nopadding-x-md">
+        <div id="board"
+          style="margin-top: 0">
+          
+          <div class="container">
+            <div class="row">
+              <div class="col-12 col-md-10 m-auto">
+                
+
+
+  <div class="row mx-auto index-card">
+    
+    
+      <div class="col-12 col-md-4 m-auto index-img">
+        <a href="/2024/03/14/MNN/MNN%20%E6%BA%90%E7%A0%81%E5%88%86%E4%BA%AB%204%20%E7%AE%97%E5%AD%90%E5%88%87%E5%88%86/" target="_self">
+          <img src="https://s2.loli.net/2024/03/12/AUQ3MRt2ndakyup.png" srcset="/img/loading.gif" lazyload alt="MNN源码分析4 mnn的图计算">
+        </a>
+      </div>
+    
+    <article class="col-12 col-md-8 mx-auto index-info">
+      <h2 class="index-header">
+        
+        <a href="/2024/03/14/MNN/MNN%20%E6%BA%90%E7%A0%81%E5%88%86%E4%BA%AB%204%20%E7%AE%97%E5%AD%90%E5%88%87%E5%88%86/" target="_self">
+          MNN源码分析4 mnn的图计算
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt " href="/2024/03/14/MNN/MNN%20%E6%BA%90%E7%A0%81%E5%88%86%E4%BA%AB%204%20%E7%AE%97%E5%AD%90%E5%88%87%E5%88%86/" target="_self">
+        <div>
+          MNN源码分析3 mnn的图计算 分析 （slice 切片为例）为了探究MNN中的Tensor的切分，我定义了下面的pytorch代码，想查看对应到MNN中，是如何实现的。 12345678910111213141516171819202122232425262728293031323334353637383940414243444546import torchimport torch.nn as
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2024-03-14 18:42" pubdate>
+              2024-03-14
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/MNN-%E6%BA%90%E7%A0%81%E7%B3%BB%E5%88%97/" class="category-chain-item">MNN 源码系列</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/%E6%A8%A1%E5%9E%8B%E9%83%A8%E7%BD%B2/">#模型部署</a>
+            
+              <a href="/tags/MNN/">#MNN</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+      <div class="col-12 col-md-4 m-auto index-img">
+        <a href="/2024/03/14/MNN/MNN%E6%BA%90%E7%A0%81%E5%88%86%E4%BA%AB1%20interpret%20/" target="_self">
+          <img src="https://s2.loli.net/2024/03/12/AUQ3MRt2ndakyup.png" srcset="/img/loading.gif" lazyload alt="MNN源码分析1 Interpreter实现">
+        </a>
+      </div>
+    
+    <article class="col-12 col-md-8 mx-auto index-info">
+      <h2 class="index-header">
+        
+        <a href="/2024/03/14/MNN/MNN%E6%BA%90%E7%A0%81%E5%88%86%E4%BA%AB1%20interpret%20/" target="_self">
+          MNN源码分析1 Interpreter实现
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt " href="/2024/03/14/MNN/MNN%E6%BA%90%E7%A0%81%E5%88%86%E4%BA%AB1%20interpret%20/" target="_self">
+        <div>
+          模型加载从磁盘到内存首先从Interpreter,出发探究运行前初始化的操作.MNN::Interpreter::createFromFile(yourmodel))会执行static Content *loadModelFile(const char *file) 用来加载mnn 文件, 其中使用FileLoader 来封装fopen,fread等操作. 12345678910111213141
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2024-03-14 18:42" pubdate>
+              2024-03-14
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/MNN-%E6%BA%90%E7%A0%81%E7%B3%BB%E5%88%97/" class="category-chain-item">MNN 源码系列</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/%E6%A8%A1%E5%9E%8B%E9%83%A8%E7%BD%B2/">#模型部署</a>
+            
+              <a href="/tags/MNN/">#MNN</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+      <div class="col-12 col-md-4 m-auto index-img">
+        <a href="/2024/03/13/MNN/MNN%20%E6%BA%90%E7%A0%81%E5%88%86%E4%BA%AB3%20bancked/" target="_self">
+          <img src="https://s2.loli.net/2024/03/12/AUQ3MRt2ndakyup.png" srcset="/img/loading.gif" lazyload alt="MNN源码分析3 Banckend">
+        </a>
+      </div>
+    
+    <article class="col-12 col-md-8 mx-auto index-info">
+      <h2 class="index-header">
+        
+        <a href="/2024/03/13/MNN/MNN%20%E6%BA%90%E7%A0%81%E5%88%86%E4%BA%AB3%20bancked/" target="_self">
+          MNN源码分析3 Banckend
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt " href="/2024/03/13/MNN/MNN%20%E6%BA%90%E7%A0%81%E5%88%86%E4%BA%AB3%20bancked/" target="_self">
+        <div>
+          分析banckend
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2024-03-13 18:42" pubdate>
+              2024-03-13
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/MNN-%E6%BA%90%E7%A0%81%E7%B3%BB%E5%88%97/" class="category-chain-item">MNN 源码系列</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/%E6%A8%A1%E5%9E%8B%E9%83%A8%E7%BD%B2/">#模型部署</a>
+            
+              <a href="/tags/MNN/">#MNN</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+      <div class="col-12 col-md-4 m-auto index-img">
+        <a href="/2024/03/12/MNN/MNN%20%E6%BA%90%E7%A0%81%E5%88%86%E4%BA%AB2%20session/" target="_self">
+          <img src="https://s2.loli.net/2024/03/12/AUQ3MRt2ndakyup.png" srcset="/img/loading.gif" lazyload alt="MNN源码分析2 Session">
+        </a>
+      </div>
+    
+    <article class="col-12 col-md-8 mx-auto index-info">
+      <h2 class="index-header">
+        
+        <a href="/2024/03/12/MNN/MNN%20%E6%BA%90%E7%A0%81%E5%88%86%E4%BA%AB2%20session/" target="_self">
+          MNN源码分析2 Session
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt " href="/2024/03/12/MNN/MNN%20%E6%BA%90%E7%A0%81%E5%88%86%E4%BA%AB2%20session/" target="_self">
+        <div>
+          MNN 使用了ScheduleInfo，以及ScheduleConfig两个类来配置session。有几个变量需要注意。 allTensors 是mnn中的信息，也是计算图中，所有的中间结果需要的tensor。 schedule的创建在MNN中tensor，是模型有向图里面的上下OP的中间计算结果。在创建session时，首先会创建一个schedule，在schedule中初始化常量Tensor,
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2024-03-12 18:42" pubdate>
+              2024-03-12
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/MNN-%E6%BA%90%E7%A0%81%E7%B3%BB%E5%88%97/" class="category-chain-item">MNN 源码系列</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/%E6%A8%A1%E5%9E%8B%E9%83%A8%E7%BD%B2/">#模型部署</a>
+            
+              <a href="/tags/MNN/">#MNN</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+      <div class="col-12 col-md-4 m-auto index-img">
+        <a href="/2024/03/12/mali/mail%20gpu%20%E5%88%9D%E6%8E%A2/" target="_self">
+          <img src="https://s2.loli.net/2024/03/13/5Q9Bf2eLNEdqTZy.png" srcset="/img/loading.gif" lazyload alt="Mali GPU 初探">
+        </a>
+      </div>
+    
+    <article class="col-12 col-md-8 mx-auto index-info">
+      <h2 class="index-header">
+        
+        <a href="/2024/03/12/mali/mail%20gpu%20%E5%88%9D%E6%8E%A2/" target="_self">
+          Mali GPU 初探
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt " href="/2024/03/12/mali/mail%20gpu%20%E5%88%9D%E6%8E%A2/" target="_self">
+        <div>
+          手机上的GPU,如果是MTK(联发科)话,使用的是ARM的公版GPU mali,以及RK系列等也都是使用的mali GPU. ARM GPU 有 Bifrost, Valhall ,5th Gen架构,不同架构,不同家族的GPU对opencl的版本支持也不一样,但是基本上也都支持 OpenCL2 以上了, 5th Gen都支持OpenCl 3.0,大部分Valhall 架构支撑opencl3.0.
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2024-03-12 18:42" pubdate>
+              2024-03-12
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Mali/" class="category-chain-item">Mali</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/%E6%A8%A1%E5%9E%8B%E9%83%A8%E7%BD%B2/">#模型部署</a>
+            
+              <a href="/tags/MNN/">#MNN</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+      <div class="col-12 col-md-4 m-auto index-img">
+        <a href="/2024/03/05/a/android%20gdb%20%E8%B0%83%E8%AF%95/" target="_self">
+          <img src="https://s2.loli.net/2024/03/13/m8h1yPiQsuoNzMT.png" srcset="/img/loading.gif" lazyload alt="Linux 中使用adb 连接手机">
+        </a>
+      </div>
+    
+    <article class="col-12 col-md-8 mx-auto index-info">
+      <h2 class="index-header">
+        
+        <a href="/2024/03/05/a/android%20gdb%20%E8%B0%83%E8%AF%95/" target="_self">
+          Linux 中使用adb 连接手机
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt " href="/2024/03/05/a/android%20gdb%20%E8%B0%83%E8%AF%95/" target="_self">
+        <div>
+          Linux 中使用adb 连接手机在做实验时，使用linux服务器连接手机，一直出现 connect 后，手机直接 offline 的情况。解决： 不能使用sudo apt install adb 安装adb，来连接手机。解决方法： 12345mkdir cli-toolswget -c https://dl.google.com/android/repository/platform-tools
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2024-03-05 10:00" pubdate>
+              2024-03-05
+            </time>
+          </div>
+        
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/linux/">#linux</a>
+            
+              <a href="/tags/adb/">#adb</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+      <div class="col-12 col-md-4 m-auto index-img">
+        <a href="/2024/03/05/a/%E4%BD%BF%E7%94%A8LLDB%20%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95android/" target="_self">
+          <img src="https://s2.loli.net/2024/03/11/4sRNlcjAr73IMaU.png" srcset="/img/loading.gif" lazyload alt="使用LLDB 远程调试 安卓native C++ 程序的vscode 配置">
+        </a>
+      </div>
+    
+    <article class="col-12 col-md-8 mx-auto index-info">
+      <h2 class="index-header">
+        
+        <a href="/2024/03/05/a/%E4%BD%BF%E7%94%A8LLDB%20%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95android/" target="_self">
+          使用LLDB 远程调试 安卓native C++ 程序的vscode 配置
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt " href="/2024/03/05/a/%E4%BD%BF%E7%94%A8LLDB%20%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95android/" target="_self">
+        <div>
+          使用LLDB 远程调试 安卓native C++ 程序的vscode 配置背景我目前使用windows ssh连接到linux 服务器上,对android native C++代码进行编写,编译(因为服务器核心数量多,编译速度快). 目前高版本的NDK如r26等,已经不再对gdbserver 提供支撑, 所以迁移到LLDB调试,也是主流的技术方向. 相关配置 安装vscode 插件CodeLLDB
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2024-03-05 10:00" pubdate>
+              2024-03-05
+            </time>
+          </div>
+        
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/linux/">#linux</a>
+            
+              <a href="/tags/adb/">#adb</a>
+            
+              <a href="/tags/LLDB/">#LLDB</a>
+            
+              <a href="/tags/android/">#android</a>
+            
+              <a href="/tags/Debug/">#Debug</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+
+
+
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+  
+</div>
+
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
