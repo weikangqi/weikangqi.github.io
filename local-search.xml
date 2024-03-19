@@ -4,6 +4,35 @@
   
   
   <entry>
+    <title>ARM neon 指令 （Android）代码环境配置</title>
+    <link href="/2024/03/18/neon/neon%20%E9%85%8D%E7%BD%AE/"/>
+    <url>/2024/03/18/neon/neon%20%E9%85%8D%E7%BD%AE/</url>
+    
+    <content type="html"><![CDATA[<p>本次使用的ARM平台是手机平台</p><ol><li>首先确保安装好了NDK<br>配置好了PATH变量，将NDK路径加入PATH</li><li>CMakeList 设置 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs bash">cmake_minimum_required (VERSION 3.16)<br>project (Dome)<br>add_subdirectory(./src/neon)<br>add_executable(neon neon.cpp)<br>set_target_properties(neon PROPERTIES RUNTIME_OUTPUT_DIRECTORY <span class="hljs-string">&quot;<span class="hljs-variable">$&#123;CMAKE_SOURCE_DIR&#125;</span>/build&quot;</span>)<br><br>target_link_libraries(neon PRIVATE c++_static dl)<br><br><span class="hljs-built_in">set</span>(THIS_COMPILE_FLAGS -march=armv8-a)<br><br>target_compile_options(neon PRIVATE <span class="hljs-variable">$&#123;THIS_COMPILE_FLAGS&#125;</span>)<br></code></pre></td></tr></table></figure></li><li>编译脚本 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs bash">cmake .. \<br>-DCMAKE_TOOLCHAIN_FILE=<span class="hljs-variable">$ANDROID_NDK</span>/build/cmake/android.toolchain.cmake \<br>-DCMAKE_BUILD_TYPE=Debug \<br>-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \<br>-DANDROID_ABI=<span class="hljs-string">&quot;arm64-v8a&quot;</span> \<br>-DANDROID_STL=c++_static \<br>-DANDROID_NATIVE_API_LEVEL=android-21  \<br>-DMNN_BUILD_FOR_ANDROID_COMMAND=<span class="hljs-literal">true</span> \<br>-DANDROID_TOOLCHAIN=clang \<br>-DCMAKE_GENERATOR=<span class="hljs-string">&quot;Unix Makefiles&quot;</span><br></code></pre></td></tr></table></figure></li><li>运行 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">adb push neon  /data/local/tmp &amp;&amp; adb shell /data/local/tmp/neon<br></code></pre></td></tr></table></figure></li></ol>]]></content>
+    
+    
+    <categories>
+      
+      <category>neon 学习系列</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>neon</tag>
+      
+      <tag>arm</tag>
+      
+      <tag>simd</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
     <title>MNN源码分析5 Pre-inference</title>
     <link href="/2024/03/18/MNN%E6%BA%90%E7%A0%81/MNN%20%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%205%20Pre-inference/"/>
     <url>/2024/03/18/MNN%E6%BA%90%E7%A0%81/MNN%20%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%205%20Pre-inference/</url>
