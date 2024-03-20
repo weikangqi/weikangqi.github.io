@@ -18,14 +18,14 @@
   
     <meta name="description" content="学习arm neon,最终实现一个FFT为目标。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="ARM neon 指令 （Android）代码环境配置">
-<meta property="og:url" content="http://example.com/2024/03/18/neon/neon%20%E9%85%8D%E7%BD%AE/index.html">
+<meta property="og:title" content="ARM neon Instruction  语法">
+<meta property="og:url" content="http://example.com/2024/03/19/neon/neon%20Instruction%20%E8%AF%AD%E6%B3%95/index.html">
 <meta property="og:site_name" content="klay&#39;s blog">
 <meta property="og:description" content="学习arm neon,最终实现一个FFT为目标。">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://s2.loli.net/2024/03/18/JUWMRmv6fEaBHAu.png">
-<meta property="article:published_time" content="2024-03-18T12:31:28.786Z">
-<meta property="article:modified_time" content="2024-03-19T13:38:22.403Z">
+<meta property="article:published_time" content="2024-03-19T13:54:38.097Z">
+<meta property="article:modified_time" content="2024-03-20T02:08:24.003Z">
 <meta property="article:author" content="klay">
 <meta property="article:tag" content="neon">
 <meta property="article:tag" content="arm">
@@ -37,7 +37,7 @@
     <meta name="referrer" content="no-referrer-when-downgrade">
   
   
-  <title>ARM neon 指令 （Android）代码环境配置 - klay&#39;s blog</title>
+  <title>ARM neon Instruction  语法 - klay&#39;s blog</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -215,7 +215,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="ARM neon 指令 （Android）代码环境配置"></span>
+            <span id="subtitle" data-typed-text="ARM neon Instruction  语法"></span>
           
         </div>
 
@@ -226,8 +226,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2024-03-18 20:31" pubdate>
-          2024年3月18日 晚上
+        <time datetime="2024-03-19 21:54" pubdate>
+          2024年3月19日 晚上
         </time>
       </span>
     
@@ -238,7 +238,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          245 字
+          575 字
         
       </span>
     
@@ -249,7 +249,7 @@
         
         
         
-          3 分钟
+          5 分钟
         
       </span>
     
@@ -286,19 +286,66 @@
       <div class="container nopadding-x-md" id="board-ctn">
         <div id="board">
           <article class="post-content mx-auto">
-            <h1 id="seo-header">ARM neon 指令 （Android）代码环境配置</h1>
+            <h1 id="seo-header">ARM neon Instruction  语法</h1>
             
             
               <div class="markdown-body">
                 
-                <p>本次使用的ARM平台是手机平台</p>
-<ol>
-<li>首先确保安装好了NDK<br>配置好了PATH变量，将NDK路径加入PATH</li>
-<li>CMakeList 设置 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs bash">cmake_minimum_required (VERSION 3.16)<br>project (Dome)<br>add_subdirectory(./src/neon)<br>add_executable(neon neon.cpp)<br>set_target_properties(neon PROPERTIES RUNTIME_OUTPUT_DIRECTORY <span class="hljs-string">&quot;<span class="hljs-variable">$&#123;CMAKE_SOURCE_DIR&#125;</span>/build&quot;</span>)<br><br>target_link_libraries(neon PRIVATE c++_static dl)<br><br><span class="hljs-built_in">set</span>(THIS_COMPILE_FLAGS -march=armv8-a)<br><br>target_compile_options(neon PRIVATE <span class="hljs-variable">$&#123;THIS_COMPILE_FLAGS&#125;</span>)<br></code></pre></td></tr></table></figure></li>
-<li>编译脚本 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs bash">cmake .. \<br>-DCMAKE_TOOLCHAIN_FILE=<span class="hljs-variable">$ANDROID_NDK</span>/build/cmake/android.toolchain.cmake \<br>-DCMAKE_BUILD_TYPE=Debug \<br>-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \<br>-DANDROID_ABI=<span class="hljs-string">&quot;arm64-v8a&quot;</span> \<br>-DANDROID_STL=c++_static \<br>-DANDROID_NATIVE_API_LEVEL=android-21  \<br>-DMNN_BUILD_FOR_ANDROID_COMMAND=<span class="hljs-literal">true</span> \<br>-DANDROID_TOOLCHAIN=clang \<br>-DCMAKE_GENERATOR=<span class="hljs-string">&quot;Unix Makefiles&quot;</span><br></code></pre></td></tr></table></figure></li>
-<li>运行 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">adb push neon  /data/local/tmp &amp;&amp; adb shell /data/local/tmp/neon<br></code></pre></td></tr></table></figure></li>
-<li>源代码<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs Cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdio.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdlib.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;arm_neon.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;math.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;cstddef&gt;</span></span><br><br><span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-comment">//定义a, b, c</span><br>    <span class="hljs-type">unsigned</span> <span class="hljs-type">char</span> a[<span class="hljs-number">8</span>] = &#123;<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>, <span class="hljs-number">6</span>, <span class="hljs-number">7</span>&#125;;<br>    <span class="hljs-type">unsigned</span> <span class="hljs-type">char</span> b[<span class="hljs-number">8</span>] = &#123;<span class="hljs-number">8</span>, <span class="hljs-number">9</span>, <span class="hljs-number">10</span>, <span class="hljs-number">11</span>, <span class="hljs-number">12</span>, <span class="hljs-number">13</span>, <span class="hljs-number">14</span>, <span class="hljs-number">15</span>&#125;;<br>    <span class="hljs-type">unsigned</span> <span class="hljs-type">char</span> c[<span class="hljs-number">8</span>];<br>    <span class="hljs-type">uint8x8_t</span> rega, regb, regc;	<span class="hljs-comment">//定义3个8x8bit无符号整型的 NEON 寄存器</span><br>    <span class="hljs-comment">//加载 a, b 到寄存器</span><br>    rega = <span class="hljs-built_in">vld1_u8</span>(&amp;a[<span class="hljs-number">0</span>]);<br>    regb = <span class="hljs-built_in">vld1_u8</span>(&amp;b[<span class="hljs-number">0</span>]);<br>    regc = <span class="hljs-built_in">vadd_u8</span>(rega, regb);	<span class="hljs-comment">//做加法</span><br>    <span class="hljs-built_in">vst1_u8</span>(&amp;c[<span class="hljs-number">0</span>], regc);		<span class="hljs-comment">//回写到c中</span><br>    <span class="hljs-comment">//测试</span><br>    <span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> i = <span class="hljs-number">0</span> ; i &lt; <span class="hljs-number">8</span> ; i++)<br>    &#123;<br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%d 	&quot;</span>,c[i] );<br>    &#125;<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;\n&quot;</span>);<br>&#125;<br></code></pre></td></tr></table></figure></li>
-</ol>
+                <p><code>V&#123;&lt;mod&gt;&#125;&lt;op&gt; &#123;&lt;shape&gt;&#125;&#123;&lt;cond&gt;&#125;&#123;.&lt;dt&gt;&#125; &lt;dest1&gt;&#123;,&lt;dest2&gt;&#125;,&lt;src1&gt;&#123;, &lt;src2&gt;&#125;</code></p>
+<h2 id="NEON-data-types"><a href="#NEON-data-types" class="headerlink" title="NEON data types"></a>NEON data types</h2><p><img src="https://s2.loli.net/2024/03/20/LAVQ9wC6T4RnlHy.png" srcset="/img/loading.gif" lazyload alt="20240320100728"></p>
+<h2 id="Instruction-modifiers"><a href="#Instruction-modifiers" class="headerlink" title="Instruction modifiers"></a>Instruction modifiers</h2><p>对于某些指令，可以指定一个修饰符，用以改变操作的行为。</p>
+<table>
+<thead>
+<tr>
+<th>修饰符</th>
+<th>行为</th>
+<th>例子</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>None</td>
+<td>Basic opeartion</td>
+<td>VADD.16 Q0, Q1,Q2</td>
+<td>结果不会被修改</td>
+</tr>
+<tr>
+<td>Q</td>
+<td>Saturation (饱和)</td>
+<td>VQADD.S16 D0, D2,D3</td>
+<td>结果向量中的每个元素如果超出可表示范围，则设为最大值或最小值。范围取决于元素的类型（位数和符号）。如果任何通道发生饱和，浮点状态与控制寄存器（FPSCR）中的粘性 QC 位将被设置。</td>
+</tr>
+<tr>
+<td>H</td>
+<td>Halved (减半)</td>
+<td>VHADD.S16 Q0, Q1,Q4</td>
+<td>每个元素向右移动一位（实际上是截断后的除以二）。VHADD 可用于计算两个输入的平均值。</td>
+</tr>
+<tr>
+<td>D</td>
+<td>Doubled before saturation</td>
+<td>VQDMULL.S16 Q0, D1, D3</td>
+<td>这在以 Q15 格式相乘时常常需要，需要额外加倍以将结果转换为正确的形式。</td>
+</tr>
+<tr>
+<td>R</td>
+<td>Rounded (四舍五入)</td>
+<td>VRSUBHN.I16 D0, Q1, Q3</td>
+<td>该指令对结果进行四舍五入，以纠正截断所引起的偏差。这相当于在截断之前向结果加上0.5。</td>
+</tr>
+</tbody></table>
+<h2 id="Instruction-shape"><a href="#Instruction-shape" class="headerlink" title="Instruction shape"></a>Instruction shape</h2><p>结果向量和操作数向量具有相同数量的元素。然而，结果中元素的数据类型可以与一个或多个操作数中的元素的数据类型不同。因此，结果的寄存器大小也可能与一个或多个操作数的寄存器大小不同。寄存器大小之间的这种关系由形状描述。对于某些指令，您可以指定一个形状。NEON数据处理指令通常有普通、长、宽、窄和饱和变体。</p>
+<h3 id="None-specified"><a href="#None-specified" class="headerlink" title="None specified"></a>None specified</h3><p>操作数和结果都是相同的宽度。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs Cpp">VADD.I16 Q0, Q1, Q2<br></code></pre></td></tr></table></figure>
+
+<h3 id="Long-L"><a href="#Long-L" class="headerlink" title="Long - L"></a>Long - L</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs Cpp">VADDL.S16 Q0, D2, D3<br></code></pre></td></tr></table></figure>
+<p>长指令通常操作双字向量并产生四倍字长向量。结果元素的宽度是操作数元素宽度的两倍。通过在指令后附加 L 来指定长指令。Q是D的两倍。</p>
+<p><img src="https://s2.loli.net/2024/03/20/3qcnPt1CWsS9Jya.png" srcset="/img/loading.gif" lazyload alt="20240320094905"></p>
+<h3 id="Narrow-N"><a href="#Narrow-N" class="headerlink" title="Narrow - N"></a>Narrow - N</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs Cpp">VADDHN.I16 D0, Q1, Q2<br></code></pre></td></tr></table></figure>
+<p>操作数具有相同的宽度。每个结果元素中的位数是每个操作数元素中位数的一半。<br><img src="https://s2.loli.net/2024/03/20/JrysBQZhAKGoE39.png" srcset="/img/loading.gif" lazyload alt="20240320100137"></p>
+<h3 id="Wide-W"><a href="#Wide-W" class="headerlink" title="Wide - W"></a>Wide - W</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs Cpp">VADDW.I16 Q0, Q1, D4<br></code></pre></td></tr></table></figure>
+<p>结果和操作数的宽度是第二个操作数的两倍。Q0,Q1是D4的两倍</p>
+<p><img src="https://s2.loli.net/2024/03/20/Hn7rY2LcRS9ZViK.png" srcset="/img/loading.gif" lazyload alt="20240320100339"></p>
 
                 
               </div>
@@ -348,8 +395,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>ARM neon 指令 （Android）代码环境配置</div>
-      <div>http://example.com/2024/03/18/neon/neon 配置/</div>
+      <div>ARM neon Instruction  语法</div>
+      <div>http://example.com/2024/03/19/neon/neon Instruction 语法/</div>
     </div>
     <div class="license-meta">
       
@@ -361,7 +408,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>发布于</div>
-          <div>2024年3月18日</div>
+          <div>2024年3月19日</div>
         </div>
       
       
@@ -393,18 +440,12 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2024/03/19/neon/neon%20Instruction%20%E8%AF%AD%E6%B3%95/" title="ARM neon Instruction  语法">
-                        <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">ARM neon Instruction  语法</span>
-                        <span class="visible-mobile">上一篇</span>
-                      </a>
-                    
                   </article>
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2024/03/18/MNN%E6%BA%90%E7%A0%81/MNN%20%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%205%20Pre-inference/" title="MNN源码分析5 Pre-inference">
-                        <span class="hidden-mobile">MNN源码分析5 Pre-inference</span>
+                      <a href="/2024/03/18/neon/neon%20%E9%85%8D%E7%BD%AE/" title="ARM neon 指令 （Android）代码环境配置">
+                        <span class="hidden-mobile">ARM neon 指令 （Android）代码环境配置</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
