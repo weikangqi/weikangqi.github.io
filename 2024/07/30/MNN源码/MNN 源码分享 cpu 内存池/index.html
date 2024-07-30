@@ -16,28 +16,23 @@
   <meta name="author" content="klay">
   <meta name="keywords" content="">
   
-    <meta name="description" content="学习arm neon,最终实现一个FFT为目标。">
+    <meta name="description" content="基本数据结构123456789101112struct MemNode &#123;public:    MemNode(size_t s) : size(s) &#123;&#125;    ~MemNode() &#123;&#125;    size_t size &#x3D; 0, offset &#x3D; 0;    void* base &#x3D; nullptr; &#x2F;&#x2F; 数据地址    bool usage">
 <meta property="og:type" content="article">
-<meta property="og:title" content="ARM neon Instruction  语法">
-<meta property="og:url" content="http://example.com/2024/03/19/neon/neon%20Instruction%20%E8%AF%AD%E6%B3%95/index.html">
+<meta property="og:title" content="klay&#39;s blog">
+<meta property="og:url" content="http://example.com/2024/07/30/MNN%E6%BA%90%E7%A0%81/MNN%20%E6%BA%90%E7%A0%81%E5%88%86%E4%BA%AB%20cpu%20%E5%86%85%E5%AD%98%E6%B1%A0/index.html">
 <meta property="og:site_name" content="klay&#39;s blog">
-<meta property="og:description" content="学习arm neon,最终实现一个FFT为目标。">
+<meta property="og:description" content="基本数据结构123456789101112struct MemNode &#123;public:    MemNode(size_t s) : size(s) &#123;&#125;    ~MemNode() &#123;&#125;    size_t size &#x3D; 0, offset &#x3D; 0;    void* base &#x3D; nullptr; &#x2F;&#x2F; 数据地址    bool usage">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://s2.loli.net/2024/03/18/JUWMRmv6fEaBHAu.png">
-<meta property="article:published_time" content="2024-03-19T13:54:38.097Z">
-<meta property="article:modified_time" content="2024-03-20T02:32:35.777Z">
+<meta property="article:published_time" content="2024-07-30T10:32:37.225Z">
+<meta property="article:modified_time" content="2024-05-22T13:54:50.363Z">
 <meta property="article:author" content="klay">
-<meta property="article:tag" content="neon">
-<meta property="article:tag" content="arm">
-<meta property="article:tag" content="simd">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://s2.loli.net/2024/03/18/JUWMRmv6fEaBHAu.png">
   
   
     <meta name="referrer" content="no-referrer-when-downgrade">
   
   
-  <title>ARM neon Instruction  语法 - klay&#39;s blog</title>
+  <title>klay&#39;s blog</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -215,7 +210,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="ARM neon Instruction  语法"></span>
+            <span id="subtitle" data-typed-text=""></span>
           
         </div>
 
@@ -226,8 +221,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2024-03-19 21:54" pubdate>
-          2024年3月19日 晚上
+        <time datetime="2024-07-30 18:32" pubdate>
+          2024年7月30日 晚上
         </time>
       </span>
     
@@ -238,7 +233,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          575 字
+          239 字
         
       </span>
     
@@ -249,7 +244,7 @@
         
         
         
-          5 分钟
+          2 分钟
         
       </span>
     
@@ -286,66 +281,19 @@
       <div class="container nopadding-x-md" id="board-ctn">
         <div id="board">
           <article class="post-content mx-auto">
-            <h1 id="seo-header">ARM neon Instruction  语法</h1>
+            <h1 id="seo-header"></h1>
             
             
               <div class="markdown-body">
                 
-                <p><code>V&#123;&lt;mod&gt;&#125;&lt;op&gt; &#123;&lt;shape&gt;&#125;&#123;&lt;cond&gt;&#125;&#123;.&lt;dt&gt;&#125; &lt;dest1&gt;&#123;,&lt;dest2&gt;&#125;,&lt;src1&gt;&#123;, &lt;src2&gt;&#125;</code></p>
-<h2 id="NEON-data-types"><a href="#NEON-data-types" class="headerlink" title="NEON data types"></a>NEON data types</h2><p><img src="https://s2.loli.net/2024/03/20/LAVQ9wC6T4RnlHy.png" srcset="/img/loading.gif" lazyload alt="20240320100728"></p>
-<h2 id="Instruction-modifiers"><a href="#Instruction-modifiers" class="headerlink" title="Instruction modifiers"></a>Instruction modifiers</h2><p>对于某些指令，可以指定一个修饰符，用以改变操作的行为。</p>
-<table>
-<thead>
-<tr>
-<th>修饰符</th>
-<th>行为</th>
-<th>例子</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>None</td>
-<td>Basic opeartion</td>
-<td>VADD.16 Q0, Q1,Q2</td>
-<td>结果不会被修改</td>
-</tr>
-<tr>
-<td>Q</td>
-<td>Saturation (饱和)</td>
-<td>VQADD.S16 D0, D2,D3</td>
-<td>结果向量中的每个元素如果超出可表示范围，则设为最大值或最小值。范围取决于元素的类型（位数和符号）。如果任何通道发生饱和，浮点状态与控制寄存器（FPSCR）中的粘性 QC 位将被设置。</td>
-</tr>
-<tr>
-<td>H</td>
-<td>Halved (减半)</td>
-<td>VHADD.S16 Q0, Q1,Q4</td>
-<td>每个元素向右移动一位（实际上是截断后的除以二）。VHADD 可用于计算两个输入的平均值。</td>
-</tr>
-<tr>
-<td>D</td>
-<td>Doubled before saturation</td>
-<td>VQDMULL.S16 Q0, D1, D3</td>
-<td>这在以 Q15 格式相乘时常常需要，需要额外加倍以将结果转换为正确的形式。</td>
-</tr>
-<tr>
-<td>R</td>
-<td>Rounded (四舍五入)</td>
-<td>VRSUBHN.I16 D0, Q1, Q3</td>
-<td>该指令对结果进行四舍五入，以纠正截断所引起的偏差。这相当于在截断之前向结果加上0.5。</td>
-</tr>
-</tbody></table>
-<h2 id="Instruction-shape"><a href="#Instruction-shape" class="headerlink" title="Instruction shape"></a>Instruction shape</h2><p>结果向量和操作数向量具有相同数量的元素。然而，结果中元素的数据类型可以与一个或多个操作数中的元素的数据类型不同。因此，结果的寄存器大小也可能与一个或多个操作数的寄存器大小不同。寄存器大小之间的这种关系由形状描述。对于某些指令，您可以指定一个形状。NEON数据处理指令通常有普通、长、宽、窄和饱和变体。</p>
-<h3 id="None-specified"><a href="#None-specified" class="headerlink" title="None specified"></a>None specified</h3><p>操作数和结果都是相同的宽度。</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs Cpp">VADD.I16 Q0, Q1, Q2<br></code></pre></td></tr></table></figure>
+                <h2 id="基本数据结构"><a href="#基本数据结构" class="headerlink" title="基本数据结构"></a>基本数据结构</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs Cpp"><span class="hljs-keyword">struct</span> <span class="hljs-title class_">MemNode</span> &#123;<br><span class="hljs-keyword">public</span>:<br>    <span class="hljs-built_in">MemNode</span>(<span class="hljs-type">size_t</span> s) : <span class="hljs-built_in">size</span>(s) &#123;&#125;<br>    ~<span class="hljs-built_in">MemNode</span>() &#123;&#125;<br>    <span class="hljs-type">size_t</span> size = <span class="hljs-number">0</span>, offset = <span class="hljs-number">0</span>;<br>    <span class="hljs-type">void</span>* base = <span class="hljs-literal">nullptr</span>; <span class="hljs-comment">// 数据地址</span><br>    <span class="hljs-type">bool</span> usage = <span class="hljs-literal">true</span>; <span class="hljs-comment">// 是否被使用</span><br>    MemNode *left = <span class="hljs-literal">nullptr</span>, *right = <span class="hljs-literal">nullptr</span>;<br>    <br>    std::vector&lt;MemNode*&gt; children;<br>    std::vector&lt;Tensor*&gt; tensors;<br>&#125;;<br></code></pre></td></tr></table></figure>
 
-<h3 id="Long-L"><a href="#Long-L" class="headerlink" title="Long - L"></a>Long - L</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs Cpp">VADDL.S16 Q0, D2, D3<br></code></pre></td></tr></table></figure>
-<p>长指令通常操作双字向量并产生四倍字长向量。结果元素的宽度是操作数元素宽度的两倍。通过在指令后附加 L 来指定长指令。Q是D的两倍。</p>
-<p><img src="https://s2.loli.net/2024/03/20/3qcnPt1CWsS9Jya.png" srcset="/img/loading.gif" lazyload alt="20240320094905"></p>
-<h3 id="Narrow-N"><a href="#Narrow-N" class="headerlink" title="Narrow - N"></a>Narrow - N</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs Cpp">VADDHN.I16 D0, Q1, Q2<br></code></pre></td></tr></table></figure>
-<p>操作数具有相同的宽度。每个结果元素中的位数是每个操作数元素中位数的一半。<br><img src="https://s2.loli.net/2024/03/20/JrysBQZhAKGoE39.png" srcset="/img/loading.gif" lazyload alt="20240320100137"></p>
-<h3 id="Wide-W"><a href="#Wide-W" class="headerlink" title="Wide - W"></a>Wide - W</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs Cpp">VADDW.I16 Q0, Q1, D4<br></code></pre></td></tr></table></figure>
-<p>结果和操作数的宽度是第二个操作数的两倍。Q0,Q1是D4的两倍</p>
-<p><img src="https://s2.loli.net/2024/03/20/Hn7rY2LcRS9ZViK.png" srcset="/img/loading.gif" lazyload alt="20240320100339"></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><code class="hljs Cpp"><span class="hljs-keyword">struct</span> <span class="hljs-title class_">MemChunk</span> &#123;<br><span class="hljs-keyword">public</span>:<br>    <span class="hljs-built_in">MemChunk</span>() = <span class="hljs-keyword">default</span>;<br>    <span class="hljs-built_in">MemChunk</span>(<span class="hljs-type">void</span>* base, <span class="hljs-type">size_t</span> offset = <span class="hljs-number">0</span>) : <span class="hljs-built_in">first</span>(base), <span class="hljs-built_in">second</span>(offset) &#123;&#125;<br>    <span class="hljs-built_in">MemChunk</span>(std::pair&lt;<span class="hljs-type">void</span>*, <span class="hljs-type">size_t</span>&gt; pointer) : <span class="hljs-built_in">first</span>(pointer.first), <span class="hljs-built_in">second</span>(pointer.second) &#123;&#125;<br>    <span class="hljs-built_in">MemChunk</span>(MemNode* node) : <span class="hljs-built_in">mNode</span>(node) &#123;&#125;<br>    ~<span class="hljs-built_in">MemChunk</span>() = <span class="hljs-keyword">default</span>;<br>    MemChunk <span class="hljs-keyword">operator</span>+ (<span class="hljs-type">size_t</span> offset);  <span class="hljs-comment">// this-&gt;second += offset</span><br>    <span class="hljs-function"><span class="hljs-type">void</span>* <span class="hljs-title">base</span><span class="hljs-params">()</span> <span class="hljs-type">const</span></span>;<br>    <span class="hljs-function"><span class="hljs-type">size_t</span> <span class="hljs-title">offset</span><span class="hljs-params">()</span> <span class="hljs-type">const</span></span>;<br>    <span class="hljs-function"><span class="hljs-type">bool</span> <span class="hljs-title">invalid</span><span class="hljs-params">()</span> <span class="hljs-type">const</span></span>;<br>    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">attach</span><span class="hljs-params">(Tensor* tensor)</span></span>;<br>    <span class="hljs-function"><span class="hljs-type">uint8_t</span>* <span class="hljs-title">ptr</span><span class="hljs-params">()</span> <span class="hljs-type">const</span> </span>&#123;    <span class="hljs-comment">// 获取数据指针 </span><br>        <span class="hljs-keyword">if</span> (mNode) &#123;<br>            <span class="hljs-keyword">return</span> <span class="hljs-built_in">static_cast</span>&lt;<span class="hljs-type">uint8_t</span>*&gt;(mNode-&gt;base) + mNode-&gt;offset + second;<br>        &#125;<br>        <span class="hljs-keyword">return</span> <span class="hljs-built_in">static_cast</span>&lt;<span class="hljs-type">uint8_t</span>*&gt;(first) + second;<br>    &#125;<br><span class="hljs-keyword">public</span>:<br>    <span class="hljs-type">void</span>* first = <span class="hljs-literal">nullptr</span>;   <span class="hljs-comment">//相当于MemNode的base</span><br>    <span class="hljs-type">size_t</span> second = <span class="hljs-number">0</span>;  <span class="hljs-comment">//想当于 MemNode-&gt;offset + second</span><br><span class="hljs-keyword">private</span>:<br>    MemNode* mNode = <span class="hljs-literal">nullptr</span>;<br>    <span class="hljs-keyword">friend</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">DeferBufferAllocator</span>;<br>    <span class="hljs-keyword">friend</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">EagerBufferAllocator</span>;<br>    <span class="hljs-keyword">friend</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">DefaultAllocator</span>;<br>&#125;;<br></code></pre></td></tr></table></figure>
+
+
+
+<h2 id="BufferAllocator"><a href="#BufferAllocator" class="headerlink" title="BufferAllocator"></a>BufferAllocator</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs Cpp"><span class="hljs-keyword">class</span> <span class="hljs-title class_">MNN_PUBLIC</span> BufferAllocator : <span class="hljs-keyword">public</span> NonCopyable &#123;<br><span class="hljs-keyword">public</span>:<br>    <span class="hljs-keyword">class</span> <span class="hljs-title class_">Allocator</span> &#123;<br>    <span class="hljs-keyword">public</span>:<br>        <span class="hljs-built_in">Allocator</span>() = <span class="hljs-keyword">default</span>;<br>        <span class="hljs-keyword">virtual</span> ~ <span class="hljs-built_in">Allocator</span>() = <span class="hljs-keyword">default</span>;<br>        <span class="hljs-function"><span class="hljs-keyword">virtual</span> MemChunk <span class="hljs-title">onAlloc</span><span class="hljs-params">(<span class="hljs-type">size_t</span> size, <span class="hljs-type">size_t</span> align)</span> </span>= <span class="hljs-number">0</span>;<br>        <span class="hljs-function"><span class="hljs-keyword">virtual</span> <span class="hljs-type">void</span> <span class="hljs-title">onRelease</span><span class="hljs-params">(MemChunk chunk)</span> </span>= <span class="hljs-number">0</span>;<br>        <span class="hljs-function"><span class="hljs-type">static</span> std::shared_ptr&lt;Allocator&gt; <span class="hljs-title">createDefault</span><span class="hljs-params">()</span></span>;<br>        <span class="hljs-function"><span class="hljs-type">static</span> std::shared_ptr&lt;Allocator&gt; <span class="hljs-title">createRecurse</span><span class="hljs-params">(BufferAllocator* parent)</span></span>;<br>    &#125;;<br>    <span class="hljs-built_in">BufferAllocator</span>() = <span class="hljs-keyword">default</span>;<br>    <span class="hljs-keyword">virtual</span> ~<span class="hljs-built_in">BufferAllocator</span>() = <span class="hljs-keyword">default</span>;<br>    <span class="hljs-function"><span class="hljs-keyword">virtual</span> MemChunk <span class="hljs-title">alloc</span><span class="hljs-params">(<span class="hljs-type">size_t</span> size, <span class="hljs-type">bool</span> separate = <span class="hljs-literal">false</span>, <span class="hljs-type">size_t</span> align = <span class="hljs-number">0</span>)</span> </span>= <span class="hljs-number">0</span>;<br>    <span class="hljs-function"><span class="hljs-keyword">virtual</span> <span class="hljs-type">bool</span> <span class="hljs-title">free</span><span class="hljs-params">(MemChunk chunk)</span> </span>= <span class="hljs-number">0</span>;<br>    <span class="hljs-function"><span class="hljs-keyword">virtual</span> <span class="hljs-type">void</span> <span class="hljs-title">release</span><span class="hljs-params">(<span class="hljs-type">bool</span> allRelease = <span class="hljs-literal">true</span>)</span> </span>= <span class="hljs-number">0</span>;<br>    <span class="hljs-function"><span class="hljs-keyword">virtual</span> <span class="hljs-type">size_t</span> <span class="hljs-title">totalSize</span><span class="hljs-params">()</span> <span class="hljs-type">const</span> </span>= <span class="hljs-number">0</span>;<br>    <span class="hljs-function"><span class="hljs-keyword">virtual</span> <span class="hljs-type">void</span> <span class="hljs-title">barrierBegin</span><span class="hljs-params">()</span> </span>&#123;&#125;<br>    <span class="hljs-function"><span class="hljs-keyword">virtual</span> <span class="hljs-type">void</span> <span class="hljs-title">barrierEnd</span><span class="hljs-params">()</span> </span>&#123;&#125;<br>    <span class="hljs-function"><span class="hljs-keyword">virtual</span> <span class="hljs-type">void</span> <span class="hljs-title">beginGroup</span><span class="hljs-params">()</span> </span>&#123;&#125;<br>    <span class="hljs-function"><span class="hljs-keyword">virtual</span> <span class="hljs-type">void</span> <span class="hljs-title">endGroup</span><span class="hljs-params">()</span> </span>&#123;&#125;<br>    <span class="hljs-function"><span class="hljs-keyword">virtual</span> <span class="hljs-type">void</span> <span class="hljs-title">reset</span><span class="hljs-params">()</span> </span>&#123;&#125;<br>    <span class="hljs-function"><span class="hljs-keyword">virtual</span> ErrorCode <span class="hljs-title">compute</span><span class="hljs-params">()</span></span>;<br>&#125;;<br></code></pre></td></tr></table></figure>
+
 
                 
               </div>
@@ -354,38 +302,6 @@
             <div>
               <div class="post-metas my-3">
   
-    <div class="post-meta mr-3 d-flex align-items-center">
-      <i class="iconfont icon-category"></i>
-      
-
-<span class="category-chains">
-  
-  
-    
-      <span class="category-chain">
-        
-  <a href="/categories/neon-%E5%AD%A6%E4%B9%A0%E7%B3%BB%E5%88%97/" class="category-chain-item">neon 学习系列</a>
-  
-  
-
-      </span>
-    
-  
-</span>
-
-    </div>
-  
-  
-    <div class="post-meta">
-      <i class="iconfont icon-tags"></i>
-      
-        <a href="/tags/neon/" class="print-no-link">#neon</a>
-      
-        <a href="/tags/arm/" class="print-no-link">#arm</a>
-      
-        <a href="/tags/simd/" class="print-no-link">#simd</a>
-      
-    </div>
   
 </div>
 
@@ -395,8 +311,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>ARM neon Instruction  语法</div>
-      <div>http://example.com/2024/03/19/neon/neon Instruction 语法/</div>
+      <div></div>
+      <div>http://example.com/2024/07/30/MNN源码/MNN 源码分享 cpu 内存池/</div>
     </div>
     <div class="license-meta">
       
@@ -408,7 +324,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>发布于</div>
-          <div>2024年3月19日</div>
+          <div>2024年7月30日</div>
         </div>
       
       
@@ -440,7 +356,7 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2024/07/30/MNN%E6%BA%90%E7%A0%81/MNN%20%E6%BA%90%E7%A0%81%E5%88%86%E4%BA%AB%20cpu%20%E5%86%85%E5%AD%98%E6%B1%A0/" title="">
+                      <a href="/2024/07/30/model%20quantization/%E6%B5%AE%E7%82%B9%E6%95%B0/" title="">
                         <i class="iconfont icon-arrowleft"></i>
                         <span class="hidden-mobile"></span>
                         <span class="visible-mobile">上一篇</span>
@@ -450,8 +366,8 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2024/03/18/neon/neon%20%E9%85%8D%E7%BD%AE/" title="ARM neon 指令 （Android）代码环境配置">
-                        <span class="hidden-mobile">ARM neon 指令 （Android）代码环境配置</span>
+                      <a href="/2024/03/19/neon/neon%20Instruction%20%E8%AF%AD%E6%B3%95/" title="ARM neon Instruction  语法">
+                        <span class="hidden-mobile">ARM neon Instruction  语法</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
