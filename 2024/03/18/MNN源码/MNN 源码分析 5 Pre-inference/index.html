@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 
 <head>
   <!-- Website mata -->
@@ -39,7 +39,7 @@
 
 
 <!-- Canonical, good for google search engine -->
-<link rel="canonical" href="http://example.com/2024/03/18/MNN源码/MNN 源码分析 5 Pre-inference/" />
+<link rel="canonical" href="https://weikangqi.github.io/2024/03/18/MNN源码/MNN 源码分析 5 Pre-inference/" />
 
 <!-- Fancybox styling -->
 
@@ -96,35 +96,35 @@
       <li class="mobile-menu-item">
         
         
-        Home              </li>
+        首页              </li>
     </a>
     
     <a href="/archives/">
       <li class="mobile-menu-item">
         
         
-        Archives              </li>
+        归档              </li>
     </a>
     
     <a href="/tags/">
       <li class="mobile-menu-item">
         
         
-        Tags              </li>
+        标签              </li>
     </a>
     
     <a href="/categories/">
       <li class="mobile-menu-item">
         
         
-        Categories              </li>
+        分类              </li>
     </a>
     
     <a href="/about/">
       <li class="mobile-menu-item">
         
         
-        About              </li>
+        关于              </li>
     </a>
     
   </ul>
@@ -143,7 +143,7 @@
           <a class="menu-item-link" href="/">  
               
               
-              Home  
+              首页  
               
           </a>  
         </li>  
@@ -152,7 +152,7 @@
           <a class="menu-item-link" href="/archives/">  
               
               
-              Archives  
+              归档  
               
           </a>  
         </li>  
@@ -161,7 +161,7 @@
           <a class="menu-item-link" href="/tags/">  
               
               
-              Tags  
+              标签  
               
           </a>  
         </li>  
@@ -170,7 +170,7 @@
           <a class="menu-item-link" href="/categories/">  
               
               
-              Categories  
+              分类  
               
           </a>  
         </li>  
@@ -179,7 +179,7 @@
           <a class="menu-item-link" href="/about/">  
               
               
-              About  
+              关于  
               
           </a>  
         </li>  
@@ -218,7 +218,7 @@
 
   
   <div class="post-toc" id="post-toc">
-    <h2 class="post-toc-title">Contents</h2>
+    <h2 class="post-toc-title">文章目录</h2>
     <div class="post-toc-content">
       <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#CPU-Backend"><span class="toc-number">1.</span> <span class="toc-text">CPU Backend</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Opencl-Backend"><span class="toc-number">2.</span> <span class="toc-text">Opencl Backend</span></a></li></ol>
     </div>
@@ -243,15 +243,15 @@
 
 <div class="post-copyright">
   <p class="copyright-item">
-    <span>Author: </span>
-    <a href="http://example.com">weikangqi</a>
+    <span>原文作者: </span>
+    <a href="https://weikangqi.github.io">weikangqi</a>
   </p>
   <p class="copyright-item">
-    <span>Link: </span>
-    <a href="http://example.com/2024/03/18/MNN%E6%BA%90%E7%A0%81/MNN%20%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%205%20Pre-inference/">http://example.com/2024/03/18/MNN%E6%BA%90%E7%A0%81/MNN%20%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%205%20Pre-inference/</a>
+    <span>原文链接: </span>
+    <a href="https://weikangqi.github.io/2024/03/18/MNN%E6%BA%90%E7%A0%81/MNN%20%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%205%20Pre-inference/">https://weikangqi.github.io/2024/03/18/MNN%E6%BA%90%E7%A0%81/MNN%20%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%205%20Pre-inference/</a>
   </p>
   <p class="copyright-item">
-    <span>License: </span>
+    <span>许可协议: </span>
     
     <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">知识共享署名-非商业性使用 4.0 国际许可协议</a>
   </p>
@@ -278,13 +278,13 @@
       <a class="prev" href="/2024/07/30/%E8%B0%83%E8%AF%95/vscode%20%E8%B0%83%E8%AF%95coredump%E6%96%87%E4%BB%B6/">  
         <i class="iconfont icon-left"></i>  
         <span class="prev-text nav-default">vscode 调试coredump 文件</span>  
-        <span class="prev-text nav-mobile">Prev</span>  
+        <span class="prev-text nav-mobile">上一篇</span>  
       </a>  
       
       
       <a class="next" href="/2024/03/16/MNN%E6%BA%90%E7%A0%81/MNN%20%E6%BA%90%E7%A0%81%E5%88%86%E4%BA%AB3%20Bancked/">  
         <span class="next-text nav-default">MNN源码分析3 Banckend</span>  
-        <span class="prev-text nav-mobile">Next</span>  
+        <span class="prev-text nav-mobile">下一篇</span>  
         <i class="iconfont icon-right"></i>  
       </a>  
       
@@ -298,6 +298,8 @@
         </div>
           
   <div class="comments" id="comments">  
+      
+      <div id="utterances-container"></div>  
       
   </div>  
   
@@ -367,11 +369,11 @@
 
 <div class="copyright">
   <span class="power-by">
-    Powered by <a class="hexo-link" target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>
+    由 <a class="hexo-link" target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> 强力驱动
   </span>
   <span class="division">|</span>
   <span class="theme-info">
-    Theme -
+    主题 -
     <a class="theme-link" target="_blank" rel="noopener" href="https://github.com/zeed-w-beez/hexo-theme-even">Even</a>
   </span>
   <span class="division">|</span>
@@ -403,7 +405,21 @@
     
     
     
-    
+  
+<script>
+  var container = document.getElementById('utterances-container');
+  var script = document.createElement('script');
+  script.src = 'https://utteranc.es/client.js';
+  script.setAttribute('repo', 'weikangqi/weikangqi.github.io.git');
+  script.setAttribute('issue-term', 'title');
+  script.setAttribute('theme', 'github-light');
+  script.setAttribute('label', 'utterances');
+  script.crossorigin = 'anonymous';
+  script.async = true;
+
+  container.appendChild(script);
+</script>
+  
     
   
 

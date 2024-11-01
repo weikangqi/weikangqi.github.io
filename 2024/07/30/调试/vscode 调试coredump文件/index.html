@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 
 <head>
   <!-- Website mata -->
@@ -39,7 +39,7 @@
 
 
 <!-- Canonical, good for google search engine -->
-<link rel="canonical" href="http://example.com/2024/07/30/调试/vscode 调试coredump文件/" />
+<link rel="canonical" href="https://weikangqi.github.io/2024/07/30/调试/vscode 调试coredump文件/" />
 
 <!-- Fancybox styling -->
 
@@ -96,35 +96,35 @@
       <li class="mobile-menu-item">
         
         
-        Home              </li>
+        首页              </li>
     </a>
     
     <a href="/archives/">
       <li class="mobile-menu-item">
         
         
-        Archives              </li>
+        归档              </li>
     </a>
     
     <a href="/tags/">
       <li class="mobile-menu-item">
         
         
-        Tags              </li>
+        标签              </li>
     </a>
     
     <a href="/categories/">
       <li class="mobile-menu-item">
         
         
-        Categories              </li>
+        分类              </li>
     </a>
     
     <a href="/about/">
       <li class="mobile-menu-item">
         
         
-        About              </li>
+        关于              </li>
     </a>
     
   </ul>
@@ -143,7 +143,7 @@
           <a class="menu-item-link" href="/">  
               
               
-              Home  
+              首页  
               
           </a>  
         </li>  
@@ -152,7 +152,7 @@
           <a class="menu-item-link" href="/archives/">  
               
               
-              Archives  
+              归档  
               
           </a>  
         </li>  
@@ -161,7 +161,7 @@
           <a class="menu-item-link" href="/tags/">  
               
               
-              Tags  
+              标签  
               
           </a>  
         </li>  
@@ -170,7 +170,7 @@
           <a class="menu-item-link" href="/categories/">  
               
               
-              Categories  
+              分类  
               
           </a>  
         </li>  
@@ -179,7 +179,7 @@
           <a class="menu-item-link" href="/about/">  
               
               
-              About  
+              关于  
               
           </a>  
         </li>  
@@ -225,32 +225,28 @@
  <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ulimit -c [size]  //这里size一般修改为unlimited,或者是其他数字：2048</span><br></pre></td></tr></table></figure>
 
 
-<p> ​上修改只对当前的shell有效，一旦关闭，则恢复原来的值</p>
+<p> 上修改只对当前的shell有效，一旦关闭，则恢复原来的值</p>
 </li>
 <li><p><code>cat /var/log/apport.log</code> 可以看到生成的日志信息</p>
 </li>
 <li><p>core文件路径</p>
 <ul>
-<li><p>ubuntu20的生成coredump路径不在可执行路径下，而是在<code>/var/lib/apport/coredump</code>，因为没有写入权限，所以产生不了coredump文件，需要sudo，或者修改产生路径。</p>
-</li>
-<li><p>修改core文件产生位置在可执行文件目录下</p>
-<p><code>sudo bash -c &#39;echo core.%e.%p &gt; /proc/sys/kernel/core_pattern&#39;</code></p>
-</li>
+<li>ubuntu20的生成coredump路径不在可执行路径下，而是在<code>/var/lib/apport/coredump</code>，因为没有写入权限，所以产生不了coredump文件，需要sudo，或者修改产生路径。</li>
+<li>修改core文件产生位置在可执行文件目录下<code>sudo bash -c &#39;echo core.%e.%p &gt; /proc/sys/kernel/core_pattern&#39;</code></li>
 </ul>
 </li>
 <li><p>vscode 配置</p>
 <ul>
-<li><p>gdb</p>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;(gdb) Launch&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;cppdbg&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;request&quot;</span><span class="punctuation">:</span> <span class="string">&quot;launch&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;program&quot;</span><span class="punctuation">:</span> <span class="string">&quot;$&#123;workspaceFolder&#125;/a.out&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;args&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;stopAtEntry&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">false</span></span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;cwd&quot;</span><span class="punctuation">:</span> <span class="string">&quot;$&#123;workspaceFolder&#125;&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;environment&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;externalConsole&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">false</span></span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;MIMode&quot;</span><span class="punctuation">:</span> <span class="string">&quot;gdb&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;setupCommands&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">        <span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Enable pretty-printing for gdb&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;text&quot;</span><span class="punctuation">:</span> <span class="string">&quot;-enable-pretty-printing&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;ignoreFailures&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span></span><br><span class="line">        <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;coreDumpPath&quot;</span><span class="punctuation">:</span> <span class="string">&quot;$&#123;workspaceFolder&#125;/core.a.out.372125&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br></pre></td></tr></table></figure></li>
+<li>gdb</li>
 </ul>
-<p> 虽然填了program，但是实际上是从coredump启动的</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;(gdb) Launch&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;cppdbg&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;request&quot;</span><span class="punctuation">:</span> <span class="string">&quot;launch&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;program&quot;</span><span class="punctuation">:</span> <span class="string">&quot;$&#123;workspaceFolder&#125;/a.out&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;args&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;stopAtEntry&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">false</span></span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;cwd&quot;</span><span class="punctuation">:</span> <span class="string">&quot;$&#123;workspaceFolder&#125;&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;environment&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;externalConsole&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">false</span></span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;MIMode&quot;</span><span class="punctuation">:</span> <span class="string">&quot;gdb&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;setupCommands&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">                <span class="punctuation">&#123;</span></span><br><span class="line">                    <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Enable pretty-printing for gdb&quot;</span><span class="punctuation">,</span></span><br><span class="line">                    <span class="attr">&quot;text&quot;</span><span class="punctuation">:</span> <span class="string">&quot;-enable-pretty-printing&quot;</span><span class="punctuation">,</span></span><br><span class="line">                    <span class="attr">&quot;ignoreFailures&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span></span><br><span class="line">                <span class="punctuation">&#125;</span></span><br><span class="line">            <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;coreDumpPath&quot;</span><span class="punctuation">:</span> <span class="string">&quot;$&#123;workspaceFolder&#125;/core.a.out.372125&quot;</span></span><br><span class="line">        <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br></pre></td></tr></table></figure>
+
+<p>  虽然填了program，但是实际上是从coredump启动的</p>
 <ul>
-<li><p>codelldb</p>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">           <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;lldb&quot;</span><span class="punctuation">,</span></span><br><span class="line">           <span class="attr">&quot;request&quot;</span><span class="punctuation">:</span> <span class="string">&quot;custom&quot;</span><span class="punctuation">,</span></span><br><span class="line">           <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Open a core dump&quot;</span><span class="punctuation">,</span></span><br><span class="line">           <span class="attr">&quot;initCommands&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">               <span class="string">&quot;target create -c $&#123;workspaceFolder&#125;/core.a.out.372125&quot;</span></span><br><span class="line">           <span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure></li>
+<li>codelldb</li>
 </ul>
-</li>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">           <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;lldb&quot;</span><span class="punctuation">,</span></span><br><span class="line">           <span class="attr">&quot;request&quot;</span><span class="punctuation">:</span> <span class="string">&quot;custom&quot;</span><span class="punctuation">,</span></span><br><span class="line">           <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Open a core dump&quot;</span><span class="punctuation">,</span></span><br><span class="line">           <span class="attr">&quot;initCommands&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">               <span class="string">&quot;target create -c $&#123;workspaceFolder&#125;/core.a.out.372125&quot;</span></span><br><span class="line">           <span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure></li>
 </ol>
-<p>​			</p>
 
     
   </div>
@@ -260,15 +256,15 @@
 
 <div class="post-copyright">
   <p class="copyright-item">
-    <span>Author: </span>
-    <a href="http://example.com">weikangqi</a>
+    <span>原文作者: </span>
+    <a href="https://weikangqi.github.io">weikangqi</a>
   </p>
   <p class="copyright-item">
-    <span>Link: </span>
-    <a href="http://example.com/2024/07/30/%E8%B0%83%E8%AF%95/vscode%20%E8%B0%83%E8%AF%95coredump%E6%96%87%E4%BB%B6/">http://example.com/2024/07/30/%E8%B0%83%E8%AF%95/vscode%20%E8%B0%83%E8%AF%95coredump%E6%96%87%E4%BB%B6/</a>
+    <span>原文链接: </span>
+    <a href="https://weikangqi.github.io/2024/07/30/%E8%B0%83%E8%AF%95/vscode%20%E8%B0%83%E8%AF%95coredump%E6%96%87%E4%BB%B6/">https://weikangqi.github.io/2024/07/30/%E8%B0%83%E8%AF%95/vscode%20%E8%B0%83%E8%AF%95coredump%E6%96%87%E4%BB%B6/</a>
   </p>
   <p class="copyright-item">
-    <span>License: </span>
+    <span>许可协议: </span>
     
     <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">知识共享署名-非商业性使用 4.0 国际许可协议</a>
   </p>
@@ -295,13 +291,13 @@
       <a class="prev" href="/2024/07/30/%E6%9D%82%E9%A1%B9/frp%E4%BB%A3%E7%90%86/">  
         <i class="iconfont icon-left"></i>  
         <span class="prev-text nav-default">frp 内网穿透配置</span>  
-        <span class="prev-text nav-mobile">Prev</span>  
+        <span class="prev-text nav-mobile">上一篇</span>  
       </a>  
       
       
       <a class="next" href="/2024/03/18/MNN%E6%BA%90%E7%A0%81/MNN%20%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%205%20Pre-inference/">  
         <span class="next-text nav-default">MNN源码分析5 Pre-inference</span>  
-        <span class="prev-text nav-mobile">Next</span>  
+        <span class="prev-text nav-mobile">下一篇</span>  
         <i class="iconfont icon-right"></i>  
       </a>  
       
@@ -315,6 +311,8 @@
         </div>
           
   <div class="comments" id="comments">  
+      
+      <div id="utterances-container"></div>  
       
   </div>  
   
@@ -384,11 +382,11 @@
 
 <div class="copyright">
   <span class="power-by">
-    Powered by <a class="hexo-link" target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>
+    由 <a class="hexo-link" target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> 强力驱动
   </span>
   <span class="division">|</span>
   <span class="theme-info">
-    Theme -
+    主题 -
     <a class="theme-link" target="_blank" rel="noopener" href="https://github.com/zeed-w-beez/hexo-theme-even">Even</a>
   </span>
   <span class="division">|</span>
@@ -420,7 +418,21 @@
     
     
     
-    
+  
+<script>
+  var container = document.getElementById('utterances-container');
+  var script = document.createElement('script');
+  script.src = 'https://utteranc.es/client.js';
+  script.setAttribute('repo', 'weikangqi/weikangqi.github.io.git');
+  script.setAttribute('issue-term', 'title');
+  script.setAttribute('theme', 'github-light');
+  script.setAttribute('label', 'utterances');
+  script.crossorigin = 'anonymous';
+  script.async = true;
+
+  container.appendChild(script);
+</script>
+  
     
   
 

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 
 <head>
   <!-- Website mata -->
@@ -18,8 +18,12 @@
 
 <!-- Website description -->
 
+<meta name="description" content="MNN源码分析 CPU 内存池" />
+
 
 <!-- Website keywords -->
+
+<meta name="keywords" content="模型部署, MNN, wkq&#39;s site" />
 
 
 
@@ -35,7 +39,7 @@
 
 
 <!-- Canonical, good for google search engine -->
-<link rel="canonical" href="http://example.com/2024/11/01/MNN源码/MNN 源码分享 cpu 内存池/" />
+<link rel="canonical" href="https://weikangqi.github.io/2024/03/15/MNN源码/MNN 源码分享 cpu 内存池/" />
 
 <!-- Fancybox styling -->
 
@@ -68,7 +72,7 @@
   window.config = {"leancloud":{"app_id":null,"app_key":null,"server_url":null,"cdn":null},"toc":true,"fancybox":true,"latex":true};
 </script>
   
-  <title> - wkq&#39;s site</title>
+  <title>MNN源码分析 CPU 内存池 - wkq&#39;s site</title>
 
 <meta name="generator" content="Hexo 7.3.0"></head>
 
@@ -92,35 +96,35 @@
       <li class="mobile-menu-item">
         
         
-        Home              </li>
+        首页              </li>
     </a>
     
     <a href="/archives/">
       <li class="mobile-menu-item">
         
         
-        Archives              </li>
+        归档              </li>
     </a>
     
     <a href="/tags/">
       <li class="mobile-menu-item">
         
         
-        Tags              </li>
+        标签              </li>
     </a>
     
     <a href="/categories/">
       <li class="mobile-menu-item">
         
         
-        Categories              </li>
+        分类              </li>
     </a>
     
     <a href="/about/">
       <li class="mobile-menu-item">
         
         
-        About              </li>
+        关于              </li>
     </a>
     
   </ul>
@@ -139,7 +143,7 @@
           <a class="menu-item-link" href="/">  
               
               
-              Home  
+              首页  
               
           </a>  
         </li>  
@@ -148,7 +152,7 @@
           <a class="menu-item-link" href="/archives/">  
               
               
-              Archives  
+              归档  
               
           </a>  
         </li>  
@@ -157,7 +161,7 @@
           <a class="menu-item-link" href="/tags/">  
               
               
-              Tags  
+              标签  
               
           </a>  
         </li>  
@@ -166,7 +170,7 @@
           <a class="menu-item-link" href="/categories/">  
               
               
-              Categories  
+              分类  
               
           </a>  
         </li>  
@@ -175,7 +179,7 @@
           <a class="menu-item-link" href="/about/">  
               
               
-              About  
+              关于  
               
           </a>  
         </li>  
@@ -192,15 +196,21 @@
   <header class="post-header">
     <h1 class="post-title">
       
-      
+      MNN源码分析 CPU 内存池
       
     </h1>
 
     <div class="post-meta">
       <span class="post-time">
-        2024-11-01
+        2024-03-15
       </span>
       
+      
+      <span class="post-category">
+        
+        <a href="/categories/MNN-%E6%BA%90%E7%A0%81%E7%B3%BB%E5%88%97/">MNN 源码系列</a>
+        
+      </span>
       
       
     </div>
@@ -208,7 +218,7 @@
 
   
   <div class="post-toc" id="post-toc">
-    <h2 class="post-toc-title">Contents</h2>
+    <h2 class="post-toc-title">文章目录</h2>
     <div class="post-toc-content">
       <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-number">1.</span> <span class="toc-text">基本数据结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#BufferAllocator"><span class="toc-number">2.</span> <span class="toc-text">BufferAllocator</span></a></li></ol>
     </div>
@@ -234,15 +244,15 @@
 
 <div class="post-copyright">
   <p class="copyright-item">
-    <span>Author: </span>
-    <a href="http://example.com">weikangqi</a>
+    <span>原文作者: </span>
+    <a href="https://weikangqi.github.io">weikangqi</a>
   </p>
   <p class="copyright-item">
-    <span>Link: </span>
-    <a href="http://example.com/2024/11/01/MNN%E6%BA%90%E7%A0%81/MNN%20%E6%BA%90%E7%A0%81%E5%88%86%E4%BA%AB%20cpu%20%E5%86%85%E5%AD%98%E6%B1%A0/">http://example.com/2024/11/01/MNN%E6%BA%90%E7%A0%81/MNN%20%E6%BA%90%E7%A0%81%E5%88%86%E4%BA%AB%20cpu%20%E5%86%85%E5%AD%98%E6%B1%A0/</a>
+    <span>原文链接: </span>
+    <a href="https://weikangqi.github.io/2024/03/15/MNN%E6%BA%90%E7%A0%81/MNN%20%E6%BA%90%E7%A0%81%E5%88%86%E4%BA%AB%20cpu%20%E5%86%85%E5%AD%98%E6%B1%A0/">https://weikangqi.github.io/2024/03/15/MNN%E6%BA%90%E7%A0%81/MNN%20%E6%BA%90%E7%A0%81%E5%88%86%E4%BA%AB%20cpu%20%E5%86%85%E5%AD%98%E6%B1%A0/</a>
   </p>
   <p class="copyright-item">
-    <span>License: </span>
+    <span>许可协议: </span>
     
     <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">知识共享署名-非商业性使用 4.0 国际许可协议</a>
   </p>
@@ -255,19 +265,27 @@
   
   <footer class="post-footer">
     
+    <div class="post-tags">
+      
+      <a href="/tags/%E6%A8%A1%E5%9E%8B%E9%83%A8%E7%BD%B2/">模型部署</a>
+      
+      <a href="/tags/MNN/">MNN</a>
+      
+    </div>
+    
       
   <nav class="post-nav">  
       
-      <a class="prev" href="/2024/11/01/neon/neon%20Instruction%20%E8%AF%AD%E6%B3%95/">  
+      <a class="prev" href="/2024/03/15/MNN%E6%BA%90%E7%A0%81/MNN%20%E6%BA%90%E7%A0%81%E5%88%86%E4%BA%AB%201%20Interpter/">  
         <i class="iconfont icon-left"></i>  
-        <span class="prev-text nav-default">ARM neon Instruction  语法</span>  
-        <span class="prev-text nav-mobile">Prev</span>  
+        <span class="prev-text nav-default">MNN源码分析1 Interpreter</span>  
+        <span class="prev-text nav-mobile">上一篇</span>  
       </a>  
       
       
-      <a class="next" href="/2024/11/01/MNN%E6%BA%90%E7%A0%81/MNN%20%E6%BA%90%E7%A0%81%E5%88%86%E4%BA%AB%204%20Execution/">  
-        <span class="next-text nav-default"></span>  
-        <span class="prev-text nav-mobile">Next</span>  
+      <a class="next" href="/2024/03/14/MNN%E6%BA%90%E7%A0%81/MNN%20%E6%BA%90%E7%A0%81%E5%88%86%E4%BA%AB%206%20%E7%AE%97%E5%AD%90%E5%88%87%E5%88%86/">  
+        <span class="next-text nav-default">MNN源码分析4 mnn的图计算</span>  
+        <span class="prev-text nav-mobile">下一篇</span>  
         <i class="iconfont icon-right"></i>  
       </a>  
       
@@ -281,6 +299,8 @@
         </div>
           
   <div class="comments" id="comments">  
+      
+      <div id="utterances-container"></div>  
       
   </div>  
   
@@ -350,11 +370,11 @@
 
 <div class="copyright">
   <span class="power-by">
-    Powered by <a class="hexo-link" target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>
+    由 <a class="hexo-link" target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> 强力驱动
   </span>
   <span class="division">|</span>
   <span class="theme-info">
-    Theme -
+    主题 -
     <a class="theme-link" target="_blank" rel="noopener" href="https://github.com/zeed-w-beez/hexo-theme-even">Even</a>
   </span>
   <span class="division">|</span>
@@ -386,7 +406,21 @@
     
     
     
-    
+  
+<script>
+  var container = document.getElementById('utterances-container');
+  var script = document.createElement('script');
+  script.src = 'https://utteranc.es/client.js';
+  script.setAttribute('repo', 'weikangqi/weikangqi.github.io.git');
+  script.setAttribute('issue-term', 'title');
+  script.setAttribute('theme', 'github-light');
+  script.setAttribute('label', 'utterances');
+  script.crossorigin = 'anonymous';
+  script.async = true;
+
+  container.appendChild(script);
+</script>
+  
     
   
 
