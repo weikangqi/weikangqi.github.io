@@ -196,6 +196,184 @@
   <header class="post-header">
     <h1 class="post-title">
       
+      <a class="post-link" href="/2024/11/01/neon/neon%20%E9%85%8D%E7%BD%AE/">ARM neon 指令 （Android）代码环境配置</a>
+      
+    </h1>
+
+    <div class="post-meta">
+      <span class="post-time">
+        2024-11-01
+      </span>
+      
+      
+      <span class="post-category">
+        
+        <a href="/categories/neon-%E5%AD%A6%E4%B9%A0%E7%B3%BB%E5%88%97/">neon 学习系列</a>
+        
+      </span>
+      
+      
+    </div>
+  </header>
+
+  
+
+  <div class="post-content">
+    
+    
+    
+    
+    
+
+    
+    学习arm neon,最终实现一个FFT为目标。
+    <div class="read-more">
+      <a href="/2024/11/01/neon/neon%20%E9%85%8D%E7%BD%AE/" class="read-more-link">Read more..</a>
+    </div>
+    
+    
+  </div>
+
+  
+
+  
+
+</article>
+  
+  <article class="post">
+  <header class="post-header">
+    <h1 class="post-title">
+      
+      <a class="post-link" href="/2024/11/01/neon/neon%20Instruction%20%E8%AF%AD%E6%B3%95/">ARM neon Instruction  语法</a>
+      
+    </h1>
+
+    <div class="post-meta">
+      <span class="post-time">
+        2024-11-01
+      </span>
+      
+      
+      <span class="post-category">
+        
+        <a href="/categories/neon-%E5%AD%A6%E4%B9%A0%E7%B3%BB%E5%88%97/">neon 学习系列</a>
+        
+      </span>
+      
+      
+    </div>
+  </header>
+
+  
+
+  <div class="post-content">
+    
+    
+    
+    
+    
+
+    
+    学习arm neon,最终实现一个FFT为目标。
+    <div class="read-more">
+      <a href="/2024/11/01/neon/neon%20Instruction%20%E8%AF%AD%E6%B3%95/" class="read-more-link">Read more..</a>
+    </div>
+    
+    
+  </div>
+
+  
+
+  
+
+</article>
+  
+  <article class="post">
+  <header class="post-header">
+    <h1 class="post-title">
+      
+      <a class="post-link" href="/2024/11/01/MNN%E6%BA%90%E7%A0%81/MNN%20%E6%BA%90%E7%A0%81%E5%88%86%E4%BA%AB%20cpu%20%E5%86%85%E5%AD%98%E6%B1%A0/"></a>
+      
+    </h1>
+
+    <div class="post-meta">
+      <span class="post-time">
+        2024-11-01
+      </span>
+      
+      
+      
+    </div>
+  </header>
+
+  
+
+  <div class="post-content">
+    
+    
+    
+
+    
+    <h2 id="基本数据结构"><a href="#基本数据结构" class="headerlink" title="基本数据结构"></a>基本数据结构</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">MemNode</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">MemNode</span>(<span class="type">size_t</span> s) : <span class="built_in">size</span>(s) &#123;&#125;</span><br><span class="line">    ~<span class="built_in">MemNode</span>() &#123;&#125;</span><br><span class="line">    <span class="type">size_t</span> size = <span class="number">0</span>, offset = <span class="number">0</span>;</span><br><span class="line">    <span class="type">void</span>* base = <span class="literal">nullptr</span>; <span class="comment">// 数据地址</span></span><br><span class="line">    <span class="type">bool</span> usage = <span class="literal">true</span>; <span class="comment">// 是否被使用</span></span><br><span class="line">    MemNode *left = <span class="literal">nullptr</span>, *right = <span class="literal">nullptr</span>;</span><br><span class="line">    </span><br><span class="line">    std::vector&lt;MemNode*&gt; children;</span><br><span class="line">    std::vector&lt;Tensor*&gt; tensors;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">MemChunk</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">MemChunk</span>() = <span class="keyword">default</span>;</span><br><span class="line">    <span class="built_in">MemChunk</span>(<span class="type">void</span>* base, <span class="type">size_t</span> offset = <span class="number">0</span>) : <span class="built_in">first</span>(base), <span class="built_in">second</span>(offset) &#123;&#125;</span><br><span class="line">    <span class="built_in">MemChunk</span>(std::pair&lt;<span class="type">void</span>*, <span class="type">size_t</span>&gt; pointer) : <span class="built_in">first</span>(pointer.first), <span class="built_in">second</span>(pointer.second) &#123;&#125;</span><br><span class="line">    <span class="built_in">MemChunk</span>(MemNode* node) : <span class="built_in">mNode</span>(node) &#123;&#125;</span><br><span class="line">    ~<span class="built_in">MemChunk</span>() = <span class="keyword">default</span>;</span><br><span class="line">    MemChunk <span class="keyword">operator</span>+ (<span class="type">size_t</span> offset);  <span class="comment">// this-&gt;second += offset</span></span><br><span class="line">    <span class="function"><span class="type">void</span>* <span class="title">base</span><span class="params">()</span> <span class="type">const</span></span>;</span><br><span class="line">    <span class="function"><span class="type">size_t</span> <span class="title">offset</span><span class="params">()</span> <span class="type">const</span></span>;</span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">invalid</span><span class="params">()</span> <span class="type">const</span></span>;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">attach</span><span class="params">(Tensor* tensor)</span></span>;</span><br><span class="line">    <span class="function"><span class="type">uint8_t</span>* <span class="title">ptr</span><span class="params">()</span> <span class="type">const</span> </span>&#123;    <span class="comment">// 获取数据指针 </span></span><br><span class="line">        <span class="keyword">if</span> (mNode) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">static_cast</span>&lt;<span class="type">uint8_t</span>*&gt;(mNode-&gt;base) + mNode-&gt;offset + second;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">static_cast</span>&lt;<span class="type">uint8_t</span>*&gt;(first) + second;</span><br><span class="line">    &#125;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="type">void</span>* first = <span class="literal">nullptr</span>;   <span class="comment">//相当于MemNode的base</span></span><br><span class="line">    <span class="type">size_t</span> second = <span class="number">0</span>;  <span class="comment">//想当于 MemNode-&gt;offset + second</span></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    MemNode* mNode = <span class="literal">nullptr</span>;</span><br><span class="line">    <span class="keyword">friend</span> <span class="keyword">class</span> <span class="title class_">DeferBufferAllocator</span>;</span><br><span class="line">    <span class="keyword">friend</span> <span class="keyword">class</span> <span class="title class_">EagerBufferAllocator</span>;</span><br><span class="line">    <span class="keyword">friend</span> <span class="keyword">class</span> <span class="title class_">DefaultAllocator</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="BufferAllocator"><a href="#BufferAllocator" class="headerlink" title="BufferAllocator"></a>BufferAllocator</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">MNN_PUBLIC</span> BufferAllocator : <span class="keyword">public</span> NonCopyable &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">Allocator</span> &#123;</span><br><span class="line">    <span class="keyword">public</span>:</span><br><span class="line">        <span class="built_in">Allocator</span>() = <span class="keyword">default</span>;</span><br><span class="line">        <span class="keyword">virtual</span> ~ <span class="built_in">Allocator</span>() = <span class="keyword">default</span>;</span><br><span class="line">        <span class="function"><span class="keyword">virtual</span> MemChunk <span class="title">onAlloc</span><span class="params">(<span class="type">size_t</span> size, <span class="type">size_t</span> align)</span> </span>= <span class="number">0</span>;</span><br><span class="line">        <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">onRelease</span><span class="params">(MemChunk chunk)</span> </span>= <span class="number">0</span>;</span><br><span class="line">        <span class="function"><span class="type">static</span> std::shared_ptr&lt;Allocator&gt; <span class="title">createDefault</span><span class="params">()</span></span>;</span><br><span class="line">        <span class="function"><span class="type">static</span> std::shared_ptr&lt;Allocator&gt; <span class="title">createRecurse</span><span class="params">(BufferAllocator* parent)</span></span>;</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="built_in">BufferAllocator</span>() = <span class="keyword">default</span>;</span><br><span class="line">    <span class="keyword">virtual</span> ~<span class="built_in">BufferAllocator</span>() = <span class="keyword">default</span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> MemChunk <span class="title">alloc</span><span class="params">(<span class="type">size_t</span> size, <span class="type">bool</span> separate = <span class="literal">false</span>, <span class="type">size_t</span> align = <span class="number">0</span>)</span> </span>= <span class="number">0</span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">bool</span> <span class="title">free</span><span class="params">(MemChunk chunk)</span> </span>= <span class="number">0</span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">release</span><span class="params">(<span class="type">bool</span> allRelease = <span class="literal">true</span>)</span> </span>= <span class="number">0</span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">size_t</span> <span class="title">totalSize</span><span class="params">()</span> <span class="type">const</span> </span>= <span class="number">0</span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">barrierBegin</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">barrierEnd</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">beginGroup</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">endGroup</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">reset</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> ErrorCode <span class="title">compute</span><span class="params">()</span></span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+
+    
+    
+  </div>
+
+  
+
+  
+
+</article>
+  
+  <article class="post">
+  <header class="post-header">
+    <h1 class="post-title">
+      
+      <a class="post-link" href="/2024/11/01/MNN%E6%BA%90%E7%A0%81/MNN%20%E6%BA%90%E7%A0%81%E5%88%86%E4%BA%AB%204%20Execution/"></a>
+      
+    </h1>
+
+    <div class="post-meta">
+      <span class="post-time">
+        2024-11-01
+      </span>
+      
+      
+      
+    </div>
+  </header>
+
+  
+
+  <div class="post-content">
+    
+    
+    
+
+    
+    
+    
+    
+  </div>
+
+  
+
+  
+
+</article>
+  
+  <article class="post">
+  <header class="post-header">
+    <h1 class="post-title">
+      
       <a class="post-link" href="/2024/11/01/hello-world/">Hello World</a>
       
     </h1>
@@ -234,9 +412,336 @@
 
 </article>
   
+  <article class="post">
+  <header class="post-header">
+    <h1 class="post-title">
+      
+      <a class="post-link" href="/2024/07/30/%E6%9D%82%E9%A1%B9/frp%E4%BB%A3%E7%90%86/">frp 内网穿透配置</a>
+      
+    </h1>
+
+    <div class="post-meta">
+      <span class="post-time">
+        2024-07-30
+      </span>
+      
+      
+      <span class="post-category">
+        
+        <a href="/categories/%E5%B7%A5%E5%85%B7%E9%85%8D%E7%BD%AE/">工具配置</a>
+        
+      </span>
+      
+      
+    </div>
+  </header>
+
+  
+
+  <div class="post-content">
+    
+    
+    
+
+    
+    <h1 id="frp-内网穿透配置"><a href="#frp-内网穿透配置" class="headerlink" title="frp 内网穿透配置"></a>frp 内网穿透配置</h1><blockquote>
+<p>要放暑假了，在家需要连接实验室服务器，之前通过云主机搭建frp中转，但是云主机比较贵，所以来白嫖Sakura Frp</p>
+</blockquote>
+<h2 id="1-注册账户"><a href="#1-注册账户" class="headerlink" title="1. 注册账户"></a>1. 注册账户</h2><p>普通用户有两个隧道，限速10M,一个月有10G流量，可以每日签到获取额外的流量，不过对于ssh来讲，基本上是够用的，代码文本也消耗不了多少流量。</p>
+<h2 id="2-建立隧道"><a href="#2-建立隧道" class="headerlink" title="2. 建立隧道"></a>2. 建立隧道</h2><p>实名制后，可以点击服务来创建一个隧道，来中转服务。</p>
+<p><img src="https://s2.loli.net/2024/07/30/uOVJQl7mUSLnt2C.png" alt="QQ_1722343688110"></p>
+<p>这样就创建了一个隧道</p>
+<p>frp本质上做的事情就是，将两端的流量进行转发，因为两端没有公网IP，也可以使用<code>zerotier</code></p>
+<p>来打洞，但是如果NAT层比较多，延时还是比较大，在学校里面使用延时比较低，如果在家延时比较高，体验不好。</p>
+<h2 id="3-服务端"><a href="#3-服务端" class="headerlink" title="3. 服务端"></a>3. 服务端</h2><p>我把你要访问的电脑称为服务端，也就是实验室的服务器</p>
+<p>服务端需要下载frp</p>
+<p><img src="https://s2.loli.net/2024/07/30/LdeWwjQl34Tn9r7.png" alt="QQ_1722342725796"></p>
+<ul>
+<li>点击复制链接</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget 链接</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>将frp下载下来，使用<code>tar -xvf natfrp-service_linux_amd64.tar.zst </code>解压缩</p>
+</li>
+<li><p><code>chmod +x ./frpc</code>来赋予可执行权限</p>
+</li>
+<li><p>获取加密参数</p>
+<p><img src="https://s2.loli.net/2024/07/30/7W1t2ougqnmKOTQ.png" alt="QQ_1722342962407"></p>
+</li>
+<li><p>启动</p>
+<p><code> ./frpc -f 参数</code></p>
+<ul>
+<li>可以使用<code>systemctl</code>来管理frp的服务，包括开机自动启动，开始，暂停等</li>
+<li>nohup开控制frpc后端执行 <code>nohup ./frpc -f 参数 &gt; runoob.log 2&gt;&amp;1 &amp;</code></li>
+</ul>
+<p><img src="https://s2.loli.net/2024/07/30/IgwdNfDqC9jY7sR.png" alt="QQ_1722343190952"></p>
+</li>
+</ul>
+<p>可以获得访问服务器的<code>ip:port</code></p>
+<h2 id="4-客户端"><a href="#4-客户端" class="headerlink" title="4. 客户端"></a>4. 客户端</h2><ul>
+<li><p>下载认证</p>
+<p><img src="https://s2.loli.net/2024/07/30/EhS36gJaFVGfLle.png" alt="QQ_1722343257332"></p>
+</li>
+</ul>
+<p><img src="https://s2.loli.net/2024/07/30/LRFC9bnuv1jlDZc.png" alt="QQ_1722343281279"></p>
+<p>会生成一个exe，点击运行即可</p>
+<ul>
+<li><p>ssh 连接</p>
+<p>注意这里ssh端口不是22</p>
+<p>而是上面获得的那个IP和端口</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh -p port yourname@ip</span><br></pre></td></tr></table></figure>
+
+<p>这样就连接到服务器了。</p>
+</li>
+</ul>
+
+    
+    
+  </div>
+
+  
+
+  
+
+</article>
+  
+  <article class="post">
+  <header class="post-header">
+    <h1 class="post-title">
+      
+      <a class="post-link" href="/2024/07/30/%E8%B0%83%E8%AF%95/vscode%20%E8%B0%83%E8%AF%95coredump%E6%96%87%E4%BB%B6/">vscode 调试coredump 文件</a>
+      
+    </h1>
+
+    <div class="post-meta">
+      <span class="post-time">
+        2024-07-30
+      </span>
+      
+      
+      <span class="post-category">
+        
+        <a href="/categories/%E5%B7%A5%E5%85%B7%E9%85%8D%E7%BD%AE/">工具配置</a>
+        
+      </span>
+      
+      
+    </div>
+  </header>
+
+  
+
+  <div class="post-content">
+    
+    
+    
+
+    
+    <ol>
+<li><p>设置<code>ulimit -c unlimited</code>，如果<code>ulimit -c </code>结果是0的话产生不了coredump文件</p>
+ <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ulimit -c [size]  //这里size一般修改为unlimited,或者是其他数字：2048</span><br></pre></td></tr></table></figure>
+
+
+<p> ​上修改只对当前的shell有效，一旦关闭，则恢复原来的值</p>
+</li>
+<li><p><code>cat /var/log/apport.log</code> 可以看到生成的日志信息</p>
+</li>
+<li><p>core文件路径</p>
+<ul>
+<li><p>ubuntu20的生成coredump路径不在可执行路径下，而是在<code>/var/lib/apport/coredump</code>，因为没有写入权限，所以产生不了coredump文件，需要sudo，或者修改产生路径。</p>
+</li>
+<li><p>修改core文件产生位置在可执行文件目录下</p>
+<p><code>sudo bash -c &#39;echo core.%e.%p &gt; /proc/sys/kernel/core_pattern&#39;</code></p>
+</li>
+</ul>
+</li>
+<li><p>vscode 配置</p>
+<ul>
+<li><p>gdb</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;(gdb) Launch&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;cppdbg&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;request&quot;</span><span class="punctuation">:</span> <span class="string">&quot;launch&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;program&quot;</span><span class="punctuation">:</span> <span class="string">&quot;$&#123;workspaceFolder&#125;/a.out&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;args&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;stopAtEntry&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">false</span></span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;cwd&quot;</span><span class="punctuation">:</span> <span class="string">&quot;$&#123;workspaceFolder&#125;&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;environment&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;externalConsole&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">false</span></span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;MIMode&quot;</span><span class="punctuation">:</span> <span class="string">&quot;gdb&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;setupCommands&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">        <span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Enable pretty-printing for gdb&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;text&quot;</span><span class="punctuation">:</span> <span class="string">&quot;-enable-pretty-printing&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;ignoreFailures&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span></span><br><span class="line">        <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;coreDumpPath&quot;</span><span class="punctuation">:</span> <span class="string">&quot;$&#123;workspaceFolder&#125;/core.a.out.372125&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<p> 虽然填了program，但是实际上是从coredump启动的</p>
+<ul>
+<li><p>codelldb</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">           <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;lldb&quot;</span><span class="punctuation">,</span></span><br><span class="line">           <span class="attr">&quot;request&quot;</span><span class="punctuation">:</span> <span class="string">&quot;custom&quot;</span><span class="punctuation">,</span></span><br><span class="line">           <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Open a core dump&quot;</span><span class="punctuation">,</span></span><br><span class="line">           <span class="attr">&quot;initCommands&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">               <span class="string">&quot;target create -c $&#123;workspaceFolder&#125;/core.a.out.372125&quot;</span></span><br><span class="line">           <span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+</ol>
+<p>​			</p>
+
+    
+    
+  </div>
+
+  
+
+  
+
+</article>
+  
+  <article class="post">
+  <header class="post-header">
+    <h1 class="post-title">
+      
+      <a class="post-link" href="/2024/03/18/MNN%E6%BA%90%E7%A0%81/MNN%20%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%205%20Pre-inference/">MNN源码分析5 Pre-inference</a>
+      
+    </h1>
+
+    <div class="post-meta">
+      <span class="post-time">
+        2024-03-18
+      </span>
+      
+      
+      <span class="post-category">
+        
+        <a href="/categories/MNN-%E6%BA%90%E7%A0%81%E7%B3%BB%E5%88%97/">MNN 源码系列</a>
+        
+      </span>
+      
+      
+    </div>
+  </header>
+
+  
+
+  <div class="post-content">
+    
+    
+    
+
+    
+    <p>MNN基本的工作流由两部分组成，即Offline Conversion和On-device Inference。On-device Inference由三部分组成，分别是：Pre-inference、算子级优化和Backend Abstraction.在Pre-inference模块中引入了一种对可选计算方案的代价评估机理，在已知输入大小和内核形状的前提下，从多种方案中选择一种最优的方案。具体需要结合代码。 </p>
+<h2 id="CPU-Backend"><a href="#CPU-Backend" class="headerlink" title="CPU Backend"></a>CPU Backend</h2><p><code>Interpreter</code>在创建session中，在session.size()时，会allocMemory(),这时会调用相应的后端去执行onCreate，如果时卷积，则会调用<code>ConvolutionFloatFactory</code>,使用<code>_createUnit</code>选择不同的卷积实现。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="type">static</span> Execution* _createUnit(<span class="type">const</span> Tensor* input, <span class="type">const</span> Tensor* output, Backend* backend,</span><br><span class="line">                              <span class="type">const</span> Convolution2D* conv2d, <span class="type">const</span> <span class="type">float</span>* originWeight, <span class="type">size_t</span> originWeightSize, <span class="type">const</span> <span class="type">float</span>* bias, <span class="type">size_t</span> biasSize, std::shared_ptr&lt;ConvolutionCommon::Int8Common&gt; weightQuantInfo, <span class="type">bool</span> supportSparse) &#123;</span><br><span class="line">    <span class="keyword">auto</span> cpuBackend = (CPUBackend*)backend;</span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> MNN_LOW_MEMORY</span></span><br><span class="line">    <span class="type">bool</span> lowMemory = cpuBackend-&gt;<span class="built_in">memoryMode</span>() == BackendConfig::Memory_Low;</span><br><span class="line"><span class="meta">#<span class="keyword">else</span></span></span><br><span class="line">    <span class="type">bool</span> lowMemory = <span class="literal">false</span>;</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">    <span class="keyword">auto</span> common = conv2d-&gt;<span class="built_in">common</span>();</span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> MNN_USE_ONEDNN</span></span><br><span class="line">    <span class="keyword">return</span> OneDNN::<span class="built_in">createConvolution</span>(common, backend, originWeight, originWeightSize, bias, biasSize);</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> MNN_USE_SPARSE_COMPUTE</span></span><br><span class="line">    <span class="keyword">if</span> (conv2d-&gt;<span class="built_in">sparseParameter</span>() &amp;&amp; <span class="literal">nullptr</span> != weightQuantInfo.<span class="built_in">get</span>()) &#123;</span><br><span class="line">        <span class="keyword">if</span> (supportSparse) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">SparseConvolutionTiledExecutor</span>(common, backend, weightQuantInfo-&gt;quan,</span><br><span class="line">                                                      conv2d-&gt;<span class="built_in">sparseParameter</span>(), bias, biasSize);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">    <span class="type">bool</span> fastWay = common-&gt;<span class="built_in">kernelY</span>() == <span class="number">1</span> &amp;&amp; common-&gt;<span class="built_in">kernelX</span>() == <span class="number">1</span></span><br><span class="line">        &amp;&amp; output-&gt;<span class="built_in">width</span>() == input-&gt;<span class="built_in">width</span>() &amp;&amp; output-&gt;<span class="built_in">height</span>() == input-&gt;<span class="built_in">height</span>()</span><br><span class="line">        &amp;&amp; common-&gt;<span class="built_in">strideX</span>() == <span class="number">1</span> &amp;&amp; common-&gt;<span class="built_in">strideY</span>() == <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (lowMemory) &#123;</span><br><span class="line">        <span class="keyword">if</span> (fastWay &amp;&amp; <span class="literal">nullptr</span> != weightQuantInfo.<span class="built_in">get</span>()) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">ConvolutionHybrid</span>(common, backend, originWeight, originWeightSize, bias, biasSize, weightQuantInfo);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">DenseConvolutionTiledExecutor</span>(common, backend, originWeight, originWeightSize, bias, biasSize, weightQuantInfo);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//如果卷积核是1 * 1， 使用 Convolution1x1Strassen</span></span><br><span class="line">    <span class="keyword">if</span> (fastWay) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Convolution1x1Strassen</span>(common, backend, originWeight, originWeightSize, bias, biasSize, weightQuantInfo);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//如果权重大小为0 使用DenseConvolution</span></span><br><span class="line">    <span class="keyword">if</span> (originWeightSize == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">DenseConvolutionTiledExecutor</span>(common, backend, originWeight, originWeightSize, bias, biasSize, weightQuantInfo);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 判断能否使用Winograd 卷积</span></span><br><span class="line">    <span class="keyword">if</span> (!ConvolutionWinogradBridge::<span class="built_in">canUseWinograd</span>(common)) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">DenseConvolutionTiledExecutor</span>(common, backend, originWeight, originWeightSize, bias, biasSize, <span class="literal">nullptr</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    PerfConfig convPerfconfig = DenseConvolutionTiledExecutor::<span class="built_in">bestTileConvolutionConfig</span>(common, input, output, cpuBackend-&gt;<span class="built_in">threadNumber</span>(), backend);</span><br><span class="line">    <span class="keyword">auto</span> winogradConfig = ConvolutionWinogradBridge::<span class="built_in">bestWinogradUnit</span>(common, input, output, cpuBackend-&gt;<span class="built_in">threadNumber</span>(), backend, convPerfconfig);</span><br><span class="line">    <span class="keyword">if</span> (winogradConfig.unit &lt;= <span class="number">1</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">DenseConvolutionTiledExecutor</span>(common, backend, originWeight, originWeightSize, bias, biasSize, <span class="literal">nullptr</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//返回 winograd的实现 </span></span><br><span class="line">    <span class="keyword">return</span> ConvolutionWinogradBridge::<span class="built_in">createWinogradImpl</span>(common, input, output, backend, originWeight, originWeightSize, bias, biasSize,</span><br><span class="line">                                   winogradConfig);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>整体来讲MNN会根据你的lowMemory的要求，以及kernel的大小来动态去选择卷积实现。</p>
+<h2 id="Opencl-Backend"><a href="#Opencl-Backend" class="headerlink" title="Opencl Backend"></a>Opencl Backend</h2><p><img src="https://s2.loli.net/2024/03/18/TsUOxqVF4HAt6jz.png" alt="20240318135208"></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(runtime-&gt;<span class="built_in">getCLTuneLevel</span>() == Heavy) &#123;</span><br><span class="line">        <span class="keyword">while</span>(lws[<span class="number">1</span>] &lt;= gws[<span class="number">1</span>] || lws[<span class="number">1</span>] &lt;= <span class="number">6</span>) &#123;</span><br><span class="line">            lws[<span class="number">0</span>] = <span class="number">1</span>;</span><br><span class="line">            <span class="keyword">while</span>(lws[<span class="number">0</span>] &lt;= gws[<span class="number">0</span>] || lws[<span class="number">0</span>] &lt;= <span class="number">6</span>) &#123;</span><br><span class="line">                <span class="keyword">if</span>(lws[<span class="number">0</span>] &lt;= maxWorkItemSizes[<span class="number">0</span>] &amp;&amp; lws[<span class="number">1</span>] &lt;= maxWorkItemSizes[<span class="number">1</span>] &amp;&amp; lws[<span class="number">0</span>]*lws[<span class="number">1</span>] &lt;= maxWorkGroupSize) &#123;</span><br><span class="line">                    cl::Event event;</span><br><span class="line">                    <span class="function">std::vector&lt;<span class="type">uint32_t</span>&gt; <span class="title">internalGlobalWS</span><span class="params">(<span class="number">2</span>, <span class="number">1</span>)</span></span>;</span><br><span class="line">                    <span class="keyword">for</span> (<span class="type">size_t</span> i = <span class="number">0</span>; i &lt; gws.<span class="built_in">size</span>(); ++i) &#123;</span><br><span class="line">                        internalGlobalWS[i] = <span class="built_in">ROUND_UP</span>(gws[i], std::<span class="built_in">max</span>((<span class="type">uint32_t</span>)<span class="number">1</span>, lws[i]));</span><br><span class="line">                    &#125;</span><br><span class="line">                    cl_int res = runtime-&gt;<span class="built_in">commandQueue</span>().<span class="built_in">enqueueNDRangeKernel</span>(</span><br><span class="line">                                    mKernel, cl::NullRange,</span><br><span class="line">                                    cl::<span class="built_in">NDRange</span>(internalGlobalWS[<span class="number">0</span>], internalGlobalWS[<span class="number">1</span>]),</span><br><span class="line">                                    cl::<span class="built_in">NDRange</span>(lws[<span class="number">0</span>], lws[<span class="number">1</span>]),</span><br><span class="line">                                    <span class="literal">nullptr</span>, &amp;event);</span><br><span class="line">                    <span class="built_in">MNN_CHECK_CL_SUCCESS</span>(res, kernelName.<span class="built_in">c_str</span>());</span><br><span class="line">                    <span class="keyword">if</span> (res != CL_SUCCESS) &#123;</span><br><span class="line">                        <span class="built_in">MNN_PRINT</span>(<span class="string">&quot;lws tune res %s\n&quot;</span>, kernelName.<span class="built_in">c_str</span>());</span><br><span class="line">                    &#125;</span><br><span class="line">                    </span><br><span class="line">                    <span class="type">int</span> cost_time = (<span class="type">int</span>)runtime-&gt;<span class="built_in">getCostTime</span>(&amp;event);</span><br><span class="line">                    <span class="comment">//获得最短时间</span></span><br><span class="line">                    <span class="keyword">if</span>(cost_time &lt; min_cost) &#123;</span><br><span class="line">                        min_cost = cost_time;</span><br><span class="line">                        lws_prefer[<span class="number">0</span>] = lws[<span class="number">0</span>];</span><br><span class="line">                        lws_prefer[<span class="number">1</span>] = lws[<span class="number">1</span>];</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">                lws[<span class="number">0</span>]++;</span><br><span class="line">            &#125;</span><br><span class="line">            lws[<span class="number">1</span>]++;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>对于<code>opencl backend</code> MNN 则会根据<code>TuneLevel</code>动态搜索最合的<code>local_work_size</code>和<code>global_work_size</code> 得到执行的最小时间。</p>
+
+    
+    
+  </div>
+
+  
+
+  
+
+</article>
+  
+  <article class="post">
+  <header class="post-header">
+    <h1 class="post-title">
+      
+      <a class="post-link" href="/2024/03/16/MNN%E6%BA%90%E7%A0%81/MNN%20%E6%BA%90%E7%A0%81%E5%88%86%E4%BA%AB3%20Bancked/">MNN源码分析3 Banckend</a>
+      
+    </h1>
+
+    <div class="post-meta">
+      <span class="post-time">
+        2024-03-16
+      </span>
+      
+      
+      <span class="post-category">
+        
+        <a href="/categories/MNN-%E6%BA%90%E7%A0%81%E7%B3%BB%E5%88%97/">MNN 源码系列</a>
+        
+      </span>
+      
+      
+    </div>
+  </header>
+
+  
+
+  <div class="post-content">
+    
+    
+    
+    
+    
+
+    
+    以Opencl Banckend 为例
+    <div class="read-more">
+      <a href="/2024/03/16/MNN%E6%BA%90%E7%A0%81/MNN%20%E6%BA%90%E7%A0%81%E5%88%86%E4%BA%AB3%20Bancked/" class="read-more-link">Read more..</a>
+    </div>
+    
+    
+  </div>
+
+  
+
+  
+
+</article>
+  
+  <article class="post">
+  <header class="post-header">
+    <h1 class="post-title">
+      
+      <a class="post-link" href="/2024/03/15/MNN%E6%BA%90%E7%A0%81/MNN%20%E6%BA%90%E7%A0%81%E5%88%86%E4%BA%AB%201%20Interpter/">MNN源码分析1 Interpreter</a>
+      
+    </h1>
+
+    <div class="post-meta">
+      <span class="post-time">
+        2024-03-15
+      </span>
+      
+      
+      <span class="post-category">
+        
+        <a href="/categories/MNN-%E6%BA%90%E7%A0%81%E7%B3%BB%E5%88%97/">MNN 源码系列</a>
+        
+      </span>
+      
+      
+    </div>
+  </header>
+
+  
+
+  <div class="post-content">
+    
+    
+    
+
+    
+    <h1 id="模型加载"><a href="#模型加载" class="headerlink" title="模型加载"></a>模型加载</h1><h2 id="从磁盘到内存"><a href="#从磁盘到内存" class="headerlink" title="从磁盘到内存"></a>从磁盘到内存</h2><p>首先从Interpreter,出发探究运行前初始化的操作.<br><code>MNN::Interpreter::createFromFile(yourmodel))</code><br>会执行<code>static Content *loadModelFile(const char *file)</code> 用来加载mnn 文件, 其中使用<code>FileLoader</code> 来封装<code>fopen</code>,<code>fread</code>等操作.</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">bool</span> <span class="title">FileLoader::read</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">auto</span> block = <span class="built_in">MNNMemoryAllocAlign</span>(gCacheSize, MNN_MEMORY_ALIGN_DEFAULT);</span><br><span class="line">    <span class="keyword">if</span> (<span class="literal">nullptr</span> == block) &#123;</span><br><span class="line">        <span class="built_in">MNN_PRINT</span>(<span class="string">&quot;Memory Alloc Failed\n&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">auto</span> size  = <span class="built_in">fread</span>(block, <span class="number">1</span>, gCacheSize, mFile);</span><br><span class="line">    mTotalSize = size;</span><br><span class="line">    mBlocks.<span class="built_in">push_back</span>(std::<span class="built_in">make_pair</span>(size, block));</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> (size == gCacheSize) &#123;</span><br><span class="line">        block = <span class="built_in">MNNMemoryAllocAlign</span>(gCacheSize, MNN_MEMORY_ALIGN_DEFAULT);</span><br><span class="line">        <span class="keyword">if</span> (<span class="literal">nullptr</span> == block) &#123;</span><br><span class="line">            <span class="built_in">MNN_PRINT</span>(<span class="string">&quot;Memory Alloc Failed\n&quot;</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        size = <span class="built_in">fread</span>(block, <span class="number">1</span>, gCacheSize, mFile);</span><br><span class="line">        <span class="keyword">if</span> (size &gt; gCacheSize) &#123;</span><br><span class="line">            <span class="built_in">MNN_PRINT</span>(<span class="string">&quot;Read file Error\n&quot;</span>);</span><br><span class="line">            <span class="built_in">MNNMemoryFreeAlign</span>(block);</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        mTotalSize += size;</span><br><span class="line">        mBlocks.<span class="built_in">push_back</span>(std::<span class="built_in">make_pair</span>(size, block));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">ferror</span>(mFile)) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>首先申请4096大小的内存块,<code>mBlocks.push_back(std::make_pair(size, block))</code> 将内存块大小,当然模型肯定是大于4096 Byte的,申请成功后,将继续以4096 Byte大小向操作系统申请内存。并将申请到的内存大小，以及地址放入mBlocks中。当文件读到末尾时，<code>size &lt;= gCacheSize</code> 这样就结束循环。于是模型就从磁盘读入到了内存中。每一次读<code>gCacheSize</code>可能是因为不知道文件的大小，无法确定要分配多少内存。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">MNN_PUBLIC</span> FileLoader &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">FileLoader</span>(<span class="type">const</span> <span class="type">char</span>* file);  <span class="comment">// mFile = fopen(file, &quot;rb&quot;)</span></span><br><span class="line"></span><br><span class="line">    ~<span class="built_in">FileLoader</span>();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">read</span><span class="params">()</span></span>;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="type">static</span> <span class="type">bool</span> <span class="title">write</span><span class="params">(<span class="type">const</span> <span class="type">char</span>* filePath, std::pair&lt;<span class="type">const</span> <span class="type">void</span>*, <span class="type">size_t</span>&gt; cacheInfo)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">valid</span><span class="params">()</span> <span class="type">const</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> mFile != <span class="literal">nullptr</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">inline</span> <span class="type">size_t</span> <span class="title">size</span><span class="params">()</span> <span class="type">const</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> mTotalSize;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">merge</span><span class="params">(AutoStorage&lt;<span class="type">uint8_t</span>&gt;&amp; buffer)</span></span>; </span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">offset</span><span class="params">(<span class="type">int64_t</span> offset)</span></span>;  <span class="comment">//封装了 fseek</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">read</span><span class="params">(<span class="type">char</span>* buffer, <span class="type">int64_t</span> size)</span></span>; <span class="comment">//封装了 fread</span></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    std::vector&lt;std::pair&lt;<span class="type">size_t</span>, <span class="type">void</span>*&gt;&gt; mBlocks; <span class="comment">// 存放申请的内存块</span></span><br><span class="line">    FILE* mFile                 = <span class="literal">nullptr</span>;</span><br><span class="line">    <span class="type">static</span> <span class="type">const</span> <span class="type">int</span> gCacheSize = <span class="number">4096</span>;  <span class="comment">//一次性 向操作系统索要的内存</span></span><br><span class="line">    <span class="type">size_t</span> mTotalSize           = <span class="number">0</span>;</span><br><span class="line">    <span class="type">const</span> <span class="type">char</span>* mFilePath       = <span class="literal">nullptr</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h2 id="从内存块到Content"><a href="#从内存块到Content" class="headerlink" title="从内存块到Content"></a>从内存块到Content</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">--- loadModelFile</span><br><span class="line">  <span class="keyword">auto</span> net = <span class="keyword">new</span> Content;</span><br><span class="line">  <span class="type">bool</span> success = loader-&gt;<span class="built_in">merge</span>(net-&gt;buffer);</span><br><span class="line">---</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">bool</span> <span class="title">FileLoader::merge</span><span class="params">(AutoStorage&lt;<span class="type">uint8_t</span>&gt;&amp; buffer)</span> </span>&#123;</span><br><span class="line">    buffer.<span class="built_in">reset</span>((<span class="type">int</span>)mTotalSize);  <span class="comment">// malloc mTotalSize的小的连续内存，并将指针赋予buffer的mData，大小赋予mSize，相当于net的存模型数据的空间。</span></span><br><span class="line">    <span class="keyword">if</span> (buffer.<span class="built_in">get</span>() == <span class="literal">nullptr</span>) &#123;</span><br><span class="line">        <span class="built_in">MNN_PRINT</span>(<span class="string">&quot;Memory Alloc Failed\n&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">auto</span> dst   = buffer.<span class="built_in">get</span>();  <span class="comment">//dst buffer-&gt;mData</span></span><br><span class="line">    <span class="type">int</span> offset = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">auto</span> iter : mBlocks) &#123;</span><br><span class="line">        ::<span class="built_in">memcpy</span>(dst + offset, iter.second, iter.first);   <span class="comment">//拷贝mBlocks中内存，合并到一个net的大内存中。</span></span><br><span class="line">        offset += iter.first;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">--- loadModelFile</span><br><span class="line">    loader.<span class="built_in">reset</span>(); <span class="comment">//将临时的内存释放</span></span><br><span class="line">    <span class="keyword">return</span> net;</span><br><span class="line">---</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>这样模型就从FileLoad 到了Content中</p>
+<h3 id="Content的结构"><a href="#Content的结构" class="headerlink" title="Content的结构"></a>Content的结构</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">Content</span> &#123;</span><br><span class="line">  AutoStorage&lt;<span class="type">uint8_t</span>&gt; buffer; <span class="comment">//模型的物理地址</span></span><br><span class="line">  <span class="type">const</span> Net *net = <span class="literal">nullptr</span>;</span><br><span class="line">  std::vector&lt;std::unique_ptr&lt;Session&gt;&gt; sessions;</span><br><span class="line">  std::map&lt;Tensor *, <span class="type">const</span> Session *&gt; tensorMap;</span><br><span class="line">  Session::ModeGroup modes;</span><br><span class="line">  AutoStorage&lt;<span class="type">uint8_t</span>&gt; cacheBuffer;</span><br><span class="line">  std::string cacheFile;</span><br><span class="line">  std::mutex lock;</span><br><span class="line">  <span class="type">size_t</span> lastCacheSize = <span class="number">0</span>;</span><br><span class="line">  std::string bizCode;</span><br><span class="line">  std::string uuid;</span><br><span class="line">  std::string externalFile;</span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> MNN_INTERNAL_ENABLED</span></span><br><span class="line">  std::map&lt;std::string, std::string&gt; basicLogginData;</span><br><span class="line">  std::map&lt;<span class="type">const</span> Session *, std::tuple&lt;<span class="type">int</span>, <span class="type">int</span>&gt;&gt; sessionInfo;</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h2 id="反序列化-解析模型"><a href="#反序列化-解析模型" class="headerlink" title="反序列化 解析模型"></a>反序列化 解析模型</h2><p>MNN的mnn文件，实际上是使用Google的FlatBuffers库序列化后的文件，这样模型占具内存的空间就会小，读模型到系统时，内存需求就小一点。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">net-&gt;net = <span class="built_in">GetNet</span>(net-&gt;buffer.<span class="built_in">get</span>());  </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">inline</span> <span class="type">const</span> MNN::Net *<span class="title">GetNet</span><span class="params">(<span class="type">const</span> <span class="type">void</span> *buf)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> flatbuffers::<span class="built_in">GetRoot</span>&lt;MNN::Net&gt;(buf);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>这样<code>net-&gt;net</code> 就可以通过 flatbuffers库解析模型，如<code>net-&gt;net-&gt;oplists()</code>。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Interpreter</span>(net);</span><br></pre></td></tr></table></figure>
+<p>这样一个Interpreter 就初始化了。</p>
+
+    
+    
+  </div>
+
+  
+
+  
+
+</article>
+  
     
   <nav class="pagination">  
       
+      
+      <a class="next" href="/page/2/">  
+        <span class="next-text">Next</span>  
+        <i class="iconfont icon-right"></i>  
+      </a>  
       
   </nav>  
   

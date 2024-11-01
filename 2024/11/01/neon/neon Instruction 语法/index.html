@@ -18,12 +18,12 @@
 
 <!-- Website description -->
 
-<meta name="description" content="sdd" />
+<meta name="description" content="ARM neon Instruction  语法" />
 
 
 <!-- Website keywords -->
 
-<meta name="keywords" content="start, wkq&#39;s site" />
+<meta name="keywords" content="neon, arm, simd, wkq&#39;s site" />
 
 
 
@@ -39,7 +39,7 @@
 
 
 <!-- Canonical, good for google search engine -->
-<link rel="canonical" href="http://example.com/2024/11/01/hello-world/" />
+<link rel="canonical" href="http://example.com/2024/11/01/neon/neon Instruction 语法/" />
 
 <!-- Fancybox styling -->
 
@@ -72,7 +72,7 @@
   window.config = {"leancloud":{"app_id":null,"app_key":null,"server_url":null,"cdn":null},"toc":true,"fancybox":true,"latex":true};
 </script>
   
-  <title>Hello World - wkq&#39;s site</title>
+  <title>ARM neon Instruction  语法 - wkq&#39;s site</title>
 
 <meta name="generator" content="Hexo 7.3.0"></head>
 
@@ -196,7 +196,7 @@
   <header class="post-header">
     <h1 class="post-title">
       
-      Hello World
+      ARM neon Instruction  语法
       
     </h1>
 
@@ -206,6 +206,12 @@
       </span>
       
       
+      <span class="post-category">
+        
+        <a href="/categories/neon-%E5%AD%A6%E4%B9%A0%E7%B3%BB%E5%88%97/">neon 学习系列</a>
+        
+      </span>
+      
       
     </div>
   </header>
@@ -214,26 +220,68 @@
   <div class="post-toc" id="post-toc">
     <h2 class="post-toc-title">Contents</h2>
     <div class="post-toc-content">
-      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Quick-Start"><span class="toc-number">1.</span> <span class="toc-text">Quick Start</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Create-a-new-post"><span class="toc-number">1.1.</span> <span class="toc-text">Create a new post</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Run-server"><span class="toc-number">1.2.</span> <span class="toc-text">Run server</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Generate-static-files"><span class="toc-number">1.3.</span> <span class="toc-text">Generate static files</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Deploy-to-remote-sites"><span class="toc-number">1.4.</span> <span class="toc-text">Deploy to remote sites</span></a></li></ol></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#NEON-data-types"><span class="toc-number">1.</span> <span class="toc-text">NEON data types</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Instruction-modifiers"><span class="toc-number">2.</span> <span class="toc-text">Instruction modifiers</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Instruction-shape"><span class="toc-number">3.</span> <span class="toc-text">Instruction shape</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#None-specified"><span class="toc-number">3.1.</span> <span class="toc-text">None specified</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Long-L"><span class="toc-number">3.2.</span> <span class="toc-text">Long - L</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Narrow-N"><span class="toc-number">3.3.</span> <span class="toc-text">Narrow - N</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Wide-W"><span class="toc-number">3.4.</span> <span class="toc-text">Wide - W</span></a></li></ol></li></ol>
     </div>
   </div>
   
 
   <div class="post-content">
     
-    <p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a target="_blank" rel="noopener" href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a target="_blank" rel="noopener" href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
+    <p><code>V&#123;&lt;mod&gt;&#125;&lt;op&gt; &#123;&lt;shape&gt;&#125;&#123;&lt;cond&gt;&#125;&#123;.&lt;dt&gt;&#125; &lt;dest1&gt;&#123;,&lt;dest2&gt;&#125;,&lt;src1&gt;&#123;, &lt;src2&gt;&#125;</code></p>
+<h2 id="NEON-data-types"><a href="#NEON-data-types" class="headerlink" title="NEON data types"></a>NEON data types</h2><p><img src="https://s2.loli.net/2024/03/20/LAVQ9wC6T4RnlHy.png" alt="20240320100728"></p>
+<h2 id="Instruction-modifiers"><a href="#Instruction-modifiers" class="headerlink" title="Instruction modifiers"></a>Instruction modifiers</h2><p>对于某些指令，可以指定一个修饰符，用以改变操作的行为。</p>
+<table>
+<thead>
+<tr>
+<th>修饰符</th>
+<th>行为</th>
+<th>例子</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>None</td>
+<td>Basic opeartion</td>
+<td>VADD.16 Q0, Q1,Q2</td>
+<td>结果不会被修改</td>
+</tr>
+<tr>
+<td>Q</td>
+<td>Saturation (饱和)</td>
+<td>VQADD.S16 D0, D2,D3</td>
+<td>结果向量中的每个元素如果超出可表示范围，则设为最大值或最小值。范围取决于元素的类型（位数和符号）。如果任何通道发生饱和，浮点状态与控制寄存器（FPSCR）中的粘性 QC 位将被设置。</td>
+</tr>
+<tr>
+<td>H</td>
+<td>Halved (减半)</td>
+<td>VHADD.S16 Q0, Q1,Q4</td>
+<td>每个元素向右移动一位（实际上是截断后的除以二）。VHADD 可用于计算两个输入的平均值。</td>
+</tr>
+<tr>
+<td>D</td>
+<td>Doubled before saturation</td>
+<td>VQDMULL.S16 Q0, D1, D3</td>
+<td>这在以 Q15 格式相乘时常常需要，需要额外加倍以将结果转换为正确的形式。</td>
+</tr>
+<tr>
+<td>R</td>
+<td>Rounded (四舍五入)</td>
+<td>VRSUBHN.I16 D0, Q1, Q3</td>
+<td>该指令对结果进行四舍五入，以纠正截断所引起的偏差。这相当于在截断之前向结果加上0.5。</td>
+</tr>
+</tbody></table>
+<h2 id="Instruction-shape"><a href="#Instruction-shape" class="headerlink" title="Instruction shape"></a>Instruction shape</h2><p>结果向量和操作数向量具有相同数量的元素。然而，结果中元素的数据类型可以与一个或多个操作数中的元素的数据类型不同。因此，结果的寄存器大小也可能与一个或多个操作数的寄存器大小不同。寄存器大小之间的这种关系由形状描述。对于某些指令，您可以指定一个形状。NEON数据处理指令通常有普通、长、宽、窄和饱和变体。</p>
+<h3 id="None-specified"><a href="#None-specified" class="headerlink" title="None specified"></a>None specified</h3><p>操作数和结果都是相同的宽度。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">VADD.I16 Q0, Q1, Q2</span><br></pre></td></tr></table></figure>
 
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
+<h3 id="Long-L"><a href="#Long-L" class="headerlink" title="Long - L"></a>Long - L</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">VADDL.S16 Q0, D2, D3</span><br></pre></td></tr></table></figure>
+<p>长指令通常操作双字向量并产生四倍字长向量。结果元素的宽度是操作数元素宽度的两倍。通过在指令后附加 L 来指定长指令。Q是D的两倍。</p>
+<p><img src="https://s2.loli.net/2024/03/20/3qcnPt1CWsS9Jya.png" alt="20240320094905"></p>
+<h3 id="Narrow-N"><a href="#Narrow-N" class="headerlink" title="Narrow - N"></a>Narrow - N</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">VADDHN.I16 D0, Q1, Q2</span><br></pre></td></tr></table></figure>
+<p>操作数具有相同的宽度。每个结果元素中的位数是每个操作数元素中位数的一半。<br><img src="https://s2.loli.net/2024/03/20/JrysBQZhAKGoE39.png" alt="20240320100137"></p>
+<h3 id="Wide-W"><a href="#Wide-W" class="headerlink" title="Wide - W"></a>Wide - W</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">VADDW.I16 Q0, Q1, D4</span><br></pre></td></tr></table></figure>
+<p>结果和操作数的宽度是第二个操作数的两倍。Q0,Q1是D4的两倍</p>
+<p><img src="https://s2.loli.net/2024/03/20/Hn7rY2LcRS9ZViK.png" alt="20240320100339"></p>
 
     
   </div>
@@ -248,7 +296,7 @@
   </p>
   <p class="copyright-item">
     <span>Link: </span>
-    <a href="http://example.com/2024/11/01/hello-world/">http://example.com/2024/11/01/hello-world/</a>
+    <a href="http://example.com/2024/11/01/neon/neon%20Instruction%20%E8%AF%AD%E6%B3%95/">http://example.com/2024/11/01/neon/neon%20Instruction%20%E8%AF%AD%E6%B3%95/</a>
   </p>
   <p class="copyright-item">
     <span>License: </span>
@@ -266,22 +314,26 @@
     
     <div class="post-tags">
       
-      <a href="/tags/start/">start</a>
+      <a href="/tags/neon/">neon</a>
+      
+      <a href="/tags/arm/">arm</a>
+      
+      <a href="/tags/simd/">simd</a>
       
     </div>
     
       
   <nav class="post-nav">  
       
-      <a class="prev" href="/2024/11/01/MNN%E6%BA%90%E7%A0%81/MNN%20%E6%BA%90%E7%A0%81%E5%88%86%E4%BA%AB%204%20Execution/">  
+      <a class="prev" href="/2024/11/01/neon/neon%20%E9%85%8D%E7%BD%AE/">  
         <i class="iconfont icon-left"></i>  
-        <span class="prev-text nav-default"></span>  
+        <span class="prev-text nav-default">ARM neon 指令 （Android）代码环境配置</span>  
         <span class="prev-text nav-mobile">Prev</span>  
       </a>  
       
       
-      <a class="next" href="/2024/07/30/%E6%9D%82%E9%A1%B9/frp%E4%BB%A3%E7%90%86/">  
-        <span class="next-text nav-default">frp 内网穿透配置</span>  
+      <a class="next" href="/2024/11/01/MNN%E6%BA%90%E7%A0%81/MNN%20%E6%BA%90%E7%A0%81%E5%88%86%E4%BA%AB%20cpu%20%E5%86%85%E5%AD%98%E6%B1%A0/">  
+        <span class="next-text nav-default"></span>  
         <span class="prev-text nav-mobile">Next</span>  
         <i class="iconfont icon-right"></i>  
       </a>  
