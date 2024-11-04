@@ -307,8 +307,8 @@
 <li>per-token量化，将每一个token做为量化的单位</li>
 <li>per-channel量化，将token中的channel作为量化单位</li>
 </ul>
-<h2 id="Attention-Inference-Time-Workflow"><a href="#Attention-Inference-Time-Workflow" class="headerlink" title="Attention Inference-Time Workflow"></a>Attention Inference-Time Workflow</h2><p>在Prefill 阶段，例如一个输入$\mathbf{X} \in \mathbb{R}^{b \times l_{\text{prompt}} \times d}$,$b$ 是batch size，$l_{prompt}$是输入的prompt词序列长度，$d$ 是hidden size,<br>$$<br>X_{K} &#x3D;XW_{K},X_{V}&#x3D;XW_{V}<br>$$<br>$W_{K},W_{V}\in \mathbb{R}^{d \times d}$,$W_{K},W_{V}$是对应的权重。获得$X_{K},X_{V}$​后需要缓存，也就是KVCache。</p>
-<p>在Decoding 阶段，输入token的embedding  $t \in \mathbb{R}^{b \times 1 \times d}$， 那么<br>$$<br>t_{K} &#x3D; tW_{K} \<br>t_{V} &#x3D; tW_{V} \<br>$$<br><strong>更新KVCache</strong><br>$$<br>\displaylines{<br>X_{K} &#x3D; Concat(X_{K},t_{K}) \<br>X_{V} &#x3D; Concat(X_{V},t_{V})<br>}<br>$$</p>
+<h2 id="Attention-Inference-Time-Workflow"><a href="#Attention-Inference-Time-Workflow" class="headerlink" title="Attention Inference-Time Workflow"></a>Attention Inference-Time Workflow</h2><p>在Prefill 阶段，例如一个输入$\mathbf{X} \in \mathbb{R}^{b \times l_{\text{prompt}} \times d}$,$b$ 是batch size，$l_{prompt}$是输入的prompt词序列长度，$d$ 是hidden size,<br>$$<br>X_{K} &#x3D;XW_{K} \\<br>X_{V}&#x3D;XW_{V}<br>$$<br>$W_{K},W_{V}\in \mathbb{R}^{d \times d}$,$W_{K},W_{V}$是对应的权重。获得$X_{K},X_{V}$​后需要缓存，也就是KVCache。</p>
+<p>在Decoding 阶段，输入token的embedding  $t \in \mathbb{R}^{b \times 1 \times d}$， 那么<br>$$<br>t_{K} &#x3D; tW_{K} \\<br>t_{V} &#x3D; tW_{V} \\<br>$$<br><strong>更新KVCache</strong><br>$$<br>X_{K} &#x3D; Concat(X_{K},t_{K}) \\<br>X_{V} &#x3D; Concat(X_{V},t_{V})\\<br>$$</p>
 <p>然后计算attention的输出</p>
 <h1 id="Motivation"><a href="#Motivation" class="headerlink" title="Motivation"></a>Motivation</h1><img src="https://s2.loli.net/2024/11/04/gqpHD8a61tmMPAf.png" alt="image-20241104104250311" style="zoom:50%;" />
 
@@ -324,9 +324,9 @@
 <p>Per-token的方式，可以很好解决和规避增长的问题，每次增加一个token的数据，只用对新增的token数据单独量化，与之前的Cache互不影响。</p>
 <p>Per-Channel的方式，问题在于量化的数据一直在增长，比如token增加，channel的长度也会增加。</p>
 <p>对于K Per-token量化，对于V Per-Channel量化，重要的是怎么解决Per-Channel的问题。</p>
-<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><p>将每个K cache，进行分组每G个token一组，进行分组量化。余剩下的进行单独量化。<br>$$<br>group_part \ X_{K_{g}} &#x3D; X_{K}[:l-r]<br>$$<br>$l$为token数量，$r$ 为$l%g$, $l-r$是$g$的整数倍<br>$$<br>residual_part X_{K_{r}} &#x3D; X_{K}[l-r:]<br>$$</p>
+<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><p>将每个K cache，进行分组每G个token一组，进行分组量化。余剩下的进行单独量化。<br>$$<br>group\_part \ X_{K_{g}} &#x3D; X_{K}[:l-r]<br>$$<br>$l$为token数量，$r$ 为$l%g$, $l-r$是$g$的整数倍<br>$$<br>residual\_part \  X_{K_{r}} &#x3D; X_{K}[l-r:]<br>$$</p>
 <p>只存储$Q(X_{K_{g}})$ 也就是分组的部分，进行量化。$X_{K_{r}}$ 不量化。在decoding 阶段，新的key_cache，会被添加到$X_{K_{r}}$中，当大小满$g$时，进行量化并添到$X_{K_{g}}$中。</p>
-<p>在做attention时，进行混合精度矩阵乘法<br>$$<br>A_g &#x3D; t_{Q} Q( X^\top_{ K_g} )\<br>X_{K_{r}} &#x3D; Concat([X_{K_r},t_{K}])\<br>A_{r} &#x3D; t_{Q}X^\top_{K_{r}}\<br>A &#x3D; Concat([A_g,A_r])\<br>$$<br>该矩阵乘法使用Triton实现。</p>
+<p>在做attention时，进行混合精度矩阵乘法<br>$$<br>A_g &#x3D; t_{Q} Q( X^\top_{ K_g} ) \\<br>X_{K_{r}} &#x3D; Concat([X_{K_r},t_{K}]) \\<br>A_{r} &#x3D; t_{Q}X^\top_{K_{r}} \\<br>A &#x3D; Concat([A_g,A_r])\\<br>$$<br>该矩阵乘法使用Triton实现。</p>
 
     
   </div>
