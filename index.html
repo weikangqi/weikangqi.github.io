@@ -413,54 +413,6 @@
   <header class="post-header">
     <h1 class="post-title">
       
-      <a class="post-link" href="/2024/07/30/%E6%9D%82%E9%A1%B9/frp%E4%BB%A3%E7%90%86/">frp 内网穿透配置</a>
-      
-    </h1>
-
-    <div class="post-meta">
-      <span class="post-time">
-        2024-07-30
-      </span>
-      
-      
-      <span class="post-category">
-        
-        <a href="/categories/%E5%B7%A5%E5%85%B7%E9%85%8D%E7%BD%AE/">工具配置</a>
-        
-      </span>
-      
-      
-    </div>
-  </header>
-
-  
-
-  <div class="post-content">
-    
-    
-    
-    
-    
-
-    
-    学习arm neon,最终实现一个FFT为目标。
-    <div class="read-more">
-      <a href="/2024/07/30/%E6%9D%82%E9%A1%B9/frp%E4%BB%A3%E7%90%86/" class="read-more-link">阅读更多</a>
-    </div>
-    
-    
-  </div>
-
-  
-
-  
-
-</article>
-  
-  <article class="post">
-  <header class="post-header">
-    <h1 class="post-title">
-      
       <a class="post-link" href="/2024/07/30/%E8%B0%83%E8%AF%95/vscode%20%E8%B0%83%E8%AF%95coredump%E6%96%87%E4%BB%B6/">vscode 调试coredump 文件</a>
       
     </h1>
@@ -494,6 +446,54 @@
     <p>使用vscode调试coredump文件，配置以及使用</p>
     <div class="read-more">
       <a href="/2024/07/30/%E8%B0%83%E8%AF%95/vscode%20%E8%B0%83%E8%AF%95coredump%E6%96%87%E4%BB%B6/" class="read-more-link">阅读更多</a>
+    </div>
+    
+    
+  </div>
+
+  
+
+  
+
+</article>
+  
+  <article class="post">
+  <header class="post-header">
+    <h1 class="post-title">
+      
+      <a class="post-link" href="/2024/07/30/%E6%9D%82%E9%A1%B9/frp%E4%BB%A3%E7%90%86/">frp 内网穿透配置</a>
+      
+    </h1>
+
+    <div class="post-meta">
+      <span class="post-time">
+        2024-07-30
+      </span>
+      
+      
+      <span class="post-category">
+        
+        <a href="/categories/%E5%B7%A5%E5%85%B7%E9%85%8D%E7%BD%AE/">工具配置</a>
+        
+      </span>
+      
+      
+    </div>
+  </header>
+
+  
+
+  <div class="post-content">
+    
+    
+    
+    
+    
+
+    
+    学习arm neon,最终实现一个FFT为目标。
+    <div class="read-more">
+      <a href="/2024/07/30/%E6%9D%82%E9%A1%B9/frp%E4%BB%A3%E7%90%86/" class="read-more-link">阅读更多</a>
     </div>
     
     
@@ -607,57 +607,6 @@
   <header class="post-header">
     <h1 class="post-title">
       
-      <a class="post-link" href="/2024/03/15/MNN%E6%BA%90%E7%A0%81/MNN%20%E6%BA%90%E7%A0%81%E5%88%86%E4%BA%AB%20cpu%20%E5%86%85%E5%AD%98%E6%B1%A0/">MNN源码分析 CPU 内存池</a>
-      
-    </h1>
-
-    <div class="post-meta">
-      <span class="post-time">
-        2024-03-15
-      </span>
-      
-      
-      <span class="post-category">
-        
-        <a href="/categories/MNN-%E6%BA%90%E7%A0%81%E7%B3%BB%E5%88%97/">MNN 源码系列</a>
-        
-      </span>
-      
-      
-    </div>
-  </header>
-
-  
-
-  <div class="post-content">
-    
-    
-    
-
-    
-    <h2 id="基本数据结构"><a href="#基本数据结构" class="headerlink" title="基本数据结构"></a>基本数据结构</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">MemNode</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">MemNode</span>(<span class="type">size_t</span> s) : <span class="built_in">size</span>(s) &#123;&#125;</span><br><span class="line">    ~<span class="built_in">MemNode</span>() &#123;&#125;</span><br><span class="line">    <span class="type">size_t</span> size = <span class="number">0</span>, offset = <span class="number">0</span>;</span><br><span class="line">    <span class="type">void</span>* base = <span class="literal">nullptr</span>; <span class="comment">// 数据地址</span></span><br><span class="line">    <span class="type">bool</span> usage = <span class="literal">true</span>; <span class="comment">// 是否被使用</span></span><br><span class="line">    MemNode *left = <span class="literal">nullptr</span>, *right = <span class="literal">nullptr</span>;</span><br><span class="line">    </span><br><span class="line">    std::vector&lt;MemNode*&gt; children;</span><br><span class="line">    std::vector&lt;Tensor*&gt; tensors;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">MemChunk</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">MemChunk</span>() = <span class="keyword">default</span>;</span><br><span class="line">    <span class="built_in">MemChunk</span>(<span class="type">void</span>* base, <span class="type">size_t</span> offset = <span class="number">0</span>) : <span class="built_in">first</span>(base), <span class="built_in">second</span>(offset) &#123;&#125;</span><br><span class="line">    <span class="built_in">MemChunk</span>(std::pair&lt;<span class="type">void</span>*, <span class="type">size_t</span>&gt; pointer) : <span class="built_in">first</span>(pointer.first), <span class="built_in">second</span>(pointer.second) &#123;&#125;</span><br><span class="line">    <span class="built_in">MemChunk</span>(MemNode* node) : <span class="built_in">mNode</span>(node) &#123;&#125;</span><br><span class="line">    ~<span class="built_in">MemChunk</span>() = <span class="keyword">default</span>;</span><br><span class="line">    MemChunk <span class="keyword">operator</span>+ (<span class="type">size_t</span> offset);  <span class="comment">// this-&gt;second += offset</span></span><br><span class="line">    <span class="function"><span class="type">void</span>* <span class="title">base</span><span class="params">()</span> <span class="type">const</span></span>;</span><br><span class="line">    <span class="function"><span class="type">size_t</span> <span class="title">offset</span><span class="params">()</span> <span class="type">const</span></span>;</span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">invalid</span><span class="params">()</span> <span class="type">const</span></span>;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">attach</span><span class="params">(Tensor* tensor)</span></span>;</span><br><span class="line">    <span class="function"><span class="type">uint8_t</span>* <span class="title">ptr</span><span class="params">()</span> <span class="type">const</span> </span>&#123;    <span class="comment">// 获取数据指针 </span></span><br><span class="line">        <span class="keyword">if</span> (mNode) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">static_cast</span>&lt;<span class="type">uint8_t</span>*&gt;(mNode-&gt;base) + mNode-&gt;offset + second;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">static_cast</span>&lt;<span class="type">uint8_t</span>*&gt;(first) + second;</span><br><span class="line">    &#125;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="type">void</span>* first = <span class="literal">nullptr</span>;   <span class="comment">//相当于MemNode的base</span></span><br><span class="line">    <span class="type">size_t</span> second = <span class="number">0</span>;  <span class="comment">//想当于 MemNode-&gt;offset + second</span></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    MemNode* mNode = <span class="literal">nullptr</span>;</span><br><span class="line">    <span class="keyword">friend</span> <span class="keyword">class</span> <span class="title class_">DeferBufferAllocator</span>;</span><br><span class="line">    <span class="keyword">friend</span> <span class="keyword">class</span> <span class="title class_">EagerBufferAllocator</span>;</span><br><span class="line">    <span class="keyword">friend</span> <span class="keyword">class</span> <span class="title class_">DefaultAllocator</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="BufferAllocator"><a href="#BufferAllocator" class="headerlink" title="BufferAllocator"></a>BufferAllocator</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">MNN_PUBLIC</span> BufferAllocator : <span class="keyword">public</span> NonCopyable &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">Allocator</span> &#123;</span><br><span class="line">    <span class="keyword">public</span>:</span><br><span class="line">        <span class="built_in">Allocator</span>() = <span class="keyword">default</span>;</span><br><span class="line">        <span class="keyword">virtual</span> ~ <span class="built_in">Allocator</span>() = <span class="keyword">default</span>;</span><br><span class="line">        <span class="function"><span class="keyword">virtual</span> MemChunk <span class="title">onAlloc</span><span class="params">(<span class="type">size_t</span> size, <span class="type">size_t</span> align)</span> </span>= <span class="number">0</span>;</span><br><span class="line">        <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">onRelease</span><span class="params">(MemChunk chunk)</span> </span>= <span class="number">0</span>;</span><br><span class="line">        <span class="function"><span class="type">static</span> std::shared_ptr&lt;Allocator&gt; <span class="title">createDefault</span><span class="params">()</span></span>;</span><br><span class="line">        <span class="function"><span class="type">static</span> std::shared_ptr&lt;Allocator&gt; <span class="title">createRecurse</span><span class="params">(BufferAllocator* parent)</span></span>;</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="built_in">BufferAllocator</span>() = <span class="keyword">default</span>;</span><br><span class="line">    <span class="keyword">virtual</span> ~<span class="built_in">BufferAllocator</span>() = <span class="keyword">default</span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> MemChunk <span class="title">alloc</span><span class="params">(<span class="type">size_t</span> size, <span class="type">bool</span> separate = <span class="literal">false</span>, <span class="type">size_t</span> align = <span class="number">0</span>)</span> </span>= <span class="number">0</span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">bool</span> <span class="title">free</span><span class="params">(MemChunk chunk)</span> </span>= <span class="number">0</span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">release</span><span class="params">(<span class="type">bool</span> allRelease = <span class="literal">true</span>)</span> </span>= <span class="number">0</span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">size_t</span> <span class="title">totalSize</span><span class="params">()</span> <span class="type">const</span> </span>= <span class="number">0</span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">barrierBegin</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">barrierEnd</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">beginGroup</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">endGroup</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">reset</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> ErrorCode <span class="title">compute</span><span class="params">()</span></span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-
-
-    
-    
-  </div>
-
-  
-
-  
-
-</article>
-  
-  <article class="post">
-  <header class="post-header">
-    <h1 class="post-title">
-      
       <a class="post-link" href="/2024/03/15/MNN%E6%BA%90%E7%A0%81/MNN%20%E6%BA%90%E7%A0%81%E5%88%86%E4%BA%AB%201%20Interpter/">MNN源码分析1 Interpreter</a>
       
     </h1>
@@ -699,6 +648,57 @@
 <p>这样<code>net-&gt;net</code> 就可以通过 flatbuffers库解析模型，如<code>net-&gt;net-&gt;oplists()</code>。</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Interpreter</span>(net);</span><br></pre></td></tr></table></figure>
 <p>这样一个Interpreter 就初始化了。</p>
+
+    
+    
+  </div>
+
+  
+
+  
+
+</article>
+  
+  <article class="post">
+  <header class="post-header">
+    <h1 class="post-title">
+      
+      <a class="post-link" href="/2024/03/15/MNN%E6%BA%90%E7%A0%81/MNN%20%E6%BA%90%E7%A0%81%E5%88%86%E4%BA%AB%20cpu%20%E5%86%85%E5%AD%98%E6%B1%A0/">MNN源码分析 CPU 内存池</a>
+      
+    </h1>
+
+    <div class="post-meta">
+      <span class="post-time">
+        2024-03-15
+      </span>
+      
+      
+      <span class="post-category">
+        
+        <a href="/categories/MNN-%E6%BA%90%E7%A0%81%E7%B3%BB%E5%88%97/">MNN 源码系列</a>
+        
+      </span>
+      
+      
+    </div>
+  </header>
+
+  
+
+  <div class="post-content">
+    
+    
+    
+
+    
+    <h2 id="基本数据结构"><a href="#基本数据结构" class="headerlink" title="基本数据结构"></a>基本数据结构</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">MemNode</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">MemNode</span>(<span class="type">size_t</span> s) : <span class="built_in">size</span>(s) &#123;&#125;</span><br><span class="line">    ~<span class="built_in">MemNode</span>() &#123;&#125;</span><br><span class="line">    <span class="type">size_t</span> size = <span class="number">0</span>, offset = <span class="number">0</span>;</span><br><span class="line">    <span class="type">void</span>* base = <span class="literal">nullptr</span>; <span class="comment">// 数据地址</span></span><br><span class="line">    <span class="type">bool</span> usage = <span class="literal">true</span>; <span class="comment">// 是否被使用</span></span><br><span class="line">    MemNode *left = <span class="literal">nullptr</span>, *right = <span class="literal">nullptr</span>;</span><br><span class="line">    </span><br><span class="line">    std::vector&lt;MemNode*&gt; children;</span><br><span class="line">    std::vector&lt;Tensor*&gt; tensors;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">MemChunk</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">MemChunk</span>() = <span class="keyword">default</span>;</span><br><span class="line">    <span class="built_in">MemChunk</span>(<span class="type">void</span>* base, <span class="type">size_t</span> offset = <span class="number">0</span>) : <span class="built_in">first</span>(base), <span class="built_in">second</span>(offset) &#123;&#125;</span><br><span class="line">    <span class="built_in">MemChunk</span>(std::pair&lt;<span class="type">void</span>*, <span class="type">size_t</span>&gt; pointer) : <span class="built_in">first</span>(pointer.first), <span class="built_in">second</span>(pointer.second) &#123;&#125;</span><br><span class="line">    <span class="built_in">MemChunk</span>(MemNode* node) : <span class="built_in">mNode</span>(node) &#123;&#125;</span><br><span class="line">    ~<span class="built_in">MemChunk</span>() = <span class="keyword">default</span>;</span><br><span class="line">    MemChunk <span class="keyword">operator</span>+ (<span class="type">size_t</span> offset);  <span class="comment">// this-&gt;second += offset</span></span><br><span class="line">    <span class="function"><span class="type">void</span>* <span class="title">base</span><span class="params">()</span> <span class="type">const</span></span>;</span><br><span class="line">    <span class="function"><span class="type">size_t</span> <span class="title">offset</span><span class="params">()</span> <span class="type">const</span></span>;</span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">invalid</span><span class="params">()</span> <span class="type">const</span></span>;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">attach</span><span class="params">(Tensor* tensor)</span></span>;</span><br><span class="line">    <span class="function"><span class="type">uint8_t</span>* <span class="title">ptr</span><span class="params">()</span> <span class="type">const</span> </span>&#123;    <span class="comment">// 获取数据指针 </span></span><br><span class="line">        <span class="keyword">if</span> (mNode) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">static_cast</span>&lt;<span class="type">uint8_t</span>*&gt;(mNode-&gt;base) + mNode-&gt;offset + second;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">static_cast</span>&lt;<span class="type">uint8_t</span>*&gt;(first) + second;</span><br><span class="line">    &#125;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="type">void</span>* first = <span class="literal">nullptr</span>;   <span class="comment">//相当于MemNode的base</span></span><br><span class="line">    <span class="type">size_t</span> second = <span class="number">0</span>;  <span class="comment">//想当于 MemNode-&gt;offset + second</span></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    MemNode* mNode = <span class="literal">nullptr</span>;</span><br><span class="line">    <span class="keyword">friend</span> <span class="keyword">class</span> <span class="title class_">DeferBufferAllocator</span>;</span><br><span class="line">    <span class="keyword">friend</span> <span class="keyword">class</span> <span class="title class_">EagerBufferAllocator</span>;</span><br><span class="line">    <span class="keyword">friend</span> <span class="keyword">class</span> <span class="title class_">DefaultAllocator</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="BufferAllocator"><a href="#BufferAllocator" class="headerlink" title="BufferAllocator"></a>BufferAllocator</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">MNN_PUBLIC</span> BufferAllocator : <span class="keyword">public</span> NonCopyable &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">Allocator</span> &#123;</span><br><span class="line">    <span class="keyword">public</span>:</span><br><span class="line">        <span class="built_in">Allocator</span>() = <span class="keyword">default</span>;</span><br><span class="line">        <span class="keyword">virtual</span> ~ <span class="built_in">Allocator</span>() = <span class="keyword">default</span>;</span><br><span class="line">        <span class="function"><span class="keyword">virtual</span> MemChunk <span class="title">onAlloc</span><span class="params">(<span class="type">size_t</span> size, <span class="type">size_t</span> align)</span> </span>= <span class="number">0</span>;</span><br><span class="line">        <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">onRelease</span><span class="params">(MemChunk chunk)</span> </span>= <span class="number">0</span>;</span><br><span class="line">        <span class="function"><span class="type">static</span> std::shared_ptr&lt;Allocator&gt; <span class="title">createDefault</span><span class="params">()</span></span>;</span><br><span class="line">        <span class="function"><span class="type">static</span> std::shared_ptr&lt;Allocator&gt; <span class="title">createRecurse</span><span class="params">(BufferAllocator* parent)</span></span>;</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="built_in">BufferAllocator</span>() = <span class="keyword">default</span>;</span><br><span class="line">    <span class="keyword">virtual</span> ~<span class="built_in">BufferAllocator</span>() = <span class="keyword">default</span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> MemChunk <span class="title">alloc</span><span class="params">(<span class="type">size_t</span> size, <span class="type">bool</span> separate = <span class="literal">false</span>, <span class="type">size_t</span> align = <span class="number">0</span>)</span> </span>= <span class="number">0</span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">bool</span> <span class="title">free</span><span class="params">(MemChunk chunk)</span> </span>= <span class="number">0</span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">release</span><span class="params">(<span class="type">bool</span> allRelease = <span class="literal">true</span>)</span> </span>= <span class="number">0</span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">size_t</span> <span class="title">totalSize</span><span class="params">()</span> <span class="type">const</span> </span>= <span class="number">0</span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">barrierBegin</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">barrierEnd</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">beginGroup</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">endGroup</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">reset</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> ErrorCode <span class="title">compute</span><span class="params">()</span></span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
 
     
     

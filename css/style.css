@@ -720,7 +720,9 @@ h6 {
   border-bottom: 1px solid #0047AB;
 }
 .post .post-content a.fancybox {
-  border: 0;
+  border: auto;
+  display: flex;
+  justify-content: center;
 }
 .post .post-content ul {
   padding-left: 0;
@@ -1091,12 +1093,12 @@ h6 {
   color: #dc322f;
 }
 .post .post-content .read-more .read-more-link {
-  color: #0047AB;
+  color: #8a8a8a;
   font-size: 1.1em;
   font-family: Athelas, STHeiti, Microsoft Yahei, serif;
 }
 .post .post-content .read-more .read-more-link:hover {
-  border-bottom: 1px solid #e6e6e6;
+  border-bottom: 1px solid #0047AB;
 }
 .post .post-copyright {
   margin-top: 20px;
