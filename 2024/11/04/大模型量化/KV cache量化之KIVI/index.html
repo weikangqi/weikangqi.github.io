@@ -18,12 +18,12 @@
 
 <!-- Website description -->
 
-<meta name="description" content="ARM neon 指令 （Android）代码环境配置" />
+<meta name="description" content="KV cache 量化之KIVI" />
 
 
 <!-- Website keywords -->
 
-<meta name="keywords" content="neon, arm, simd, wkq&#39;s site" />
+<meta name="keywords" content="大模型, 量化, wkq&#39;s site" />
 
 
 
@@ -39,7 +39,7 @@
 
 
 <!-- Canonical, good for google search engine -->
-<link rel="canonical" href="https://weikangqi.github.io/2024/11/01/neon/neon 配置/" />
+<link rel="canonical" href="https://weikangqi.github.io/2024/11/04/大模型量化/KV cache量化之KIVI/" />
 
 <!-- Fancybox styling -->
 
@@ -72,7 +72,7 @@
   window.config = {"leancloud":{"app_id":null,"app_key":null,"server_url":null,"cdn":null},"toc":true,"fancybox":true,"latex":true};
 </script>
   
-  <title>ARM neon 指令 （Android）代码环境配置 - wkq&#39;s site</title>
+  <title>KV cache 量化之KIVI - wkq&#39;s site</title>
 
 <meta name="generator" content="Hexo 7.3.0"><style>.mjpage .MJX-monospace {
   font-family: monospace;
@@ -268,19 +268,19 @@
   <header class="post-header">
     <h1 class="post-title">
       
-      ARM neon 指令 （Android）代码环境配置
+      KV cache 量化之KIVI
       
     </h1>
 
     <div class="post-meta">
       <span class="post-time">
-        2024-11-01
+        2024-11-04
       </span>
       
       
       <span class="post-category">
         
-        <a href="/categories/neon-%E5%AD%A6%E4%B9%A0%E7%B3%BB%E5%88%97/">neon 学习系列</a>
+        <a href="/categories/LLM-%E9%87%8F%E5%8C%96/">LLM 量化</a>
         
       </span>
       
@@ -289,17 +289,44 @@
   </header>
 
   
+  <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-number">1.</span> <span class="toc-text">背景</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#per-token-and-per-channel-quantization"><span class="toc-number">1.1.</span> <span class="toc-text">per-token and per-channel quantization</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Attention-Inference-Time-Workflow"><span class="toc-number">1.2.</span> <span class="toc-text">Attention Inference-Time Workflow</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Motivation"><span class="toc-number">2.</span> <span class="toc-text">Motivation</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88K-T%EF%BC%8CV-C%E7%9A%84%E6%96%B9%E5%BC%8F%E6%9C%80%E5%A5%BD"><span class="toc-number">3.</span> <span class="toc-text">为什么K-T，V-C的方式最好</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%87%8F%E5%8C%96%E5%AE%9E%E7%8E%B0"><span class="toc-number">4.</span> <span class="toc-text">量化实现</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%B9%E6%B3%95"><span class="toc-number">4.1.</span> <span class="toc-text">方法</span></a></li></ol></li></ol>
+    </div>
+  </div>
+  
 
   <div class="post-content">
     
-    <p>本次使用的ARM平台是手机平台</p>
-<ol>
-<li>首先确保安装好了NDK<br>配置好了PATH变量，将NDK路径加入PATH</li>
-<li>CMakeList 设置 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">cmake_minimum_required (VERSION 3.16)</span><br><span class="line">project (Dome)</span><br><span class="line">add_subdirectory(./src/neon)</span><br><span class="line">add_executable(neon neon.cpp)</span><br><span class="line">set_target_properties(neon PROPERTIES RUNTIME_OUTPUT_DIRECTORY <span class="string">&quot;<span class="variable">$&#123;CMAKE_SOURCE_DIR&#125;</span>/build&quot;</span>)</span><br><span class="line"></span><br><span class="line">target_link_libraries(neon PRIVATE c++_static dl)</span><br><span class="line"></span><br><span class="line"><span class="built_in">set</span>(THIS_COMPILE_FLAGS -march=armv8-a)</span><br><span class="line"></span><br><span class="line">target_compile_options(neon PRIVATE <span class="variable">$&#123;THIS_COMPILE_FLAGS&#125;</span>)</span><br></pre></td></tr></table></figure></li>
-<li>编译脚本 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">cmake .. \</span><br><span class="line">-DCMAKE_TOOLCHAIN_FILE=<span class="variable">$ANDROID_NDK</span>/build/cmake/android.toolchain.cmake \</span><br><span class="line">-DCMAKE_BUILD_TYPE=Debug \</span><br><span class="line">-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \</span><br><span class="line">-DANDROID_ABI=<span class="string">&quot;arm64-v8a&quot;</span> \</span><br><span class="line">-DANDROID_STL=c++_static \</span><br><span class="line">-DANDROID_NATIVE_API_LEVEL=android-21  \</span><br><span class="line">-DMNN_BUILD_FOR_ANDROID_COMMAND=<span class="literal">true</span> \</span><br><span class="line">-DANDROID_TOOLCHAIN=clang \</span><br><span class="line">-DCMAKE_GENERATOR=<span class="string">&quot;Unix Makefiles&quot;</span></span><br></pre></td></tr></table></figure></li>
-<li>运行 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb push neon  /data/local/tmp &amp;&amp; adb shell /data/local/tmp/neon</span><br></pre></td></tr></table></figure></li>
-<li>源代码<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;arm_neon.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;math.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstddef&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">//定义a, b, c</span></span><br><span class="line">    <span class="type">unsigned</span> <span class="type">char</span> a[<span class="number">8</span>] = &#123;<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>&#125;;</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">char</span> b[<span class="number">8</span>] = &#123;<span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">13</span>, <span class="number">14</span>, <span class="number">15</span>&#125;;</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">char</span> c[<span class="number">8</span>];</span><br><span class="line">    <span class="type">uint8x8_t</span> rega, regb, regc;	<span class="comment">//定义3个8x8bit无符号整型的 NEON 寄存器</span></span><br><span class="line">    <span class="comment">//加载 a, b 到寄存器</span></span><br><span class="line">    rega = <span class="built_in">vld1_u8</span>(&amp;a[<span class="number">0</span>]);</span><br><span class="line">    regb = <span class="built_in">vld1_u8</span>(&amp;b[<span class="number">0</span>]);</span><br><span class="line">    regc = <span class="built_in">vadd_u8</span>(rega, regb);	<span class="comment">//做加法</span></span><br><span class="line">    <span class="built_in">vst1_u8</span>(&amp;c[<span class="number">0</span>], regc);		<span class="comment">//回写到c中</span></span><br><span class="line">    <span class="comment">//测试</span></span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">0</span> ; i &lt; <span class="number">8</span> ; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%d 	&quot;</span>,c[i] );</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;\n&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
-</ol>
+    <p>高效地服务大型语言模型 (LLM) 需要对许多请求进行批处理，以降低每个请求的成本。然而，随着批量大小和上下文长度的增加，存储注意力键和值以避免重新计算的键值（KV）缓存显着增加了内存需求，并成为速度和内存使用的新瓶颈。此外，KV缓存的加载会导致计算核心空闲，从而限制了推理速度。减少 KV 缓存大小的一个直接有效的解决方案是量化，这会减少 KV 缓存占用的总字节数。然而，缺乏深入研究KV缓存的元素分布来了解KV缓存量化的难度和局限性。</p>
+<p><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2402.02750">KIVI: A Tuning-Free Asymmetric 2bit Quantization for KV Cache | PDF</a></p>
+<h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><h2 id="per-token-and-per-channel-quantization"><a href="#per-token-and-per-channel-quantization" class="headerlink" title="per-token and per-channel quantization"></a>per-token and per-channel quantization</h2><img src="https://s2.loli.net/2024/11/04/ta69MmdWl2STDpE.png" alt="image-20241104102212250" style="zoom: 67%;" />
+
+<ul>
+<li>per-token量化，将每一个token做为量化的单位</li>
+<li>per-channel量化，将token中的channel作为量化单位</li>
+</ul>
+<h2 id="Attention-Inference-Time-Workflow"><a href="#Attention-Inference-Time-Workflow" class="headerlink" title="Attention Inference-Time Workflow"></a>Attention Inference-Time Workflow</h2><p>在Prefill 阶段，例如一个输入$\mathbf{X} \in \mathbb{R}^{b \times l_{\text{prompt}} \times d}$,$b$ 是batch size，$l_{prompt}$是输入的prompt词序列长度，$d$ 是hidden size,<br>$$<br>X_{K} &#x3D;XW_{K},X_{V}&#x3D;XW_{V}<br>$$<br>$W_{K},W_{V}\in \mathbb{R}^{d \times d}$,$W_{K},W_{V}$是对应的权重。获得$X_{K},X_{V}$​后需要缓存，也就是KVCache。</p>
+<p>在Decoding 阶段，输入token的embedding  $t \in \mathbb{R}^{b \times 1 \times d}$， 那么<br>$$<br>t_{K} &#x3D; tW_{K} \<br>t_{V} &#x3D; tW_{V} \<br>$$<br><strong>更新KVCache</strong><br>$$<br>\displaylines{<br>X_{K} &#x3D; Concat(X_{K},t_{K}) \<br>X_{V} &#x3D; Concat(X_{V},t_{V})<br>}<br>$$</p>
+<p>然后计算attention的输出</p>
+<h1 id="Motivation"><a href="#Motivation" class="headerlink" title="Motivation"></a>Motivation</h1><img src="https://s2.loli.net/2024/11/04/gqpHD8a61tmMPAf.png" alt="image-20241104104250311" style="zoom:50%;" />
+
+<p>可以看到在4bit量化时，K，V按照per-token的方法，在CoQA以及TruthfulQA可以保持精度，但是2bit量化时，精度会崩塌。</p>
+<p><strong>KIVI的目的是解决KVCache 2bit的量化问题。</strong></p>
+<p>从表中可以看出，最好的方法是K按照per-channel,而V按照per-token</p>
+<h1 id="为什么K-T，V-C的方式最好"><a href="#为什么K-T，V-C的方式最好" class="headerlink" title="为什么K-T，V-C的方式最好"></a>为什么K-T，V-C的方式最好</h1><p>量化嘛，肯定是要看数据的分布</p>
+<p><img src="https://s2.loli.net/2024/11/04/vVxG7M9XbdtzZYS.png" alt="image-20241104105542985"></p>
+<p>从上面图中可以看出KVCache中的数据分布。</p>
+<p>对于Key_Cache, 不同的token分布情况类似，异常值集中再特定的几个channel中</p>
+<p>对于Value_Cache,整体数据分布比较平缓</p>
+<h1 id="量化实现"><a href="#量化实现" class="headerlink" title="量化实现"></a>量化实现</h1><p><strong>KVCache 与普通量化的不同</strong>: KVCache是一个stream,会随着上下文增加而增加。不像权重量化，是固定大小，不随着推理变化而变化。</p>
+<p>Per-token的方式，可以很好解决和规避增长的问题，每次增加一个token的数据，只用对新增的token数据单独量化，与之前的Cache互不影响。</p>
+<p>Per-Channel的方式，问题在于量化的数据一直在增长，比如token增加，channel的长度也会增加。</p>
+<p>对于K Per-token量化，对于V Per-Channel量化，重要的是怎么解决Per-Channel的问题。</p>
+<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><p>将每个K cache，进行分组每G个token一组，进行分组量化。余剩下的进行单独量化。<br>$$<br>group_part \ X_{K_{g}} &#x3D; X_{K}[:l-r]<br>$$<br>$l$为token数量，$r$ 为$l%g$, $l-r$是$g$的整数倍<br>$$<br>residual_part X_{K_{r}} &#x3D; X_{K}[l-r:]<br>$$</p>
+<p>只存储$Q(X_{K_{g}})$ 也就是分组的部分，进行量化。$X_{K_{r}}$ 不量化。在decoding 阶段，新的key_cache，会被添加到$X_{K_{r}}$中，当大小满$g$时，进行量化并添到$X_{K_{g}}$中。</p>
+<p>在做attention时，进行混合精度矩阵乘法<br>$$<br>A_g &#x3D; t_{Q} Q( X^\top_{ K_g} )\<br>X_{K_{r}} &#x3D; Concat([X_{K_r},t_{K}])\<br>A_{r} &#x3D; t_{Q}X^\top_{K_{r}}\<br>A &#x3D; Concat([A_g,A_r])\<br>$$<br>该矩阵乘法使用Triton实现。</p>
 
     
   </div>
@@ -314,7 +341,7 @@
   </p>
   <p class="copyright-item">
     <span>原文链接: </span>
-    <a href="https://weikangqi.github.io/2024/11/01/neon/neon%20%E9%85%8D%E7%BD%AE/">https://weikangqi.github.io/2024/11/01/neon/neon%20%E9%85%8D%E7%BD%AE/</a>
+    <a href="https://weikangqi.github.io/2024/11/04/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E9%87%8F%E5%8C%96/KV%20cache%E9%87%8F%E5%8C%96%E4%B9%8BKIVI/">https://weikangqi.github.io/2024/11/04/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E9%87%8F%E5%8C%96/KV%20cache%E9%87%8F%E5%8C%96%E4%B9%8BKIVI/</a>
   </p>
   <p class="copyright-item">
     <span>许可协议: </span>
@@ -332,26 +359,18 @@
     
     <div class="post-tags">
       
-      <a href="/tags/neon/">neon</a>
+      <a href="/tags/%E5%A4%A7%E6%A8%A1%E5%9E%8B/">大模型</a>
       
-      <a href="/tags/arm/">arm</a>
-      
-      <a href="/tags/simd/">simd</a>
+      <a href="/tags/%E9%87%8F%E5%8C%96/">量化</a>
       
     </div>
     
       
   <nav class="post-nav">  
       
-      <a class="prev" href="/2024/11/04/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E9%87%8F%E5%8C%96/KV%20cache%E9%87%8F%E5%8C%96%E4%B9%8BKIVI/">  
-        <i class="iconfont icon-left"></i>  
-        <span class="prev-text nav-default">KV cache 量化之KIVI</span>  
-        <span class="prev-text nav-mobile">上一篇</span>  
-      </a>  
       
-      
-      <a class="next" href="/2024/11/01/neon/neon%20Instruction%20%E8%AF%AD%E6%B3%95/">  
-        <span class="next-text nav-default">ARM neon Instruction  语法</span>  
+      <a class="next" href="/2024/11/01/neon/neon%20%E9%85%8D%E7%BD%AE/">  
+        <span class="next-text nav-default">ARM neon 指令 （Android）代码环境配置</span>  
         <span class="prev-text nav-mobile">下一篇</span>  
         <i class="iconfont icon-right"></i>  
       </a>  
