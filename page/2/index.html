@@ -406,6 +406,46 @@
   <header class="post-header">
     <h1 class="post-title">
       
+      <a class="post-link" href="/2024/03/05/a/android%20gdb%20%E8%B0%83%E8%AF%95/">Linux 中使用adb 连接手机</a>
+      
+    </h1>
+
+    <div class="post-meta">
+      <span class="post-time">
+        2024-03-05
+      </span>
+      
+      
+      
+    </div>
+  </header>
+
+  
+
+  <div class="post-content">
+    
+    
+    
+
+    
+    <h1 id="Linux-中使用adb-连接手机"><a href="#Linux-中使用adb-连接手机" class="headerlink" title="Linux 中使用adb 连接手机"></a>Linux 中使用adb 连接手机</h1><p>在做实验时，使用linux服务器连接手机，一直出现 connect 后，手机直接 offline 的情况。<br>解决： 不能使用<code>sudo apt install adb</code> 安装adb，来连接手机。<br>解决方法：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> cli-tools</span><br><span class="line">wget -c https://dl.google.com/android/repository/platform-tools-latest-linux.zip</span><br><span class="line">unzip platform-tools-latest-linux.zip </span><br><span class="line"><span class="built_in">cd</span> platform-tools/</span><br><span class="line">./adb connect yourIP:Port</span><br></pre></td></tr></table></figure>
+
+
+    
+    
+  </div>
+
+  
+
+  
+
+</article>
+  
+  <article class="post">
+  <header class="post-header">
+    <h1 class="post-title">
+      
       <a class="post-link" href="/2024/03/05/a/%E4%BD%BF%E7%94%A8LLDB%20%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95android/">使用LLDB 远程调试 安卓native C++ 程序的vscode 配置</a>
       
     </h1>
@@ -448,46 +488,6 @@
 <li>如果配置不成功,首先不使用vscode插件,在自己的电脑上命令行能够启动LLDB,LLDB-server和调试native c++程序.</li>
 <li>codeLLDB 使用的是自己的lldb,需要检查该lldb能够正常运行和调试<br><img src="https://s2.loli.net/2024/03/11/i1LOAze2saZJ6VK.png" alt="20240311142552"></li>
 </ul>
-
-    
-    
-  </div>
-
-  
-
-  
-
-</article>
-  
-  <article class="post">
-  <header class="post-header">
-    <h1 class="post-title">
-      
-      <a class="post-link" href="/2024/03/05/a/android%20gdb%20%E8%B0%83%E8%AF%95/">Linux 中使用adb 连接手机</a>
-      
-    </h1>
-
-    <div class="post-meta">
-      <span class="post-time">
-        2024-03-05
-      </span>
-      
-      
-      
-    </div>
-  </header>
-
-  
-
-  <div class="post-content">
-    
-    
-    
-
-    
-    <h1 id="Linux-中使用adb-连接手机"><a href="#Linux-中使用adb-连接手机" class="headerlink" title="Linux 中使用adb 连接手机"></a>Linux 中使用adb 连接手机</h1><p>在做实验时，使用linux服务器连接手机，一直出现 connect 后，手机直接 offline 的情况。<br>解决： 不能使用<code>sudo apt install adb</code> 安装adb，来连接手机。<br>解决方法：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> cli-tools</span><br><span class="line">wget -c https://dl.google.com/android/repository/platform-tools-latest-linux.zip</span><br><span class="line">unzip platform-tools-latest-linux.zip </span><br><span class="line"><span class="built_in">cd</span> platform-tools/</span><br><span class="line">./adb connect yourIP:Port</span><br></pre></td></tr></table></figure>
-
 
     
     
