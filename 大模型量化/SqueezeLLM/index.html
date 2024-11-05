@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <!-- Website mata -->
+<meta charset="UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+<!-- Disable transformation -->
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+<!-- Website description -->
+
+<meta name="description" content="SqueezeLLM的新型量化框架，旨在解决大型语言模型（LLMs）在推理部署时面临的内存带宽瓶颈问题。SqueezeLLM通过两种创新方法实现超低比特精度量化，同时保持模型性能：一是敏感度基于的非均匀量化，根据权重的二阶信息为不同权重分配最优的比特精度；二是密集-稀疏分解，将异常值以高效的稀疏格式存储" />
+
+
+<!-- Website keywords -->
+
+<meta name="keywords" content="大模型, 量化, wkq&#39;s site" />
+
+
+
+
+<!-- Website rss -->
+
+<link rel="alternate" href="/default" title="wkq's site" >
+
+
+<!-- Website favicon -->
+
+<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=3.0.0" />
+
+
+<!-- Canonical, good for google search engine -->
+<link rel="canonical" href="https://weikangqi.github.io/大模型量化/SqueezeLLM/" />
+
+<!-- Fancybox styling -->
+
+
+<link rel="stylesheet" type="text/css" href="/lib/fancybox/jquery.fancybox.css" />
+
+
+<!-- MathJax (LaTeX) support -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ['\\(','\\)']] } });  
+  </script>
+<script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+<!-- Theme styling -->
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=3.0.0" />
+
+<!-- Analytics and push -->
+
+
+
+  
+
+
+
+<!-- LeanCloud Counter -->
+
+
+<script>
+  window.config = {"leancloud":{"app_id":null,"app_key":null,"server_url":null,"cdn":null},"toc":true,"fancybox":true,"latex":true};
+</script>
+  
+  <title>SqueezeLLm量化笔记 - wkq&#39;s site</title>
+
+<meta name="generator" content="Hexo 7.3.0"><style>.mjpage .MJX-monospace {
+  font-family: monospace;
+}
+
+.mjpage .MJX-sans-serif {
+  font-family: sans-serif;
+}
+
+.mjpage {
+  display: inline;
+  font-style: normal;
+  font-weight: normal;
+  line-height: normal;
+  font-size: 100%;
+  font-size-adjust: none;
+  text-indent: 0;
+  text-align: left;
+  text-transform: none;
+  letter-spacing: normal;
+  word-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  float: none;
+  direction: ltr;
+  max-width: none;
+  max-height: none;
+  min-width: 0;
+  min-height: 0;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.mjpage * {
+  transition: none;
+  -webkit-transition: none;
+  -moz-transition: none;
+  -ms-transition: none;
+  -o-transition: none;
+}
+
+.mjx-svg-href {
+  fill: blue;
+  stroke: blue;
+}
+
+.MathJax_SVG_LineBox {
+  display: table !important;
+}
+
+.MathJax_SVG_LineBox span {
+  display: table-cell !important;
+  width: 10000em !important;
+  min-width: 0;
+  max-width: none;
+  padding: 0;
+  border: 0;
+  margin: 0;
+}
+
+.mjpage__block {
+  text-align: center;
+  margin: 1em 0em;
+  position: relative;
+  display: block !important;
+  text-indent: 0;
+  max-width: none;
+  max-height: none;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+}
+</style></head>
+
+<body>
+  <div class="scrollPercentage"></div>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">wkq&#39;s site</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    
+    <a href="/">
+      <li class="mobile-menu-item">
+        
+        
+        首页              </li>
+    </a>
+    
+    <a href="/archives/">
+      <li class="mobile-menu-item">
+        
+        
+        归档              </li>
+    </a>
+    
+    <a href="/tags/">
+      <li class="mobile-menu-item">
+        
+        
+        标签              </li>
+    </a>
+    
+    <a href="/categories/">
+      <li class="mobile-menu-item">
+        
+        
+        分类              </li>
+    </a>
+    
+    <a href="/about/">
+      <li class="mobile-menu-item">
+        
+        
+        关于              </li>
+    </a>
+    
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+      <div class="logo-wrapper">  
+  <a href="/." class="logo">wkq's site</a>  
+</div>  
+  
+<nav class="site-navbar">  
+    
+    <ul id="menu" class="menu">  
+        
+        <li class="menu-item">  
+          <a class="menu-item-link" href="/">  
+              
+              
+              首页  
+              
+          </a>  
+        </li>  
+        
+        <li class="menu-item">  
+          <a class="menu-item-link" href="/archives/">  
+              
+              
+              归档  
+              
+          </a>  
+        </li>  
+        
+        <li class="menu-item">  
+          <a class="menu-item-link" href="/tags/">  
+              
+              
+              标签  
+              
+          </a>  
+        </li>  
+        
+        <li class="menu-item">  
+          <a class="menu-item-link" href="/categories/">  
+              
+              
+              分类  
+              
+          </a>  
+        </li>  
+        
+        <li class="menu-item">  
+          <a class="menu-item-link" href="/about/">  
+              
+              
+              关于  
+              
+          </a>  
+        </li>  
+        
+    </ul>  
+    
+</nav>  
+
+    </header>
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+  <header class="post-header">
+    <h1 class="post-title">
+      
+      SqueezeLLm量化笔记
+      
+    </h1>
+
+    <div class="post-meta">
+      <span class="post-time">
+        2024-11-05
+      </span>
+      
+      
+      <span class="post-category">
+        
+        <a href="/categories/LLM-%E9%87%8F%E5%8C%96/">LLM 量化</a>
+        
+      </span>
+      
+      
+    </div>
+  </header>
+
+  
+  <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-number">1.</span> <span class="toc-text">背景</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BB%E8%A6%81%E5%B7%A5%E4%BD%9C"><span class="toc-number">2.</span> <span class="toc-text">主要工作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%B9%E6%B3%95"><span class="toc-number">3.</span> <span class="toc-text">方法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8ESensitivity%E7%9A%84%E9%9D%9E%E7%BA%BF%E6%80%A7%E9%87%8F%E5%8C%96"><span class="toc-number">3.1.</span> <span class="toc-text">基于Sensitivity的非线性量化</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Dense-and-Sparse-Quantization"><span class="toc-number">4.</span> <span class="toc-text">Dense-and-Sparse Quantization</span></a></li></ol>
+    </div>
+  </div>
+  
+
+  <div class="post-content">
+    
+    <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>​	大模型推理的瓶颈主要在于内存带宽，量化是比较好的解决办法，其中模型参数以较低的精度存储，而不是用于训练的典型 16 或 32 位精度。而且证明LLM模型可以以8位精度存储而不会降低性能，其中8位量化不仅将存储要求提高了一半，而且还有可能提高性能推理延迟和吞吐量。</p>
+<p>​	相比较于GPTQ，它使用免训练量化技术，为具有超过数百亿个参数的 LLM 模型实现近乎无损的 4 位量化。然而，实现高量化性能仍然具有挑战性，特别是对于<strong>较低位精度和相对较小的模型</strong>（例如，&lt; 50B 参数）。</p>
+<p><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2306.07629">SqueezeLLM: Dense-and-Sparse Quantization | PDF</a></p>
+<h2 id="主要工作"><a href="#主要工作" class="headerlink" title="主要工作"></a>主要工作</h2><ul>
+<li>基于Sensitivity的非线性量化<br>&emsp;因为LLM权重分布表现出明显的不均匀模式，之前的推理计算并未完全受益于统一量化，因为算术是以 FP16 精度执行的（W？A16），而不是以降精度执行的（W？A？）非线性量化不支持用于计算加速的整数运算，但这个缺点对于内存限制问题并不重要，因为主要瓶颈在于内存带宽而不是计算。</li>
+<li>提出混合量化<br>&emsp;将异常值（Sparse 部分）保存为fp16，其他（Dense部分）保存为低bit值，这样在低bit下更好量化</li>
+</ul>
+<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><h3 id="基于Sensitivity的非线性量化"><a href="#基于Sensitivity的非线性量化" class="headerlink" title="基于Sensitivity的非线性量化"></a>基于Sensitivity的非线性量化</h3><p>寻找最佳非均匀量化配置可转化为解决 k-means 问题，给定权重分布，目标是确定最能代表分布的 k 个中心点，</p>
+<p>比如3bit量化，$k &#x3D; 8$ ，可以表示为：<br>$$<br>Q(w)^* &#x3D; \arg \min_Q | W - W_Q |_2^2<br>$$<br>虽然这已经优于均匀量化，下面是改进的基于Sensitivity的聚类算法。</p>
+<p>量化目标是以低比特精度表示模型权重，同时将模型输出的扰动降至最低，虽然量化会对每一层产生扰动，但我们需要尽量减少整体扰动，因为它能更直接地衡量量化后端到端性能的下降情况。为此，我们需要将 k-means 中心点放在对最终损失更敏感的值附近，而不是对所有权重值一视同仁，为了确定更敏感的值，我们进行了泰勒扩展，以分析损失是如何随权重 W 的扰动而变化的。<br>$$<br>L(W_Q) \approx L(W) - g^\top (W - W_Q) + \frac{1}{2} (W - W_Q)^\top H (W - W_Q)<br>$$<br>$g$ 是梯度，$H$ 是W损失的海森矩阵。模型收敛的话，可以认为$g $ 等于0<br>$$<br>Q(w)^* &#x3D; \arg \min_{Q} (W - W_Q)^\top H (W - W_Q)<br>$$<br>量化后每个权重的扰动是由二阶导数引入的比例因子加权得出，这凸显了对 Hessian 值较大的权重最小化扰动的重要性，因为它们对最终输出的整体扰动影响更大。换句话说，二阶导数可以衡量每个权重值的重要性。</p>
+<p>由于计算 Hessian 的成本较高，使用基于费雪信息矩阵 F 的 Hessian 近似值、可通过样本数据集 D 计算得出。为了提高可行性，我们进一步将费舍尔信息矩阵近似为对角矩阵，假定交叉权重的相互作用可以忽略不计。这样，我们的目标就简化为<br>$$<br>Q(w)^* \sim \arg \min_Q (W - W_Q)^\top \text{diag}(\mathcal{F})(W - W_Q)<br>$$<br>结果就是，在加权 K 均值聚类设置中，中心点会被拉近到这些敏感的权重值。</p>
+<img src="https://s2.loli.net/2024/11/05/r2sHwgJk3IfV8EM.png" alt="image-20241105192156518" style="zoom:50%;" />
+
+<p>上面是原始分布，以及20个敏感值，下面图，绿色是线性量化，紫色是基于敏感值的非线性量化。</p>
+<p>可以看出基于敏感值的非线性量化，能更好的与敏感值分布接近。</p>
+<h2 id="Dense-and-Sparse-Quantization"><a href="#Dense-and-Sparse-Quantization" class="headerlink" title="Dense-and-Sparse Quantization"></a>Dense-and-Sparse Quantization</h2><p><img src="https://s2.loli.net/2024/11/05/JKIbfm6dzqjRMDF.png" alt="image-20241105192612376"></p>
+<p>左右分别是 MHA 的输出层和 FFN 的down project输出，可以看出99%的值在很小的分布区间（&lt;10%的区间）</p>
+<p>简单地量化大范围的权重会显着降低性能，尤其是在低精度的情况下。只需删除少量异常值，权重值的范围就可以缩小 10 倍，量化分粒度显着提高。而且这将有助于基于敏感值的 k 均值中心集更多地关注敏感值，而不是少数异常值。</p>
+<p>于是将权重矩阵根据阈值分为Sparse（也就是包含异常值的部分）和Dense两部分，因为Sparse很少，不会影响推理效率。这些值可以根据 费雪信息矩阵轻松识别。这不仅可以保持 FP16 的异常值以避免它们对模型输出的影响，而且还可以防止方程的质心避免偏向这些异常值。</p>
+
+    
+  </div>
+
+  
+  <!-- Post Copyright -->
+<!-- 
+<div class="post-copyright">
+  <p class="copyright-item">
+    <span>原文作者: </span>
+    <a href="https://weikangqi.github.io">weikangqi</a>
+  </p>
+  <p class="copyright-item">
+    <span>原文链接: </span>
+    <a href="https://weikangqi.github.io/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E9%87%8F%E5%8C%96/SqueezeLLM/">https://weikangqi.github.io/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E9%87%8F%E5%8C%96/SqueezeLLM/</a>
+  </p>
+  <p class="copyright-item">
+    <span>许可协议: </span>
+    
+    <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">知识共享署名-非商业性使用 4.0 国际许可协议</a>
+  </p>
+</div>
+ -->
+
+
+  <div class="post-copyright">
+    <p class="copyright-item">
+      <span>原文作者: </span>
+      <a href="https://weikangqi.github.io">weikangqi</a>
+    </p>
+    <p class="copyright-item">
+      <span>原文链接: </span>
+      <a href="https://weikangqi.github.io/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E9%87%8F%E5%8C%96/SqueezeLLM/">https://weikangqi.github.io/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E9%87%8F%E5%8C%96/SqueezeLLM/</a>
+    </p>
+    <p class="copyright-item">
+      <span>许可协议: </span>
+      
+      <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">知识共享署名-非商业性使用 4.0 国际许可协议</a>
+    </p>
+  </div>
+  
+    
+
+  
+
+  
+  <footer class="post-footer">
+    
+    <div class="post-tags">
+      
+      <a href="/tags/%E5%A4%A7%E6%A8%A1%E5%9E%8B/">大模型</a>
+      
+      <a href="/tags/%E9%87%8F%E5%8C%96/">量化</a>
+      
+    </div>
+    
+      
+  <nav class="post-nav">  
+      
+      
+      <a class="next" href="/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E9%87%8F%E5%8C%96/KV%20cache%E9%87%8F%E5%8C%96%E4%B9%8BKIVI/">  
+        <span class="next-text nav-default">KV cache 量化之KIVI</span>  
+        <span class="prev-text nav-mobile">下一篇</span>  
+        <i class="iconfont icon-right"></i>  
+      </a>  
+      
+  </nav>  
+  
+
+  </footer>
+  
+
+</article>
+        </div>
+          
+  <div class="comments" id="comments">  
+      
+      <div id="utterances-container"></div>  
+      
+  </div>  
+  
+
+      </div>
+    </main>
+    <footer id="footer" class="footer">
+      <!-- Social Links -->
+
+<div class="social-links">
+  
+  
+  
+  
+  <a href="mailto:your@email.com" class="iconfont icon-email" title="email"></a>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <a target="_blank" rel="noopener" href="https://github.com/ahonn" class="iconfont icon-github" title="github"></a>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  
+  
+  <a href="/atom.xml" class="iconfont icon-rss" title="rss"></a>
+  
+</div>
+
+
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 -
+    <a class="theme-link" target="_blank" rel="noopener" href="https://github.com/zeed-w-beez/hexo-theme-even">Even</a>
+  </span>
+  <span class="division">|</span>
+  <span class="hosting-info">
+    footer.hosting
+  </span>
+
+  <span class="copyright-year">
+    <span>
+      
+      &copy;
+      
+      2020 - 2024      
+    </span>
+
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+
+    <span class="author">weikangqi</span>
+  </span>
+
+</div>
+    </footer>
+    <div class="back-to-top" id="back-to-top"> <i class="iconfont icon-up"></i> </div>
+  </div>
+    
+    
+    
+    
+    
+  
+<script>
+  var container = document.getElementById('utterances-container');
+  var script = document.createElement('script');
+  script.src = 'https://utteranc.es/client.js';
+  script.setAttribute('repo', 'weikangqi/weikangqi.github.io');
+  script.setAttribute('issue-term', 'pathname');
+  script.setAttribute('theme', 'github-light');
+  script.setAttribute('label', 'utterances');
+  script.crossorigin = 'anonymous';
+  script.async = true;
+
+  container.appendChild(script);
+</script>
+  
+    
+  
+
+  
+
+
+
+
+
+
+
+<script type="text/javascript" src="/lib/jquery/jquery.min.js"></script>
+
+
+
+<script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+
+
+
+<script type="text/javascript" src="/lib/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script type="text/javascript" src="/js/src/even.js?v=3.0.0"></script>
+</body>
+
+</html>
