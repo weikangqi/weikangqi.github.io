@@ -18,8 +18,12 @@
 
 <!-- Website description -->
 
+<meta name="description" content="KVQuant是由SqueezeAILab开发的一种创新方法，旨在解决大规模语言模型(LLM)推理时的内存瓶颈问题。通过高效的KV缓存量化技术，KVQuant能够实现超长上下文长度的模型推理，为LLM的应用开辟了新的可能性。" />
+
 
 <!-- Website keywords -->
+
+<meta name="keywords" content="大模型, 量化, wkq&#39;s site" />
 
 
 
@@ -35,7 +39,7 @@
 
 
 <!-- Canonical, good for google search engine -->
-<link rel="canonical" href="https://weikangqi.github.io/archives/page/2/" />
+<link rel="canonical" href="https://weikangqi.github.io/大模型量化/KV cache量化之KVQuant/" />
 
 <!-- Fancybox styling -->
 
@@ -69,7 +73,7 @@
   window.config = {"leancloud":{"app_id":null,"app_key":null,"server_url":null,"cdn":null},"toc":true,"fancybox":true,"latex":true};
 </script>
   
-  <title>归档 · wkq&#39;s site</title>
+  <title>KVQuant - wkq&#39;s site</title>
 
 <meta name="generator" content="Hexo 7.3.0"><style>.mjpage .MJX-monospace {
   font-family: monospace;
@@ -261,144 +265,126 @@
     <main id="main" class="main">
       <div class="content-wrapper">
         <div id="content" class="content">
-          
+          <article class="post">
+  <header class="post-header">
+    <h1 class="post-title">
+      
+      KVQuant
+      
+    </h1>
 
-<section id="archive" class="archive">
-  
+    <div class="post-meta">
+      <span class="post-time">
+        2024-11-08
+      </span>
+      
+      
+      <span class="post-category">
+        
+        <a href="/categories/LLM-%E9%87%8F%E5%8C%96/">LLM 量化</a>
+        
+      </span>
+      
+      
+    </div>
+  </header>
 
   
+
+  <div class="post-content">
+    
+    <p>KVQuant 主要做了</p>
+<ul>
+<li>发现每通道量化为Key提供了显着的准确性优势，但对Value却没有。也就是K按照Token量化，V按照Channel量化</li>
+<li>在RoPE前对Key进行量化，从下图可以看出</li>
+</ul>
+<p><img src="https://s2.loli.net/2024/11/08/G49tNXmHd1j7Yng.png" alt="image-20241108094807901"></p>
+<ul>
+<li>nuqX：每层敏感度加权非均匀数据量化，与SqueezeLLM的方法相同，只不过KVCache数据是增长的，论文用离线标定来解决，而KIVI使用分组来解决。</li>
+<li>Dense-and-Sparse Quantization： 类似SqueezeLLM的方法相同，只不过从而不是每一层的单个异常值阈值，变成每个向量或者Token或者channel。更细粒度。使用离线使用数据集校准。</li>
+<li>Attention Sink-Aware Quantization注意力沉降感知量化：在大语言模型的前几层，模型会将大量注意力分配给第一个词元（token），即使它在语义上并不重要。这个现象是因为模型倾向于把第一个词元当作“沉降点”或“注意力聚集点”（sink）。由于这种注意力下沉现象，模型对第一个词元的量化误差特别敏感。也就是说，量化误差在第一个词元上会更显著地影响模型的表现。为了解决这个问题，在量化时将第一个词元保留为FP16（半精度浮点数）可以带来困惑度（perplexity）的提升，特别是在2位（2-bit）量化时效果明显。当第一个词元保留为FP16时，量化校准过程也会忽略第一个词元的影响。这意味着在推导自定义数据类型（nuqX）和校准Key的缩放因子及零点时，第一个词元不会被考虑。</li>
+</ul>
+
+    
+  </div>
+
   
-  
-  
-  
-  
-  <div class="collection-title">
-    <h2 class="archive-year">
-      <a href="/archives/2024" class="archive-year">2024</a>
-    </h2>
+  <!-- Post Copyright -->
+<!-- 
+<div class="post-copyright">
+  <p class="copyright-item">
+    <span>原文作者: </span>
+    <a href="https://weikangqi.github.io">weikangqi</a>
+  </p>
+  <p class="copyright-item">
+    <span>原文链接: </span>
+    <a href="https://weikangqi.github.io/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E9%87%8F%E5%8C%96/KV%20cache%E9%87%8F%E5%8C%96%E4%B9%8BKVQuant/">https://weikangqi.github.io/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E9%87%8F%E5%8C%96/KV%20cache%E9%87%8F%E5%8C%96%E4%B9%8BKVQuant/</a>
+  </p>
+  <p class="copyright-item">
+    <span>许可协议: </span>
+    
+    <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">知识共享署名-非商业性使用 4.0 国际许可协议</a>
+  </p>
+</div>
+ -->
+
+
+  <div class="post-copyright">
+    <p class="copyright-item">
+      <span>原文作者: </span>
+      <a href="https://weikangqi.github.io">weikangqi</a>
+    </p>
+    <p class="copyright-item">
+      <span>原文链接: </span>
+      <a href="https://weikangqi.github.io/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E9%87%8F%E5%8C%96/KV%20cache%E9%87%8F%E5%8C%96%E4%B9%8BKVQuant/">https://weikangqi.github.io/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E9%87%8F%E5%8C%96/KV%20cache%E9%87%8F%E5%8C%96%E4%B9%8BKVQuant/</a>
+    </p>
+    <p class="copyright-item">
+      <span>许可协议: </span>
+      
+      <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">知识共享署名-非商业性使用 4.0 国际许可协议</a>
+    </p>
   </div>
   
-  
-
-  <div class="archive-post">
-    <span class="archive-post-time">
-      
-      03-15
-      
-    </span>
-    <span class="archive-post-title">
-      <a href="/MNN%E6%BA%90%E7%A0%81/MNN%20%E6%BA%90%E7%A0%81%E5%88%86%E4%BA%AB%20cpu%20%E5%86%85%E5%AD%98%E6%B1%A0/" class="archive-post-link">
-        MNN源码分析 CPU 内存池
-      </a>
-    </span>
-  </div>
-  
-  
-  
-  
-  
-
-  <div class="archive-post">
-    <span class="archive-post-time">
-      
-      03-14
-      
-    </span>
-    <span class="archive-post-title">
-      <a href="/MNN%E6%BA%90%E7%A0%81/MNN%20%E6%BA%90%E7%A0%81%E5%88%86%E4%BA%AB%206%20%E7%AE%97%E5%AD%90%E5%88%87%E5%88%86/" class="archive-post-link">
-        MNN源码分析4 mnn的图计算
-      </a>
-    </span>
-  </div>
-  
-  
-  
-  
-  
-
-  <div class="archive-post">
-    <span class="archive-post-time">
-      
-      03-12
-      
-    </span>
-    <span class="archive-post-title">
-      <a href="/MNN%E6%BA%90%E7%A0%81/MNN%20%E6%BA%90%E7%A0%81%E5%88%86%E4%BA%AB2%20session/" class="archive-post-link">
-        MNN源码分析2 Session
-      </a>
-    </span>
-  </div>
-  
-  
-  
-  
-  
-
-  <div class="archive-post">
-    <span class="archive-post-time">
-      
-      03-12
-      
-    </span>
-    <span class="archive-post-title">
-      <a href="/mali/mail_gpu_%E5%88%9D%E6%8E%A2/" class="archive-post-link">
-        Mali GPU 初探
-      </a>
-    </span>
-  </div>
-  
-  
-  
-  
-  
-
-  <div class="archive-post">
-    <span class="archive-post-time">
-      
-      03-05
-      
-    </span>
-    <span class="archive-post-title">
-      <a href="/a/android%20gdb%20%E8%B0%83%E8%AF%95/" class="archive-post-link">
-        Linux 中使用adb 连接手机
-      </a>
-    </span>
-  </div>
-  
-  
-  
-  
-  
-
-  <div class="archive-post">
-    <span class="archive-post-time">
-      
-      03-05
-      
-    </span>
-    <span class="archive-post-title">
-      <a href="/a/%E4%BD%BF%E7%94%A8LLDB%20%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95android/" class="archive-post-link">
-        使用LLDB 远程调试 安卓native C++ 程序的vscode 配置
-      </a>
-    </span>
-  </div>
-  
-</section>
+    
 
   
-  <nav class="pagination">  
+
+  
+  <footer class="post-footer">
+    
+    <div class="post-tags">
       
-      <a class="prev" href="/archives/">  
-        <i class="iconfont icon-left"></i>  
-        <span class="prev-text">上一页</span>  
+      <a href="/tags/%E5%A4%A7%E6%A8%A1%E5%9E%8B/">大模型</a>
+      
+      <a href="/tags/%E9%87%8F%E5%8C%96/">量化</a>
+      
+    </div>
+    
+      
+  <nav class="post-nav">  
+      
+      
+      <a class="next" href="/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E9%87%8F%E5%8C%96/SqueezeLLM/">  
+        <span class="next-text nav-default">SqueezeLLm量化笔记</span>  
+        <span class="prev-text nav-mobile">下一篇</span>  
+        <i class="iconfont icon-right"></i>  
       </a>  
-      
       
   </nav>  
   
 
+  </footer>
+  
+
+</article>
         </div>
           
+  <div class="comments" id="comments">  
+      
+      <div id="utterances-container"></div>  
+      
+  </div>  
+  
 
       </div>
     </main>
@@ -497,6 +483,27 @@
     <div class="back-to-top" id="back-to-top"> <i class="iconfont icon-up"></i> </div>
   </div>
     
+    
+    
+    
+    
+  
+<script>
+  var container = document.getElementById('utterances-container');
+  var script = document.createElement('script');
+  script.src = 'https://utteranc.es/client.js';
+  script.setAttribute('repo', 'weikangqi/weikangqi.github.io');
+  script.setAttribute('issue-term', 'pathname');
+  script.setAttribute('theme', 'github-light');
+  script.setAttribute('label', 'utterances');
+  script.crossorigin = 'anonymous';
+  script.async = true;
+
+  container.appendChild(script);
+</script>
+  
+    
+  
 
   
 
