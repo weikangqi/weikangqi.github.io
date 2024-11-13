@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <!-- Website mata -->
+<meta charset="UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+<!-- Disable transformation -->
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+<!-- Website description -->
+
+<meta name="description" content="GPTQ量化-笔记" />
+
+
+<!-- Website keywords -->
+
+<meta name="keywords" content="大模型, 量化, wkq&#39;s site" />
+
+
+
+
+<!-- Website rss -->
+
+<link rel="alternate" href="/default" title="wkq's site" >
+
+
+<!-- Website favicon -->
+
+<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=3.0.0" />
+
+
+<!-- Canonical, good for google search engine -->
+<link rel="canonical" href="https://weikangqi.github.io/大模型量化/GPTQ/" />
+
+<!-- Fancybox styling -->
+
+
+<link rel="stylesheet" type="text/css" href="/lib/fancybox/jquery.fancybox.css" />
+
+
+<!-- MathJax (LaTeX) support -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ tex2jax: { inlineMath: [['$','$'], ['\\(','\\)']] } });  
+  </script>
+<script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+<!-- Theme styling -->
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=3.0.0" />
+
+<!-- Analytics and push -->
+
+
+
+  
+
+
+
+<!-- LeanCloud Counter -->
+
+
+<script>
+  window.config = {"leancloud":{"app_id":null,"app_key":null,"server_url":null,"cdn":null},"toc":true,"fancybox":true,"latex":true};
+</script>
+  
+  <title>GPTQ量化-笔记 - wkq&#39;s site</title>
+
+<meta name="generator" content="Hexo 7.3.0"><style>.mjpage .MJX-monospace {
+  font-family: monospace;
+}
+
+.mjpage .MJX-sans-serif {
+  font-family: sans-serif;
+}
+
+.mjpage {
+  display: inline;
+  font-style: normal;
+  font-weight: normal;
+  line-height: normal;
+  font-size: 100%;
+  font-size-adjust: none;
+  text-indent: 0;
+  text-align: left;
+  text-transform: none;
+  letter-spacing: normal;
+  word-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  float: none;
+  direction: ltr;
+  max-width: none;
+  max-height: none;
+  min-width: 0;
+  min-height: 0;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.mjpage * {
+  transition: none;
+  -webkit-transition: none;
+  -moz-transition: none;
+  -ms-transition: none;
+  -o-transition: none;
+}
+
+.mjx-svg-href {
+  fill: blue;
+  stroke: blue;
+}
+
+.MathJax_SVG_LineBox {
+  display: table !important;
+}
+
+.MathJax_SVG_LineBox span {
+  display: table-cell !important;
+  width: 10000em !important;
+  min-width: 0;
+  max-width: none;
+  padding: 0;
+  border: 0;
+  margin: 0;
+}
+
+.mjpage__block {
+  text-align: center;
+  margin: 1em 0em;
+  position: relative;
+  display: block !important;
+  text-indent: 0;
+  max-width: none;
+  max-height: none;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+}
+</style></head>
+
+<body>
+  <div class="scrollPercentage"></div>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">wkq&#39;s site</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    
+    <a href="/">
+      <li class="mobile-menu-item">
+        
+        
+        首页              </li>
+    </a>
+    
+    <a href="/archives/">
+      <li class="mobile-menu-item">
+        
+        
+        归档              </li>
+    </a>
+    
+    <a href="/tags/">
+      <li class="mobile-menu-item">
+        
+        
+        标签              </li>
+    </a>
+    
+    <a href="/categories/">
+      <li class="mobile-menu-item">
+        
+        
+        分类              </li>
+    </a>
+    
+    <a href="/about/">
+      <li class="mobile-menu-item">
+        
+        
+        关于              </li>
+    </a>
+    
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+      <div class="logo-wrapper">  
+  <a href="/." class="logo">wkq's site</a>  
+</div>  
+  
+<nav class="site-navbar">  
+    
+    <ul id="menu" class="menu">  
+        
+        <li class="menu-item">  
+          <a class="menu-item-link" href="/">  
+              
+              
+              首页  
+              
+          </a>  
+        </li>  
+        
+        <li class="menu-item">  
+          <a class="menu-item-link" href="/archives/">  
+              
+              
+              归档  
+              
+          </a>  
+        </li>  
+        
+        <li class="menu-item">  
+          <a class="menu-item-link" href="/tags/">  
+              
+              
+              标签  
+              
+          </a>  
+        </li>  
+        
+        <li class="menu-item">  
+          <a class="menu-item-link" href="/categories/">  
+              
+              
+              分类  
+              
+          </a>  
+        </li>  
+        
+        <li class="menu-item">  
+          <a class="menu-item-link" href="/about/">  
+              
+              
+              关于  
+              
+          </a>  
+        </li>  
+        
+    </ul>  
+    
+</nav>  
+
+    </header>
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+  <header class="post-header">
+    <h1 class="post-title">
+      
+      GPTQ量化-笔记
+      
+    </h1>
+
+    <div class="post-meta">
+      <span class="post-time">
+        2024-11-13
+      </span>
+      
+      
+      <span class="post-category">
+        
+        <a href="/categories/LLM-%E9%87%8F%E5%8C%96/">LLM 量化</a>
+        
+      </span>
+      
+      
+    </div>
+  </header>
+
+  
+  <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E6%B5%B7%E6%A3%AE%E7%9F%A9%E9%98%B5"><span class="toc-number">1.</span> <span class="toc-text">初始化海森矩阵</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#fasterquant"><span class="toc-number">2.</span> <span class="toc-text">fasterquant</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Cholesky-%E5%88%86%E8%A7%A3"><span class="toc-number">2.1.</span> <span class="toc-text">Cholesky 分解</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%AD%E4%BB%A3%E9%87%8F%E5%8C%96"><span class="toc-number">2.2.</span> <span class="toc-text">迭代量化</span></a></li></ol></li></ol>
+    </div>
+  </div>
+  
+
+  <div class="post-content">
+    
+    <blockquote>
+<p>参考：</p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/692338716">真的从头到尾弄懂量化之GPTQ - 知乎</a></p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/690834228">LLM 推理加速技术 —— GPTQ 量化技术演进 - 知乎</a></p>
+</blockquote>
+<p>原理和推导公式可见上面的几篇文章</p>
+<p>下面主要看下autogptq的源码</p>
+<h2 id="初始化海森矩阵"><a href="#初始化海森矩阵" class="headerlink" title="初始化海森矩阵"></a>初始化海森矩阵</h2><p>$$<br>H &#x3D; 2XX^T<br>$$</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">add_batch</span>(<span class="params">self, inp, out</span>):</span><br><span class="line">    <span class="keyword">if</span> os.environ.get(<span class="string">&quot;DEBUG&quot;</span>):</span><br><span class="line">        <span class="variable language_">self</span>.inp1 = inp</span><br><span class="line">        <span class="variable language_">self</span>.out1 = out</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(inp.shape) == <span class="number">2</span>:</span><br><span class="line">        inp = inp.unsqueeze(<span class="number">0</span>)</span><br><span class="line">    tmp = inp.shape[<span class="number">0</span>]</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">isinstance</span>(<span class="variable language_">self</span>.layer, nn.Linear) <span class="keyword">or</span> <span class="built_in">isinstance</span>(<span class="variable language_">self</span>.layer, transformers.Conv1D):</span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">len</span>(inp.shape) == <span class="number">3</span>:</span><br><span class="line">            inp = inp.reshape((-<span class="number">1</span>, inp.shape[-<span class="number">1</span>]))</span><br><span class="line">        inp = inp.t()</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">isinstance</span>(<span class="variable language_">self</span>.layer, nn.Conv2d):</span><br><span class="line">        unfold = nn.Unfold(</span><br><span class="line">            <span class="variable language_">self</span>.layer.kernel_size,</span><br><span class="line">            dilation=<span class="variable language_">self</span>.layer.dilation,</span><br><span class="line">            padding=<span class="variable language_">self</span>.layer.padding,</span><br><span class="line">            stride=<span class="variable language_">self</span>.layer.stride,</span><br><span class="line">        )</span><br><span class="line">        inp = unfold(inp)</span><br><span class="line">        inp = inp.permute([<span class="number">1</span>, <span class="number">0</span>, <span class="number">2</span>])</span><br><span class="line">        inp = inp.flatten(<span class="number">1</span>)</span><br><span class="line">    <span class="comment">##这里通过更新 self.H 来维持一个运行平均值。self.nsamples 表示累积的样本数，tmp 是当前批次的大		小。通过加权平均的方式，self.H 会逐步收敛到输入数据的统计信息。</span></span><br><span class="line">    <span class="variable language_">self</span>.H *= <span class="variable language_">self</span>.nsamples / (<span class="variable language_">self</span>.nsamples + tmp)</span><br><span class="line">    <span class="variable language_">self</span>.nsamples += tmp</span><br><span class="line">    <span class="comment"># inp = inp.float()</span></span><br><span class="line">    <span class="comment">## 归一化与缩放</span></span><br><span class="line">    <span class="comment">#这个操作的目的是对输入进行归一化，使得随着样本数的增加，输入的尺度逐渐调整。</span></span><br><span class="line">    inp = math.sqrt(<span class="number">2</span> / <span class="variable language_">self</span>.nsamples) * inp.<span class="built_in">float</span>()</span><br><span class="line">    <span class="comment"># self.H += 2 / self.nsamples * inp.matmul(inp.t())</span></span><br><span class="line">    <span class="comment"># 矩阵更新</span></span><br><span class="line">    <span class="variable language_">self</span>.H += inp.matmul(inp.t())</span><br></pre></td></tr></table></figure>
+
+<h2 id="fasterquant"><a href="#fasterquant" class="headerlink" title="fasterquant"></a>fasterquant</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#这里，H[dead, dead] 访问 H 中 dead 为 True 的对角线元素，然后将这些元素的值设置为 1。</span></span><br><span class="line"><span class="comment">#这个操作可能是为了避免在后续计算中出现除以零的错误或者在数值优化过程中保持稳定性。    </span></span><br><span class="line">    H = <span class="variable language_">self</span>.H</span><br><span class="line">    <span class="keyword">del</span> <span class="variable language_">self</span>.H</span><br><span class="line">    dead = torch.diag(H) == <span class="number">0</span></span><br><span class="line">    H[dead, dead] = <span class="number">1</span></span><br><span class="line">    W[:, dead] = <span class="number">0</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="Cholesky-分解"><a href="#Cholesky-分解" class="headerlink" title="Cholesky 分解"></a>Cholesky 分解</h3><p>为什么分解可以看<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/690834228">LLM 推理加速技术 —— GPTQ 量化技术演进 - 知乎</a></p>
+<p>Cholesky 分解是将一个正定矩阵分解为一个下三角矩阵和其转置的乘积。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">H = torch.linalg.cholesky(H)</span><br><span class="line">H = torch.cholesky_inverse(H)</span><br><span class="line">H = torch.linalg.cholesky(H, upper=<span class="literal">True</span>)</span><br><span class="line">Hinv = H </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<ol>
+<li><p>Cholesky 分解：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">H = torch.linalg.cholesky(H)</span><br></pre></td></tr></table></figure>
+
+<p>这一行将矩阵 <code>H</code> 进行 <strong>Cholesky 分解</strong>，即将 <code>H</code> 分解为一个下三角矩阵。对于一个正定矩阵 <code>H</code>，其 Cholesky 分解会产生一个下三角矩阵 <code>L</code>，满足：<br>$$<br>H &#x3D; LL^T<br>$$</p>
+</li>
+<li><p>Cholesky 逆矩阵</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">H = torch.cholesky_inverse(H)</span><br></pre></td></tr></table></figure>
+
+<p>接下来，调用 <code>torch.cholesky_inverse()</code> 来计算 Cholesky 分解矩阵 <code>H</code> 的逆矩阵。注意，<code>H</code> 在这之前已经是一个下三角矩阵（通过 Cholesky 分解得到）。该函数会计算 <code>L^&#123;-1&#125;</code>，即 <code>L</code> 的逆矩阵，满足：<br>$$<br>H^{-1} &#x3D; (L^{-1})(L^{-1})^T<br>$$</p>
+</li>
+<li><p>再次进行 Cholesky 分解（上三角）</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">H = torch.linalg.cholesky(H, upper=<span class="literal">True</span>)</span><br></pre></td></tr></table></figure>
+
+<p>现在，<code>H</code> 是 $L^{-1}$，即 <code>L</code> 的逆矩阵。</p>
+<p>这里，我们对 $L^{-1}$​ 进行 <strong>Cholesky 分解</strong>，并且指定 <code>upper=True</code>，这意味着我们得到的是一个 <strong>上三角矩阵</strong> <code>T</code>，满足：<br>$$<br>L^{−1}&#x3D;TT^{T}<br>$$</p>
+<p> 因此，<code>H</code> 在这一行变成了一个上三角矩阵 <code>T</code>，它是 $L^{-1}$ 的 Cholesky 分解。</p>
+</li>
+</ol>
+<p>$$<br>\delta W &#x3D; - \frac{W_{:,q} - \text{quant}(W_{:,q})}{C_q T_{qq}} C_q T_{q,q:}<br>$$</p>
+<h3 id="迭代量化"><a href="#迭代量化" class="headerlink" title="迭代量化"></a>迭代量化</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line">Losses = torch.zeros_like(W)</span><br><span class="line">Q = torch.zeros_like(W)</span><br><span class="line"></span><br><span class="line">damp = percdamp * torch.mean(torch.diag(H))</span><br><span class="line">diag = torch.arange(<span class="variable language_">self</span>.columns, device=<span class="variable language_">self</span>.dev)</span><br><span class="line">H[diag, diag] += damp</span><br><span class="line">H = torch.linalg.cholesky(H)</span><br><span class="line">H = torch.cholesky_inverse(H)</span><br><span class="line">H = torch.linalg.cholesky(H, upper=<span class="literal">True</span>)</span><br><span class="line">Hinv = H</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i1 <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="variable language_">self</span>.columns, blocksize):</span><br><span class="line">    i2 = <span class="built_in">min</span>(i1 + blocksize, <span class="variable language_">self</span>.columns)</span><br><span class="line">    count = i2 - i1</span><br><span class="line"></span><br><span class="line">    W1 = W[:, i1:i2].clone()</span><br><span class="line">    Q1 = torch.zeros_like(W1)</span><br><span class="line">    Err1 = torch.zeros_like(W1)</span><br><span class="line">    Losses1 = torch.zeros_like(W1)</span><br><span class="line">    Hinv1 = Hinv[i1:i2, i1:i2]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(count):</span><br><span class="line">        w = W1[:, i]</span><br><span class="line">        d = Hinv1[i, i]</span><br><span class="line">        <span class="comment">## 找量化参数scale,zero</span></span><br><span class="line">        <span class="keyword">if</span> group_size != -<span class="number">1</span>:</span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">not</span> static_groups:</span><br><span class="line">                <span class="keyword">if</span> (i1 + i) % group_size == <span class="number">0</span>:</span><br><span class="line">                    <span class="variable language_">self</span>.quantizer.find_params(W[:, (i1 + i) : (i1 + i + group_size)], weight=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> ((i1 + i) // group_size) - now_idx == -<span class="number">1</span>:</span><br><span class="line">                    scale.append(<span class="variable language_">self</span>.quantizer.scale)</span><br><span class="line">                    zero.append(<span class="variable language_">self</span>.quantizer.zero)</span><br><span class="line">                    now_idx += <span class="number">1</span></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                idx = i1 + i</span><br><span class="line">                <span class="keyword">if</span> actorder:</span><br><span class="line">                    idx = perm[idx]</span><br><span class="line">                <span class="variable language_">self</span>.quantizer = groups[idx // group_size]</span><br><span class="line">        <span class="comment">## 反量化</span></span><br><span class="line">        q = <span class="variable language_">self</span>.quantizer.quantize(w.unsqueeze(<span class="number">1</span>)).flatten()</span><br><span class="line">        Q1[:, i] = q</span><br><span class="line">        <span class="comment">## 计算Loss</span></span><br><span class="line">        Losses1[:, i] = (w - q) ** <span class="number">2</span> / d**<span class="number">2</span></span><br><span class="line"></span><br><span class="line">        err1 = (w - q) / d</span><br><span class="line">        <span class="comment">#更新Block里面没有量化的权重</span></span><br><span class="line">        W1[:, i:] -= err1.unsqueeze(<span class="number">1</span>).matmul(Hinv1[i, i:].unsqueeze(<span class="number">0</span>))</span><br><span class="line">        Err1[:, i] = err1</span><br><span class="line"></span><br><span class="line">    Q[:, i1:i2] = Q1</span><br><span class="line">    Losses[:, i1:i2] = Losses1 / <span class="number">2</span></span><br><span class="line">    <span class="comment">## 更新权重</span></span><br><span class="line">    W[:, i2:] -= Err1.matmul(Hinv[i1:i2, i2:])</span><br></pre></td></tr></table></figure>
+
+<p>量化结束将scale, zero等量化参数返回，而W还是原值</p>
+
+    
+  </div>
+
+  
+  <!-- Post Copyright -->
+<!-- 
+<div class="post-copyright">
+  <p class="copyright-item">
+    <span>原文作者: </span>
+    <a href="https://weikangqi.github.io">weikangqi</a>
+  </p>
+  <p class="copyright-item">
+    <span>原文链接: </span>
+    <a href="https://weikangqi.github.io/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E9%87%8F%E5%8C%96/GPTQ/">https://weikangqi.github.io/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E9%87%8F%E5%8C%96/GPTQ/</a>
+  </p>
+  <p class="copyright-item">
+    <span>许可协议: </span>
+    
+    <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">知识共享署名-非商业性使用 4.0 国际许可协议</a>
+  </p>
+</div>
+ -->
+
+
+  <div class="post-copyright">
+    <p class="copyright-item">
+      <span>原文作者: </span>
+      <a href="https://weikangqi.github.io">weikangqi</a>
+    </p>
+    <!-- <p class="copyright-item">
+      <span>原文链接: </span>
+      <a href="https://weikangqi.github.io/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E9%87%8F%E5%8C%96/GPTQ/">https://weikangqi.github.io/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E9%87%8F%E5%8C%96/GPTQ/</a>
+    </p> -->
+    <p class="copyright-item">
+      <span>许可协议: </span>
+      
+      <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">知识共享署名-非商业性使用 4.0 国际许可协议</a>
+    </p>
+  </div>
+  
+    
+
+  
+
+  
+  <footer class="post-footer">
+    
+    <div class="post-tags">
+      
+      <a href="/tags/%E5%A4%A7%E6%A8%A1%E5%9E%8B/">大模型</a>
+      
+      <a href="/tags/%E9%87%8F%E5%8C%96/">量化</a>
+      
+    </div>
+    
+      
+  <nav class="post-nav">  
+      
+      
+      <a class="next" href="/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E9%87%8F%E5%8C%96/Atom%E4%BD%8E%E6%AF%94%E7%89%B9%E6%9D%83%E9%87%8D%E6%BF%80%E6%B4%BB%E4%BB%A5%E5%8F%8ACache%E9%87%8F%E5%8C%96/">  
+        <span class="next-text nav-default">Atom低比特权重激活以及Cache量化</span>  
+        <span class="prev-text nav-mobile">下一篇</span>  
+        <i class="iconfont icon-right"></i>  
+      </a>  
+      
+  </nav>  
+  
+
+  </footer>
+  
+
+</article>
+        </div>
+          
+  <div class="comments" id="comments">  
+      
+      <div id="utterances-container"></div>  
+      
+  </div>  
+  
+
+      </div>
+    </main>
+    <footer id="footer" class="footer">
+      <!-- Social Links -->
+
+<div class="social-links">
+  
+  
+  
+  
+  <a href="mailto:your@email.com" class="iconfont icon-email" title="email"></a>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <a target="_blank" rel="noopener" href="https://github.com/ahonn" class="iconfont icon-github" title="github"></a>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  
+  
+  <a href="/atom.xml" class="iconfont icon-rss" title="rss"></a>
+  
+</div>
+
+
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 -
+    <a class="theme-link" target="_blank" rel="noopener" href="https://github.com/zeed-w-beez/hexo-theme-even">Even</a>
+  </span>
+  <span class="division">|</span>
+  <span class="hosting-info">
+    footer.hosting
+  </span>
+
+  <span class="copyright-year">
+    <span>
+      
+      &copy;
+      
+      2020 - 2024      
+    </span>
+
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+
+    <span class="author">weikangqi</span>
+  </span>
+
+</div>
+    </footer>
+    <div class="back-to-top" id="back-to-top"> <i class="iconfont icon-up"></i> </div>
+  </div>
+    
+    
+    
+    
+    
+  
+<script>
+  var container = document.getElementById('utterances-container');
+  var script = document.createElement('script');
+  script.src = 'https://utteranc.es/client.js';
+  script.setAttribute('repo', 'weikangqi/weikangqi.github.io');
+  script.setAttribute('issue-term', 'pathname');
+  script.setAttribute('theme', 'github-light');
+  script.setAttribute('label', 'utterances');
+  script.crossorigin = 'anonymous';
+  script.async = true;
+
+  container.appendChild(script);
+</script>
+  
+    
+  
+
+  
+
+
+
+
+
+
+
+<script type="text/javascript" src="/lib/jquery/jquery.min.js"></script>
+
+
+
+<script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+
+
+
+<script type="text/javascript" src="/lib/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script type="text/javascript" src="/js/src/even.js?v=3.0.0"></script>
+</body>
+
+</html>
