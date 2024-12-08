@@ -18,12 +18,12 @@
 
 <!-- Website description -->
 
-<meta name="description" content="Atom低比特权重激活以及Cache量化，使用通道重新排序后混合精度，细粒度分组量化，动态激活量化以最小化量化误差" />
+<meta name="description" content="frp 内网穿透配置" />
 
 
 <!-- Website keywords -->
 
-<meta name="keywords" content="大模型, 量化, wkq&#39;s site" />
+<meta name="keywords" content="frp, 内网穿透, wkq&#39;s site" />
 
 
 
@@ -39,7 +39,7 @@
 
 
 <!-- Canonical, good for google search engine -->
-<link rel="canonical" href="https://weikangqi.github.io/大模型量化/Atom低比特权重激活以及Cache量化/" />
+<link rel="canonical" href="https://weikangqi.github.io/post/3fa21dd.html" />
 
 <!-- Fancybox styling -->
 
@@ -73,7 +73,7 @@
   window.config = {"leancloud":{"app_id":null,"app_key":null,"server_url":null,"cdn":null},"toc":true,"fancybox":true,"latex":true};
 </script>
   
-  <title>Atom低比特权重激活以及Cache量化 - wkq&#39;s site</title>
+  <title>frp 内网穿透配置 - wkq&#39;s site</title>
 
 <meta name="generator" content="Hexo 7.3.0"><style>.mjpage .MJX-monospace {
   font-family: monospace;
@@ -269,19 +269,19 @@
   <header class="post-header">
     <h1 class="post-title">
       
-      Atom低比特权重激活以及Cache量化
+      frp 内网穿透配置
       
     </h1>
 
     <div class="post-meta">
       <span class="post-time">
-        2024-11-12
+        2024-07-30
       </span>
       
       
       <span class="post-category">
         
-        <a href="/categories/LLM-%E9%87%8F%E5%8C%96/">LLM 量化</a>
+        <a href="/categories/%E5%B7%A5%E5%85%B7%E9%85%8D%E7%BD%AE/">工具配置</a>
         
       </span>
       
@@ -293,69 +293,58 @@
   <div class="post-toc" id="post-toc">
     <h2 class="post-toc-title">文章目录</h2>
     <div class="post-toc-content">
-      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-number">1.</span> <span class="toc-text">背景</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%B9%E6%B3%95"><span class="toc-number">2.</span> <span class="toc-text">方法</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84"><span class="toc-number">2.1.</span> <span class="toc-text">整体架构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B7%B7%E5%90%88%E7%B2%BE%E5%BA%A6%E9%87%8F%E5%8C%96"><span class="toc-number">2.2.</span> <span class="toc-text">混合精度量化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%86%E7%B2%92%E5%BA%A6%E7%9A%84%E5%88%86%E7%BB%84%E9%87%8F%E5%8C%96"><span class="toc-number">2.3.</span> <span class="toc-text">细粒度的分组量化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8A%A8%E6%80%81%E9%87%8F%E5%8C%96"><span class="toc-number">2.4.</span> <span class="toc-text">动态量化</span></a></li></ol></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#frp-%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F%E9%85%8D%E7%BD%AE"><span class="toc-number">1.</span> <span class="toc-text">frp 内网穿透配置</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E6%B3%A8%E5%86%8C%E8%B4%A6%E6%88%B7"><span class="toc-number">1.1.</span> <span class="toc-text">1. 注册账户</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E5%BB%BA%E7%AB%8B%E9%9A%A7%E9%81%93"><span class="toc-number">1.2.</span> <span class="toc-text">2. 建立隧道</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E6%9C%8D%E5%8A%A1%E7%AB%AF"><span class="toc-number">1.3.</span> <span class="toc-text">3. 服务端</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E5%AE%A2%E6%88%B7%E7%AB%AF"><span class="toc-number">1.4.</span> <span class="toc-text">4. 客户端</span></a></li></ol></li></ol>
     </div>
   </div>
   
 
   <div class="post-content">
     
-    <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><ol>
-<li>流行的量化方案LLM.int8(),SmoothQuant（例如 8 位权重激活量化）无法充分利用现代 GPU 的功能，例如 int4计算，从而导致性能不佳。例如，A100 GPU 可以达到 1248 TOPS（INT4）和 624 TOPS（INT8），而带有 Tensor Core 的 FP16 只能达到 312 TFLOPS。然而，INT8量化仍然无法利用低位运算，例如INT4 Tensor Core。</li>
-<li>OmniQuant等提出将 LLM 量化为 4 位，但是PPL增加很多。</li>
-</ol>
-<h1 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h1><h2 id="整体架构"><a href="#整体架构" class="headerlink" title="整体架构"></a>整体架构</h2><img src="https://s2.loli.net/2024/11/12/cG3uxMjY5TZNhQS.png" alt="image-20241112101807424" style="zoom:50%;" />
+    <h1 id="frp-内网穿透配置"><a href="#frp-内网穿透配置" class="headerlink" title="frp 内网穿透配置"></a>frp 内网穿透配置</h1><blockquote>
+<p>要放暑假了，在家需要连接实验室服务器，之前通过云主机搭建frp中转，但是云主机比较贵，所以来白嫖Sakura Frp</p>
+</blockquote>
+<h2 id="1-注册账户"><a href="#1-注册账户" class="headerlink" title="1. 注册账户"></a>1. 注册账户</h2><p>普通用户有两个隧道，限速10M,一个月有10G流量，可以每日签到获取额外的流量，不过对于ssh来讲，基本上是够用的，代码文本也消耗不了多少流量。</p>
+<h2 id="2-建立隧道"><a href="#2-建立隧道" class="headerlink" title="2. 建立隧道"></a>2. 建立隧道</h2><p>实名制后，可以点击服务来创建一个隧道，来中转服务。</p>
+<img src="https://s2.loli.net/2024/07/30/uOVJQl7mUSLnt2C.png" alt="QQ_1722343688110" style="zoom: 80%;" div align="center" />
 
-<p>主要做了</p>
+<p>这样就创建了一个隧道</p>
+<p>frp本质上做的事情就是，将两端的流量进行转发，因为两端没有公网IP，也可以使用<code>zerotier</code></p>
+<p>来打洞，但是如果NAT层比较多，延时还是比较大，在学校里面使用延时比较低，如果在家延时比较高，体验不好。</p>
+<h2 id="3-服务端"><a href="#3-服务端" class="headerlink" title="3. 服务端"></a>3. 服务端</h2><p>我把你要访问的电脑称为服务端，也就是实验室的服务器</p>
+<p>服务端需要下载frp</p>
+<p><img src="https://s2.loli.net/2024/07/30/LdeWwjQl34Tn9r7.png" alt="QQ_1722342725796"></p>
 <ul>
-<li>通道重新排序后混合精度</li>
-<li>细粒度分组量化</li>
-<li>动态激活量化以最小化量化误差</li>
-<li>KV-缓存量化</li>
+<li>击复制链接<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget 链接</span><br></pre></td></tr></table></figure></li>
+<li>将frp下载下来，使用<code>tar -xvf natfrp-service_linux_amd64.tar.zst </code>解压缩</li>
+<li><code>chmod +x ./frpc</code>来赋予可执行权限</li>
+<li>获取加密参数</li>
 </ul>
-<h2 id="混合精度量化"><a href="#混合精度量化" class="headerlink" title="混合精度量化"></a>混合精度量化</h2><img src="https://s2.loli.net/2024/11/12/3bewBxDsd1kgZ9J.png" alt="image-20241112103337042" style="zoom:50%;" />
+<p><img src="https://s2.loli.net/2024/07/30/7W1t2ougqnmKOTQ.png" alt="QQ_1722342962407"></p>
+<ul>
+<li>启动</li>
+</ul>
+<p>  <code> ./frpc -f 参数</code></p>
+<ul>
+<li>可以使用<code>systemctl</code>来管理frp的服务，包括开机自动启动，开始，暂停等</li>
+<li>nohup开控制frpc后端执行 <code>nohup ./frpc -f 参数 &gt; runoob.log 2&gt;&amp;1 &amp;</code></li>
+</ul>
+<p><img src="https://s2.loli.net/2024/07/30/IgwdNfDqC9jY7sR.png" alt="QQ_1722343190952"></p>
+<p>可以获得访问服务器的<code>ip:port</code></p>
+<h2 id="4-客户端"><a href="#4-客户端" class="headerlink" title="4. 客户端"></a>4. 客户端</h2><ul>
+<li>下载认证</li>
+</ul>
+<p><img src="https://s2.loli.net/2024/07/30/EhS36gJaFVGfLle.png" alt="QQ_1722343257332"></p>
+<img src="https://s2.loli.net/2024/07/30/LRFC9bnuv1jlDZc.png" alt="QQ_1722343281279" style="zoom: 67%; " />
 
-<p>每个通道的激活平均值，有一些通道有很大的异常值，这些值很大的影响了量化精度，论文对通道进行了重排，将这些离群通道重新排序到矩阵的末尾，并使用更高的精度（int8,FP8）来量化它们，同时保持常规的内存访问，去除异常值后，剩余通道更加均匀，可以通过低位值有效表达。Atom 对异常值应用 INT8 量化。</p>
-<p>这样会可能对内存重排，效率肯定不会高，</p>
-<p>怎么解决这个问题？</p>
-<ol>
-<li><p>为了在保持常规内存访问的同时应用混合精度量化，Atom 重新利用了RPTQ中的重新排序技术。</p>
-<p>权重矩阵的重新排序会产生一次性成本。然而，激活矩阵的重新排序仍然需要在线执行，这可能会很昂贵。</p>
-<p>为了缓解这个问题，Atom 将激活矩阵重新排序运算符融合到先前的运算符中，从而将重新排序开销显着降低到运行时的 0.5% 以下。</p>
-<img src="https://s2.loli.net/2024/11/12/GdXbKVmxIqzlouP.png" alt="image-20241112130614019" style="zoom:150%;" />
-</li>
-<li><p>为了保证计算结果的等价性，需要使用相应的激活重新排序索引对权重矩阵进行重新排序</p>
-</li>
-</ol>
-<p><img src="https://s2.loli.net/2024/11/12/HLb1wOECx2jv4pm.png" alt="image-20241112130353400"></p>
-<ol start="3">
-<li><p>RPTQ</p>
-<p>RPTQ（Reorder-based Post-training Quantization）是一种针对大型语言模型（LLMs）的量化方法，它通过重新排列激活中的通道并将它们分簇进行量化，以降低通道范围差异的影响。为了解决通道重排的耗时问题，RPTQ采取了以下策略：</p>
-<ol>
-<li><p><strong>避免显式重新排序</strong>：RPTQ通过避免在运行时显式重新排列激活中的通道来减少存储和计算开销。这种方法避免了将不同通道的数据从一个内存位置物理移动到另一个位置，从而降低了重排过程的耗时。</p>
-</li>
-<li><p><strong>权重和激活的重排序</strong>：作者重新排序了线性层的权重，使它们能够直接按照排序顺序产生激活。同时，修改了LayerNorm的方法，使其能够直接产生重新排序的激活，从而省去了在推理过程中进行显式通道调整。</p>
-</li>
-<li><p><strong>集成到层归一化操作和线性层权重中</strong>：RPTQ将通道重排集成到层归一化操作和线性层权重中，以最小化相关的开销。这种方法有效地减轻了通道范围的差异，并且通过操作融合，避免了显式重新排序的操作，使得RPTQ的开销几乎为零。</p>
-</li>
-<li><p><strong>工程优化</strong>：为了减少内存重排的开销，RPTQ提出了一些工程优化措施，例如把重排操作融入到layernorm层中，直接在layernorm刷回内存时按新排序的index进行写入。同时，调整了weight顺序，允许线性层直接接受重排的激活值，同时自身也输出重排的激活值。</p>
-</li>
-</ol>
-</li>
-</ol>
-<h2 id="细粒度的分组量化"><a href="#细粒度的分组量化" class="headerlink" title="细粒度的分组量化"></a>细粒度的分组量化</h2><ol>
-<li><p>即使 Atom 分别量化异常值和正常值，由于 4 位精度的表示能力有限，后者仍然难以准确执行。为了进一步提高精度，广泛采用组量化，它将矩阵划分为子组并在每个子组内执行量化。比如，例如，组大小为 128 意味着 128 个元素的每个连续序列都被视为单个组，该组是独立量化的。</p>
-</li>
-<li><p>并实现了一个融合GEMM算子</p>
-<img src="https://s2.loli.net/2024/11/12/i4GDZVI89Kzbjwu.png" alt="image-20241112123044039" style="zoom: 67%;" />
+<p>会生成一个exe，点击运行即可</p>
+<ul>
+<li>ssh 连接</li>
+</ul>
+<p>  注意这里ssh端口不是22</p>
+<p>  而是上面获得的那个IP和端口</p>
+  <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh -p port yourname@ip</span><br></pre></td></tr></table></figure>
 
-<p>每一分组，可以利用Tensor Core进行高效的计算，相加时，反量化为FP16，利用CUDA Core计算。</p>
-</li>
-</ol>
-<h2 id="动态量化"><a href="#动态量化" class="headerlink" title="动态量化"></a>动态量化</h2><p>如果基于校准数据静态计算量化参数，因为实际输入可能具有不同的局部分布，上面的细粒度分组量化的优势会减弱。</p>
-<p>因此，Atom采用动态量化，在推理过程中为每个激活矩阵定制量化参数。为了控制动态量化的开销，我们将量化操作融合到先验运算符中，类似于 ZeroQuant 的实现。由于附加运算符是逐元素的（具有缩减和逐元素除法），因此与耗时的密集层和自注意力层相比，融合运算符的运行时间仍然可以忽略不计。如下图LLama-7b的模型推理</p>
-<p><img src="https://s2.loli.net/2024/11/12/z1ulxikPCeFIKyU.png" alt="image-20241112124849864"></p>
-<p>为了在吞吐量和准确性之间取得平衡，我们选择对称量化并仔细选择剪辑阈值。在量化权重矩阵时，结合了 GPTQ。</p>
+<p>  这样就连接到服务器了。</p>
 
     
   </div>
@@ -370,7 +359,7 @@
   </p>
   <p class="copyright-item">
     <span>原文链接: </span>
-    <a href="https://weikangqi.github.io/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E9%87%8F%E5%8C%96/Atom%E4%BD%8E%E6%AF%94%E7%89%B9%E6%9D%83%E9%87%8D%E6%BF%80%E6%B4%BB%E4%BB%A5%E5%8F%8ACache%E9%87%8F%E5%8C%96/">https://weikangqi.github.io/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E9%87%8F%E5%8C%96/Atom%E4%BD%8E%E6%AF%94%E7%89%B9%E6%9D%83%E9%87%8D%E6%BF%80%E6%B4%BB%E4%BB%A5%E5%8F%8ACache%E9%87%8F%E5%8C%96/</a>
+    <a href="https://weikangqi.github.io/post/3fa21dd.html">https://weikangqi.github.io/post/3fa21dd.html</a>
   </p>
   <p class="copyright-item">
     <span>许可协议: </span>
@@ -388,7 +377,7 @@
     </p>
     <!-- <p class="copyright-item">
       <span>原文链接: </span>
-      <a href="https://weikangqi.github.io/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E9%87%8F%E5%8C%96/Atom%E4%BD%8E%E6%AF%94%E7%89%B9%E6%9D%83%E9%87%8D%E6%BF%80%E6%B4%BB%E4%BB%A5%E5%8F%8ACache%E9%87%8F%E5%8C%96/">https://weikangqi.github.io/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E9%87%8F%E5%8C%96/Atom%E4%BD%8E%E6%AF%94%E7%89%B9%E6%9D%83%E9%87%8D%E6%BF%80%E6%B4%BB%E4%BB%A5%E5%8F%8ACache%E9%87%8F%E5%8C%96/</a>
+      <a href="https://weikangqi.github.io/post/3fa21dd.html">https://weikangqi.github.io/post/3fa21dd.html</a>
     </p> -->
     <p class="copyright-item">
       <span>许可协议: </span>
@@ -406,24 +395,24 @@
     
     <div class="post-tags">
       
-      <a href="/tags/%E5%A4%A7%E6%A8%A1%E5%9E%8B/">大模型</a>
+      <a href="/tags/frp/">frp</a>
       
-      <a href="/tags/%E9%87%8F%E5%8C%96/">量化</a>
+      <a href="/tags/%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F/">内网穿透</a>
       
     </div>
     
       
   <nav class="post-nav">  
       
-      <a class="prev" href="/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E9%87%8F%E5%8C%96/GPTQ/">  
+      <a class="prev" href="/post/ca618d41.html">  
         <i class="iconfont icon-left"></i>  
-        <span class="prev-text nav-default">GPTQ量化-笔记</span>  
+        <span class="prev-text nav-default">ARM neon Instruction  语法</span>  
         <span class="prev-text nav-mobile">上一篇</span>  
       </a>  
       
       
-      <a class="next" href="/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E9%87%8F%E5%8C%96/KV%20cache%E9%87%8F%E5%8C%96%E4%B9%8BKVQuant/">  
-        <span class="next-text nav-default">KVQuant</span>  
+      <a class="next" href="/post/6ba3a223.html">  
+        <span class="next-text nav-default">vscode 调试coredump 文件</span>  
         <span class="prev-text nav-mobile">下一篇</span>  
         <i class="iconfont icon-right"></i>  
       </a>  

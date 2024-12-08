@@ -18,12 +18,12 @@
 
 <!-- Website description -->
 
-<meta name="description" content="SqueezeLLM的新型量化框架，旨在解决大型语言模型（LLMs）在推理部署时面临的内存带宽瓶颈问题。SqueezeLLM通过两种创新方法实现超低比特精度量化，同时保持模型性能：一是敏感度基于的非均匀量化，根据权重的二阶信息为不同权重分配最优的比特精度；二是密集-稀疏分解，将异常值以高效的稀疏格式存储" />
+<meta name="description" content="ARM neon Instruction  语法" />
 
 
 <!-- Website keywords -->
 
-<meta name="keywords" content="大模型, 量化, wkq&#39;s site" />
+<meta name="keywords" content="neon, arm, simd, wkq&#39;s site" />
 
 
 
@@ -39,7 +39,7 @@
 
 
 <!-- Canonical, good for google search engine -->
-<link rel="canonical" href="https://weikangqi.github.io/大模型量化/SqueezeLLM/" />
+<link rel="canonical" href="https://weikangqi.github.io/post/ca618d41.html" />
 
 <!-- Fancybox styling -->
 
@@ -73,7 +73,7 @@
   window.config = {"leancloud":{"app_id":null,"app_key":null,"server_url":null,"cdn":null},"toc":true,"fancybox":true,"latex":true};
 </script>
   
-  <title>SqueezeLLm量化笔记 - wkq&#39;s site</title>
+  <title>ARM neon Instruction  语法 - wkq&#39;s site</title>
 
 <meta name="generator" content="Hexo 7.3.0"><style>.mjpage .MJX-monospace {
   font-family: monospace;
@@ -269,19 +269,19 @@
   <header class="post-header">
     <h1 class="post-title">
       
-      SqueezeLLm量化笔记
+      ARM neon Instruction  语法
       
     </h1>
 
     <div class="post-meta">
       <span class="post-time">
-        2024-11-05
+        2024-11-01
       </span>
       
       
       <span class="post-category">
         
-        <a href="/categories/LLM-%E9%87%8F%E5%8C%96/">LLM 量化</a>
+        <a href="/categories/neon-%E5%AD%A6%E4%B9%A0%E7%B3%BB%E5%88%97/">neon 学习系列</a>
         
       </span>
       
@@ -293,32 +293,68 @@
   <div class="post-toc" id="post-toc">
     <h2 class="post-toc-title">文章目录</h2>
     <div class="post-toc-content">
-      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-number">1.</span> <span class="toc-text">背景</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BB%E8%A6%81%E5%B7%A5%E4%BD%9C"><span class="toc-number">2.</span> <span class="toc-text">主要工作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%B9%E6%B3%95"><span class="toc-number">3.</span> <span class="toc-text">方法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8ESensitivity%E7%9A%84%E9%9D%9E%E7%BA%BF%E6%80%A7%E9%87%8F%E5%8C%96"><span class="toc-number">3.1.</span> <span class="toc-text">基于Sensitivity的非线性量化</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Dense-and-Sparse-Quantization"><span class="toc-number">4.</span> <span class="toc-text">Dense-and-Sparse Quantization</span></a></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#NEON-data-types"><span class="toc-number">1.</span> <span class="toc-text">NEON data types</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Instruction-modifiers"><span class="toc-number">2.</span> <span class="toc-text">Instruction modifiers</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Instruction-shape"><span class="toc-number">3.</span> <span class="toc-text">Instruction shape</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#None-specified"><span class="toc-number">3.1.</span> <span class="toc-text">None specified</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Long-L"><span class="toc-number">3.2.</span> <span class="toc-text">Long - L</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Narrow-N"><span class="toc-number">3.3.</span> <span class="toc-text">Narrow - N</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Wide-W"><span class="toc-number">3.4.</span> <span class="toc-text">Wide - W</span></a></li></ol></li></ol>
     </div>
   </div>
   
 
   <div class="post-content">
     
-    <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>​	大模型推理的瓶颈主要在于内存带宽，量化是比较好的解决办法，其中模型参数以较低的精度存储，而不是用于训练的典型 16 或 32 位精度。而且证明LLM模型可以以8位精度存储而不会降低性能，其中8位量化不仅将存储要求提高了一半，而且还有可能提高性能推理延迟和吞吐量。</p>
-<p>​	相比较于GPTQ，它使用免训练量化技术，为具有超过数百亿个参数的 LLM 模型实现近乎无损的 4 位量化。然而，实现高量化性能仍然具有挑战性，特别是对于<strong>较低位精度和相对较小的模型</strong>（例如，&lt; 50B 参数）。</p>
-<p><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2306.07629">SqueezeLLM: Dense-and-Sparse Quantization | PDF</a></p>
-<h2 id="主要工作"><a href="#主要工作" class="headerlink" title="主要工作"></a>主要工作</h2><ul>
-<li>基于Sensitivity的非线性量化<br>&emsp;因为LLM权重分布表现出明显的不均匀模式，之前的推理计算并未完全受益于统一量化，因为算术是以 FP16 精度执行的（W？A16），而不是以降精度执行的（W？A？）非线性量化不支持用于计算加速的整数运算，但这个缺点对于内存限制问题并不重要，因为主要瓶颈在于内存带宽而不是计算。</li>
-<li>提出混合量化<br>&emsp;将异常值（Sparse 部分）保存为fp16，其他（Dense部分）保存为低bit值，这样在低bit下更好量化</li>
-</ul>
-<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><h3 id="基于Sensitivity的非线性量化"><a href="#基于Sensitivity的非线性量化" class="headerlink" title="基于Sensitivity的非线性量化"></a>基于Sensitivity的非线性量化</h3><p>寻找最佳非均匀量化配置可转化为解决 k-means 问题，给定权重分布，目标是确定最能代表分布的 k 个中心点，</p>
-<p>比如3bit量化，$k &#x3D; 8$ ，可以表示为：<br>$$<br>Q(w)^* &#x3D; \arg \min_Q | W - W_Q |_2^2<br>$$<br>虽然这已经优于均匀量化，下面是改进的基于Sensitivity的聚类算法。</p>
-<p>量化目标是以低比特精度表示模型权重，同时将模型输出的扰动降至最低，虽然量化会对每一层产生扰动，但我们需要尽量减少整体扰动，因为它能更直接地衡量量化后端到端性能的下降情况。为此，我们需要将 k-means 中心点放在对最终损失更敏感的值附近，而不是对所有权重值一视同仁，为了确定更敏感的值，我们进行了泰勒扩展，以分析损失是如何随权重 W 的扰动而变化的。<br>$$<br>L(W_Q) \approx L(W) - g^\top (W - W_Q) + \frac{1}{2} (W - W_Q)^\top H (W - W_Q)<br>$$<br>$g$ 是梯度，$H$ 是W损失的海森矩阵。模型收敛的话，可以认为$g $ 等于0<br>$$<br>Q(w)^* &#x3D; \arg \min_{Q} (W - W_Q)^\top H (W - W_Q)<br>$$<br>量化后每个权重的扰动是由二阶导数引入的比例因子加权得出，这凸显了对 Hessian 值较大的权重最小化扰动的重要性，因为它们对最终输出的整体扰动影响更大。换句话说，二阶导数可以衡量每个权重值的重要性。</p>
-<p>由于计算 Hessian 的成本较高，使用基于费雪信息矩阵 F 的 Hessian 近似值、可通过样本数据集 D 计算得出。为了提高可行性，我们进一步将费舍尔信息矩阵近似为对角矩阵，假定交叉权重的相互作用可以忽略不计。这样，我们的目标就简化为<br>$$<br>Q(w)^* \sim \arg \min_Q (W - W_Q)^\top \text{diag}(\mathcal{F})(W - W_Q)<br>$$<br>结果就是，在加权 K 均值聚类设置中，中心点会被拉近到这些敏感的权重值。</p>
-<img src="https://s2.loli.net/2024/11/05/r2sHwgJk3IfV8EM.png" alt="image-20241105192156518" style="zoom:50%;" />
+    <p><code>V&#123;&lt;mod&gt;&#125;&lt;op&gt; &#123;&lt;shape&gt;&#125;&#123;&lt;cond&gt;&#125;&#123;.&lt;dt&gt;&#125; &lt;dest1&gt;&#123;,&lt;dest2&gt;&#125;,&lt;src1&gt;&#123;, &lt;src2&gt;&#125;</code></p>
+<h2 id="NEON-data-types"><a href="#NEON-data-types" class="headerlink" title="NEON data types"></a>NEON data types</h2><p><img src="https://s2.loli.net/2024/03/20/LAVQ9wC6T4RnlHy.png" alt="20240320100728"></p>
+<h2 id="Instruction-modifiers"><a href="#Instruction-modifiers" class="headerlink" title="Instruction modifiers"></a>Instruction modifiers</h2><p>对于某些指令，可以指定一个修饰符，用以改变操作的行为。</p>
+<table>
+<thead>
+<tr>
+<th>修饰符</th>
+<th>行为</th>
+<th>例子</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>None</td>
+<td>Basic opeartion</td>
+<td>VADD.16 Q0, Q1,Q2</td>
+<td>结果不会被修改</td>
+</tr>
+<tr>
+<td>Q</td>
+<td>Saturation (饱和)</td>
+<td>VQADD.S16 D0, D2,D3</td>
+<td>结果向量中的每个元素如果超出可表示范围，则设为最大值或最小值。范围取决于元素的类型（位数和符号）。如果任何通道发生饱和，浮点状态与控制寄存器（FPSCR）中的粘性 QC 位将被设置。</td>
+</tr>
+<tr>
+<td>H</td>
+<td>Halved (减半)</td>
+<td>VHADD.S16 Q0, Q1,Q4</td>
+<td>每个元素向右移动一位（实际上是截断后的除以二）。VHADD 可用于计算两个输入的平均值。</td>
+</tr>
+<tr>
+<td>D</td>
+<td>Doubled before saturation</td>
+<td>VQDMULL.S16 Q0, D1, D3</td>
+<td>这在以 Q15 格式相乘时常常需要，需要额外加倍以将结果转换为正确的形式。</td>
+</tr>
+<tr>
+<td>R</td>
+<td>Rounded (四舍五入)</td>
+<td>VRSUBHN.I16 D0, Q1, Q3</td>
+<td>该指令对结果进行四舍五入，以纠正截断所引起的偏差。这相当于在截断之前向结果加上0.5。</td>
+</tr>
+</tbody></table>
+<h2 id="Instruction-shape"><a href="#Instruction-shape" class="headerlink" title="Instruction shape"></a>Instruction shape</h2><p>结果向量和操作数向量具有相同数量的元素。然而，结果中元素的数据类型可以与一个或多个操作数中的元素的数据类型不同。因此，结果的寄存器大小也可能与一个或多个操作数的寄存器大小不同。寄存器大小之间的这种关系由形状描述。对于某些指令，您可以指定一个形状。NEON数据处理指令通常有普通、长、宽、窄和饱和变体。</p>
+<h3 id="None-specified"><a href="#None-specified" class="headerlink" title="None specified"></a>None specified</h3><p>操作数和结果都是相同的宽度。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">VADD.I16 Q0, Q1, Q2</span><br></pre></td></tr></table></figure>
 
-<p>上面是原始分布，以及20个敏感值，下面图，绿色是线性量化，紫色是基于敏感值的非线性量化。</p>
-<p>可以看出基于敏感值的非线性量化，能更好的与敏感值分布接近。</p>
-<h2 id="Dense-and-Sparse-Quantization"><a href="#Dense-and-Sparse-Quantization" class="headerlink" title="Dense-and-Sparse Quantization"></a>Dense-and-Sparse Quantization</h2><p><img src="https://s2.loli.net/2024/11/05/JKIbfm6dzqjRMDF.png" alt="image-20241105192612376"></p>
-<p>左右分别是 MHA 的输出层和 FFN 的down project输出，可以看出99%的值在很小的分布区间（&lt;10%的区间）</p>
-<p>简单地量化大范围的权重会显着降低性能，尤其是在低精度的情况下。只需删除少量异常值，权重值的范围就可以缩小 10 倍，量化分粒度显着提高。而且这将有助于基于敏感值的 k 均值中心集更多地关注敏感值，而不是少数异常值。</p>
-<p>于是将权重矩阵根据阈值分为Sparse（也就是包含异常值的部分）和Dense两部分，因为Sparse很少，不会影响推理效率。这些值可以根据 费雪信息矩阵轻松识别。这不仅可以保持 FP16 的异常值以避免它们对模型输出的影响，而且还可以防止方程的质心避免偏向这些异常值。</p>
+<h3 id="Long-L"><a href="#Long-L" class="headerlink" title="Long - L"></a>Long - L</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">VADDL.S16 Q0, D2, D3</span><br></pre></td></tr></table></figure>
+<p>长指令通常操作双字向量并产生四倍字长向量。结果元素的宽度是操作数元素宽度的两倍。通过在指令后附加 L 来指定长指令。Q是D的两倍。</p>
+<p><img src="https://s2.loli.net/2024/03/20/3qcnPt1CWsS9Jya.png" alt="20240320094905"></p>
+<h3 id="Narrow-N"><a href="#Narrow-N" class="headerlink" title="Narrow - N"></a>Narrow - N</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">VADDHN.I16 D0, Q1, Q2</span><br></pre></td></tr></table></figure>
+<p>操作数具有相同的宽度。每个结果元素中的位数是每个操作数元素中位数的一半。<br><img src="https://s2.loli.net/2024/03/20/JrysBQZhAKGoE39.png" alt="20240320100137"></p>
+<h3 id="Wide-W"><a href="#Wide-W" class="headerlink" title="Wide - W"></a>Wide - W</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">VADDW.I16 Q0, Q1, D4</span><br></pre></td></tr></table></figure>
+<p>结果和操作数的宽度是第二个操作数的两倍。Q0,Q1是D4的两倍</p>
+<p><img src="https://s2.loli.net/2024/03/20/Hn7rY2LcRS9ZViK.png" alt="20240320100339"></p>
 
     
   </div>
@@ -333,7 +369,7 @@
   </p>
   <p class="copyright-item">
     <span>原文链接: </span>
-    <a href="https://weikangqi.github.io/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E9%87%8F%E5%8C%96/SqueezeLLM/">https://weikangqi.github.io/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E9%87%8F%E5%8C%96/SqueezeLLM/</a>
+    <a href="https://weikangqi.github.io/post/ca618d41.html">https://weikangqi.github.io/post/ca618d41.html</a>
   </p>
   <p class="copyright-item">
     <span>许可协议: </span>
@@ -351,7 +387,7 @@
     </p>
     <!-- <p class="copyright-item">
       <span>原文链接: </span>
-      <a href="https://weikangqi.github.io/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E9%87%8F%E5%8C%96/SqueezeLLM/">https://weikangqi.github.io/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E9%87%8F%E5%8C%96/SqueezeLLM/</a>
+      <a href="https://weikangqi.github.io/post/ca618d41.html">https://weikangqi.github.io/post/ca618d41.html</a>
     </p> -->
     <p class="copyright-item">
       <span>许可协议: </span>
@@ -369,24 +405,26 @@
     
     <div class="post-tags">
       
-      <a href="/tags/%E5%A4%A7%E6%A8%A1%E5%9E%8B/">大模型</a>
+      <a href="/tags/neon/">neon</a>
       
-      <a href="/tags/%E9%87%8F%E5%8C%96/">量化</a>
+      <a href="/tags/arm/">arm</a>
+      
+      <a href="/tags/simd/">simd</a>
       
     </div>
     
       
   <nav class="post-nav">  
       
-      <a class="prev" href="/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E9%87%8F%E5%8C%96/KV%20cache%E9%87%8F%E5%8C%96%E4%B9%8BKVQuant/">  
+      <a class="prev" href="/post/2949e6de.html">  
         <i class="iconfont icon-left"></i>  
-        <span class="prev-text nav-default">KVQuant</span>  
+        <span class="prev-text nav-default">ARM neon 指令 （Android）代码环境配置</span>  
         <span class="prev-text nav-mobile">上一篇</span>  
       </a>  
       
       
-      <a class="next" href="/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E9%87%8F%E5%8C%96/KV%20cache%E9%87%8F%E5%8C%96%E4%B9%8BKIVI/">  
-        <span class="next-text nav-default">KV cache 量化之KIVI</span>  
+      <a class="next" href="/post/3fa21dd.html">  
+        <span class="next-text nav-default">frp 内网穿透配置</span>  
         <span class="prev-text nav-mobile">下一篇</span>  
         <i class="iconfont icon-right"></i>  
       </a>  

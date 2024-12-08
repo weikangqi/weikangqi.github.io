@@ -18,12 +18,12 @@
 
 <!-- Website description -->
 
-<meta name="description" content="Linux 中使用adb 连接手机" />
+<meta name="description" content="使用LLDB 远程调试 安卓native C++ 程序的vscode 配置" />
 
 
 <!-- Website keywords -->
 
-<meta name="keywords" content="linux, adb, wkq&#39;s site" />
+<meta name="keywords" content="linux, adb, LLDB, android, Debug, wkq&#39;s site" />
 
 
 
@@ -39,7 +39,7 @@
 
 
 <!-- Canonical, good for google search engine -->
-<link rel="canonical" href="https://weikangqi.github.io/a/android gdb 调试/" />
+<link rel="canonical" href="https://weikangqi.github.io/post/fad8c362.html" />
 
 <!-- Fancybox styling -->
 
@@ -73,7 +73,7 @@
   window.config = {"leancloud":{"app_id":null,"app_key":null,"server_url":null,"cdn":null},"toc":true,"fancybox":true,"latex":true};
 </script>
   
-  <title>Linux 中使用adb 连接手机 - wkq&#39;s site</title>
+  <title>使用LLDB 远程调试 安卓native C++ 程序的vscode 配置 - wkq&#39;s site</title>
 
 <meta name="generator" content="Hexo 7.3.0"><style>.mjpage .MJX-monospace {
   font-family: monospace;
@@ -269,7 +269,7 @@
   <header class="post-header">
     <h1 class="post-title">
       
-      Linux 中使用adb 连接手机
+      使用LLDB 远程调试 安卓native C++ 程序的vscode 配置
       
     </h1>
 
@@ -287,16 +287,33 @@
   <div class="post-toc" id="post-toc">
     <h2 class="post-toc-title">文章目录</h2>
     <div class="post-toc-content">
-      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Linux-%E4%B8%AD%E4%BD%BF%E7%94%A8adb-%E8%BF%9E%E6%8E%A5%E6%89%8B%E6%9C%BA"><span class="toc-number">1.</span> <span class="toc-text">Linux 中使用adb 连接手机</span></a></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8LLDB-%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95-%E5%AE%89%E5%8D%93native-C-%E7%A8%8B%E5%BA%8F%E7%9A%84vscode-%E9%85%8D%E7%BD%AE"><span class="toc-number">1.</span> <span class="toc-text">使用LLDB 远程调试 安卓native C++ 程序的vscode 配置</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-number">1.1.</span> <span class="toc-text">背景</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%B8%E5%85%B3%E9%85%8D%E7%BD%AE"><span class="toc-number">1.2.</span> <span class="toc-text">相关配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BB%BA%E8%AE%AE"><span class="toc-number">1.3.</span> <span class="toc-text">建议</span></a></li></ol></li></ol>
     </div>
   </div>
   
 
   <div class="post-content">
     
-    <h1 id="Linux-中使用adb-连接手机"><a href="#Linux-中使用adb-连接手机" class="headerlink" title="Linux 中使用adb 连接手机"></a>Linux 中使用adb 连接手机</h1><p>在做实验时，使用linux服务器连接手机，一直出现 connect 后，手机直接 offline 的情况。<br>解决： 不能使用<code>sudo apt install adb</code> 安装adb，来连接手机。<br>解决方法：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> cli-tools</span><br><span class="line">wget -c https://dl.google.com/android/repository/platform-tools-latest-linux.zip</span><br><span class="line">unzip platform-tools-latest-linux.zip </span><br><span class="line"><span class="built_in">cd</span> platform-tools/</span><br><span class="line">./adb connect yourIP:Port</span><br></pre></td></tr></table></figure>
-
+    <h1 id="使用LLDB-远程调试-安卓native-C-程序的vscode-配置"><a href="#使用LLDB-远程调试-安卓native-C-程序的vscode-配置" class="headerlink" title="使用LLDB 远程调试 安卓native C++ 程序的vscode 配置"></a>使用LLDB 远程调试 安卓native C++ 程序的vscode 配置</h1><h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>我目前使用windows ssh连接到linux 服务器上,对android native C++代码进行编写,编译(因为服务器核心数量多,编译速度快). 目前高版本的NDK如r26等,已经不再对gdbserver 提供支撑, 所以迁移到LLDB调试,也是主流的技术方向.</p>
+<h2 id="相关配置"><a href="#相关配置" class="headerlink" title="相关配置"></a>相关配置</h2><ol>
+<li>安装vscode 插件<br>CodeLLDB<br><img src="https://s2.loli.net/2024/03/11/pFxMIkRtHvYUyBL.png" alt="20240311140633"></li>
+<li>下载NDK<br><a target="_blank" rel="noopener" href="https://developer.android.com/ndk/downloads?hl=zh-cn">NDK下载网站链接</a><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">wget https://dl.google.com/android/repository/android-ndk-r26c-linux.zip?hl=zh-cn</span><br><span class="line">unzip android-ndk-r26c-linux.zip\?hl\=zh-cn</span><br><span class="line"></span><br></pre></td></tr></table></figure></li>
+<li>adb 上传lldb-server <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span>  android-ndk-r26c</span><br><span class="line">find ./ -name <span class="string">&quot;lldb-server&quot;</span></span><br></pre></td></tr></table></figure>
+ <img src="https://s2.loli.net/2024/03/11/1X3Hesi5EPVQ9oy.png" alt="20240311141315"><br> 选取aarch64 版本的lldb-server <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">adb push ./toolchains/llvm/prebuilt/linux-x86_64/lib/clang/17/lib/linux/aarch64/lldb-server /data/local/tmp</span><br><span class="line">adb shell <span class="string">&quot;chmod +xrw /data/local/tmp/lldb-server&quot;</span></span><br></pre></td></tr></table></figure></li>
+<li>启动lldb-server<br><code>lldb-server platform --server --listen *:9999</code> 端口可以自己选,不冲突就行</li>
+<li>配置vscode 的launch.json 文件<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Remote launch&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;lldb&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;request&quot;</span><span class="punctuation">:</span> <span class="string">&quot;launch&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;program&quot;</span><span class="punctuation">:</span> <span class="string">&quot;$&#123;workspaceFolder&#125;/build/debuggee&quot;</span><span class="punctuation">,</span> <span class="comment">// Local path. </span></span><br><span class="line">    <span class="attr">&quot;initCommands&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">        <span class="string">&quot;platform select &lt;platform&gt;&quot;</span><span class="punctuation">,</span> <span class="comment">// For example: &#x27;remote-linux&#x27;, &#x27;remote-macosx&#x27;, &#x27;remote-android&#x27;, etc.</span></span><br><span class="line">        <span class="string">&quot;platform connect connect://&lt;remote_host&gt;:&lt;port&gt;&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="string">&quot;settings set target.inherit-env false&quot;</span><span class="punctuation">,</span> <span class="comment">// See note below.</span></span><br><span class="line">    <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;env&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;PATH&quot;</span><span class="punctuation">:</span> <span class="string">&quot;xxx&quot;</span><span class="punctuation">,</span> <span class="comment">// remote 的path</span></span><br><span class="line">        <span class="attr">&quot;LD_LIBRARY_PATH&quot;</span><span class="punctuation">:</span> <span class="string">&quot;/data/local/tmp/code&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;args&quot;</span><span class="punctuation">:</span><span class="punctuation">[</span></span><br><span class="line">        <span class="string">&quot;/data/local/tmp/code/pose.mnn&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="string">&quot;/data/local/tmp/code/input.png&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="string">&quot;/data/local/tmp/code/out.png&quot;</span></span><br><span class="line">    <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;breakpointMode&quot;</span><span class="punctuation">:</span> <span class="string">&quot;file&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+ 有几个点需要注意<ul>
+<li>program 是linux本地的路径,不是在remote手机上的路径</li>
+<li>args 是程序运行时的参数,如果需要路径,是remote上的路径</li>
+<li>env 配置的是remote上运行的env,比如链接库地址,PATH等</li>
+<li>breakpointMode 设置为file就行</li>
+</ul>
+</li>
+</ol>
+<h2 id="建议"><a href="#建议" class="headerlink" title="建议"></a>建议</h2><ul>
+<li>如果配置不成功,首先不使用vscode插件,在自己的电脑上命令行能够启动LLDB,LLDB-server和调试native c++程序.</li>
+<li>codeLLDB 使用的是自己的lldb,需要检查该lldb能够正常运行和调试<br><img src="https://s2.loli.net/2024/03/11/i1LOAze2saZJ6VK.png" alt="20240311142552"></li>
+</ul>
 
     
   </div>
@@ -311,7 +328,7 @@
   </p>
   <p class="copyright-item">
     <span>原文链接: </span>
-    <a href="https://weikangqi.github.io/a/android%20gdb%20%E8%B0%83%E8%AF%95/">https://weikangqi.github.io/a/android%20gdb%20%E8%B0%83%E8%AF%95/</a>
+    <a href="https://weikangqi.github.io/post/fad8c362.html">https://weikangqi.github.io/post/fad8c362.html</a>
   </p>
   <p class="copyright-item">
     <span>许可协议: </span>
@@ -329,7 +346,7 @@
     </p>
     <!-- <p class="copyright-item">
       <span>原文链接: </span>
-      <a href="https://weikangqi.github.io/a/android%20gdb%20%E8%B0%83%E8%AF%95/">https://weikangqi.github.io/a/android%20gdb%20%E8%B0%83%E8%AF%95/</a>
+      <a href="https://weikangqi.github.io/post/fad8c362.html">https://weikangqi.github.io/post/fad8c362.html</a>
     </p> -->
     <p class="copyright-item">
       <span>许可协议: </span>
@@ -351,23 +368,23 @@
       
       <a href="/tags/adb/">adb</a>
       
+      <a href="/tags/LLDB/">LLDB</a>
+      
+      <a href="/tags/android/">android</a>
+      
+      <a href="/tags/Debug/">Debug</a>
+      
     </div>
     
       
   <nav class="post-nav">  
       
-      <a class="prev" href="/mali/mail_gpu_%E5%88%9D%E6%8E%A2/">  
+      <a class="prev" href="/post/b07bb7d4.html">  
         <i class="iconfont icon-left"></i>  
-        <span class="prev-text nav-default">Mali GPU 初探</span>  
+        <span class="prev-text nav-default">Linux 中使用adb 连接手机</span>  
         <span class="prev-text nav-mobile">上一篇</span>  
       </a>  
       
-      
-      <a class="next" href="/a/%E4%BD%BF%E7%94%A8LLDB%20%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95android/">  
-        <span class="next-text nav-default">使用LLDB 远程调试 安卓native C++ 程序的vscode 配置</span>  
-        <span class="prev-text nav-mobile">下一篇</span>  
-        <i class="iconfont icon-right"></i>  
-      </a>  
       
   </nav>  
   

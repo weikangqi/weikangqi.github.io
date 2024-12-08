@@ -18,12 +18,12 @@
 
 <!-- Website description -->
 
-<meta name="description" content="ARM neon Instruction  语法" />
+<meta name="description" content="KV cache 量化之KIVI" />
 
 
 <!-- Website keywords -->
 
-<meta name="keywords" content="neon, arm, simd, wkq&#39;s site" />
+<meta name="keywords" content="大模型, 量化, wkq&#39;s site" />
 
 
 
@@ -39,7 +39,7 @@
 
 
 <!-- Canonical, good for google search engine -->
-<link rel="canonical" href="https://weikangqi.github.io/neon/neon Instruction 语法/" />
+<link rel="canonical" href="https://weikangqi.github.io/post/1a87fd41.html" />
 
 <!-- Fancybox styling -->
 
@@ -73,7 +73,7 @@
   window.config = {"leancloud":{"app_id":null,"app_key":null,"server_url":null,"cdn":null},"toc":true,"fancybox":true,"latex":true};
 </script>
   
-  <title>ARM neon Instruction  语法 - wkq&#39;s site</title>
+  <title>KV cache 量化之KIVI - wkq&#39;s site</title>
 
 <meta name="generator" content="Hexo 7.3.0"><style>.mjpage .MJX-monospace {
   font-family: monospace;
@@ -269,19 +269,19 @@
   <header class="post-header">
     <h1 class="post-title">
       
-      ARM neon Instruction  语法
+      KV cache 量化之KIVI
       
     </h1>
 
     <div class="post-meta">
       <span class="post-time">
-        2024-11-01
+        2024-11-04
       </span>
       
       
       <span class="post-category">
         
-        <a href="/categories/neon-%E5%AD%A6%E4%B9%A0%E7%B3%BB%E5%88%97/">neon 学习系列</a>
+        <a href="/categories/LLM-%E9%87%8F%E5%8C%96/">LLM 量化</a>
         
       </span>
       
@@ -293,68 +293,41 @@
   <div class="post-toc" id="post-toc">
     <h2 class="post-toc-title">文章目录</h2>
     <div class="post-toc-content">
-      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#NEON-data-types"><span class="toc-number">1.</span> <span class="toc-text">NEON data types</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Instruction-modifiers"><span class="toc-number">2.</span> <span class="toc-text">Instruction modifiers</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Instruction-shape"><span class="toc-number">3.</span> <span class="toc-text">Instruction shape</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#None-specified"><span class="toc-number">3.1.</span> <span class="toc-text">None specified</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Long-L"><span class="toc-number">3.2.</span> <span class="toc-text">Long - L</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Narrow-N"><span class="toc-number">3.3.</span> <span class="toc-text">Narrow - N</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Wide-W"><span class="toc-number">3.4.</span> <span class="toc-text">Wide - W</span></a></li></ol></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-number">1.</span> <span class="toc-text">背景</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#per-token-and-per-channel-quantization"><span class="toc-number">1.1.</span> <span class="toc-text">per-token and per-channel quantization</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Attention-Inference-Time-Workflow"><span class="toc-number">1.2.</span> <span class="toc-text">Attention Inference-Time Workflow</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Motivation"><span class="toc-number">2.</span> <span class="toc-text">Motivation</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88K-T%EF%BC%8CV-C%E7%9A%84%E6%96%B9%E5%BC%8F%E6%9C%80%E5%A5%BD"><span class="toc-number">3.</span> <span class="toc-text">为什么K-T，V-C的方式最好</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%87%8F%E5%8C%96%E5%AE%9E%E7%8E%B0"><span class="toc-number">4.</span> <span class="toc-text">量化实现</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%B9%E6%B3%95"><span class="toc-number">4.1.</span> <span class="toc-text">方法</span></a></li></ol></li></ol>
     </div>
   </div>
   
 
   <div class="post-content">
     
-    <p><code>V&#123;&lt;mod&gt;&#125;&lt;op&gt; &#123;&lt;shape&gt;&#125;&#123;&lt;cond&gt;&#125;&#123;.&lt;dt&gt;&#125; &lt;dest1&gt;&#123;,&lt;dest2&gt;&#125;,&lt;src1&gt;&#123;, &lt;src2&gt;&#125;</code></p>
-<h2 id="NEON-data-types"><a href="#NEON-data-types" class="headerlink" title="NEON data types"></a>NEON data types</h2><p><img src="https://s2.loli.net/2024/03/20/LAVQ9wC6T4RnlHy.png" alt="20240320100728"></p>
-<h2 id="Instruction-modifiers"><a href="#Instruction-modifiers" class="headerlink" title="Instruction modifiers"></a>Instruction modifiers</h2><p>对于某些指令，可以指定一个修饰符，用以改变操作的行为。</p>
-<table>
-<thead>
-<tr>
-<th>修饰符</th>
-<th>行为</th>
-<th>例子</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>None</td>
-<td>Basic opeartion</td>
-<td>VADD.16 Q0, Q1,Q2</td>
-<td>结果不会被修改</td>
-</tr>
-<tr>
-<td>Q</td>
-<td>Saturation (饱和)</td>
-<td>VQADD.S16 D0, D2,D3</td>
-<td>结果向量中的每个元素如果超出可表示范围，则设为最大值或最小值。范围取决于元素的类型（位数和符号）。如果任何通道发生饱和，浮点状态与控制寄存器（FPSCR）中的粘性 QC 位将被设置。</td>
-</tr>
-<tr>
-<td>H</td>
-<td>Halved (减半)</td>
-<td>VHADD.S16 Q0, Q1,Q4</td>
-<td>每个元素向右移动一位（实际上是截断后的除以二）。VHADD 可用于计算两个输入的平均值。</td>
-</tr>
-<tr>
-<td>D</td>
-<td>Doubled before saturation</td>
-<td>VQDMULL.S16 Q0, D1, D3</td>
-<td>这在以 Q15 格式相乘时常常需要，需要额外加倍以将结果转换为正确的形式。</td>
-</tr>
-<tr>
-<td>R</td>
-<td>Rounded (四舍五入)</td>
-<td>VRSUBHN.I16 D0, Q1, Q3</td>
-<td>该指令对结果进行四舍五入，以纠正截断所引起的偏差。这相当于在截断之前向结果加上0.5。</td>
-</tr>
-</tbody></table>
-<h2 id="Instruction-shape"><a href="#Instruction-shape" class="headerlink" title="Instruction shape"></a>Instruction shape</h2><p>结果向量和操作数向量具有相同数量的元素。然而，结果中元素的数据类型可以与一个或多个操作数中的元素的数据类型不同。因此，结果的寄存器大小也可能与一个或多个操作数的寄存器大小不同。寄存器大小之间的这种关系由形状描述。对于某些指令，您可以指定一个形状。NEON数据处理指令通常有普通、长、宽、窄和饱和变体。</p>
-<h3 id="None-specified"><a href="#None-specified" class="headerlink" title="None specified"></a>None specified</h3><p>操作数和结果都是相同的宽度。</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">VADD.I16 Q0, Q1, Q2</span><br></pre></td></tr></table></figure>
+    <p>高效地服务大型语言模型 (LLM) 需要对许多请求进行批处理，以降低每个请求的成本。然而，随着批量大小和上下文长度的增加，存储注意力键和值以避免重新计算的键值（KV）缓存显着增加了内存需求，并成为速度和内存使用的新瓶颈。此外，KV缓存的加载会导致计算核心空闲，从而限制了推理速度。减少 KV 缓存大小的一个直接有效的解决方案是量化，这会减少 KV 缓存占用的总字节数。然而，缺乏深入研究KV缓存的元素分布来了解KV缓存量化的难度和局限性。</p>
+<p><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2402.02750">KIVI: A Tuning-Free Asymmetric 2bit Quantization for KV Cache | PDF</a></p>
+<h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><h2 id="per-token-and-per-channel-quantization"><a href="#per-token-and-per-channel-quantization" class="headerlink" title="per-token and per-channel quantization"></a>per-token and per-channel quantization</h2><img src="https://s2.loli.net/2024/11/04/ta69MmdWl2STDpE.png" alt="image-20241104102212250" style="zoom: 67%;" />
 
-<h3 id="Long-L"><a href="#Long-L" class="headerlink" title="Long - L"></a>Long - L</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">VADDL.S16 Q0, D2, D3</span><br></pre></td></tr></table></figure>
-<p>长指令通常操作双字向量并产生四倍字长向量。结果元素的宽度是操作数元素宽度的两倍。通过在指令后附加 L 来指定长指令。Q是D的两倍。</p>
-<p><img src="https://s2.loli.net/2024/03/20/3qcnPt1CWsS9Jya.png" alt="20240320094905"></p>
-<h3 id="Narrow-N"><a href="#Narrow-N" class="headerlink" title="Narrow - N"></a>Narrow - N</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">VADDHN.I16 D0, Q1, Q2</span><br></pre></td></tr></table></figure>
-<p>操作数具有相同的宽度。每个结果元素中的位数是每个操作数元素中位数的一半。<br><img src="https://s2.loli.net/2024/03/20/JrysBQZhAKGoE39.png" alt="20240320100137"></p>
-<h3 id="Wide-W"><a href="#Wide-W" class="headerlink" title="Wide - W"></a>Wide - W</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">VADDW.I16 Q0, Q1, D4</span><br></pre></td></tr></table></figure>
-<p>结果和操作数的宽度是第二个操作数的两倍。Q0,Q1是D4的两倍</p>
-<p><img src="https://s2.loli.net/2024/03/20/Hn7rY2LcRS9ZViK.png" alt="20240320100339"></p>
+<ul>
+<li>per-token量化，将每一个token做为量化的单位</li>
+<li>per-channel量化，将token中的channel作为量化单位</li>
+</ul>
+<h2 id="Attention-Inference-Time-Workflow"><a href="#Attention-Inference-Time-Workflow" class="headerlink" title="Attention Inference-Time Workflow"></a>Attention Inference-Time Workflow</h2><p>在Prefill 阶段，例如一个输入$\mathbf{X} \in \mathbb{R}^{b \times l_{\text{prompt}} \times d}$,$b$ 是batch size，$l_{prompt}$是输入的prompt词序列长度，$d$ 是hidden size,<br>$$<br>X_{K} &#x3D;XW_{K} \\<br>X_{V}&#x3D;XW_{V}<br>$$<br>$W_{K},W_{V}\in \mathbb{R}^{d \times d}$,$W_{K},W_{V}$是对应的权重。获得$X_{K},X_{V}$​后需要缓存，也就是KVCache。</p>
+<p>在Decoding 阶段，输入token的embedding  $t \in \mathbb{R}^{b \times 1 \times d}$， 那么<br>$$<br>t_{K} &#x3D; tW_{K} \\<br>t_{V} &#x3D; tW_{V} \\<br>$$<br><strong>更新KVCache</strong><br>$$<br>X_{K} &#x3D; Concat(X_{K},t_{K}) \\<br>X_{V} &#x3D; Concat(X_{V},t_{V})\\<br>$$</p>
+<p>然后计算attention的输出</p>
+<h1 id="Motivation"><a href="#Motivation" class="headerlink" title="Motivation"></a>Motivation</h1><img src="https://s2.loli.net/2024/11/04/gqpHD8a61tmMPAf.png" alt="image-20241104104250311" style="zoom:50%;" />
+
+<p>可以看到在4bit量化时，K，V按照per-token的方法，在CoQA以及TruthfulQA可以保持精度，但是2bit量化时，精度会崩塌。</p>
+<p><strong>KIVI的目的是解决KVCache 2bit的量化问题。</strong></p>
+<p>从表中可以看出，最好的方法是K按照per-channel,而V按照per-token</p>
+<h1 id="为什么K-T，V-C的方式最好"><a href="#为什么K-T，V-C的方式最好" class="headerlink" title="为什么K-T，V-C的方式最好"></a>为什么K-T，V-C的方式最好</h1><p>量化嘛，肯定是要看数据的分布</p>
+<p><img src="https://s2.loli.net/2024/11/04/vVxG7M9XbdtzZYS.png" alt="image-20241104105542985"></p>
+<p>从上面图中可以看出KVCache中的数据分布。</p>
+<p>对于Key_Cache, 不同的token分布情况类似，异常值集中再特定的几个channel中</p>
+<p>对于Value_Cache,整体数据分布比较平缓</p>
+<h1 id="量化实现"><a href="#量化实现" class="headerlink" title="量化实现"></a>量化实现</h1><p><strong>KVCache 与普通量化的不同</strong>: KVCache是一个stream,会随着上下文增加而增加。不像权重量化，是固定大小，不随着推理变化而变化。</p>
+<p>Per-token的方式，可以很好解决和规避增长的问题，每次增加一个token的数据，只用对新增的token数据单独量化，与之前的Cache互不影响。</p>
+<p>Per-Channel的方式，问题在于量化的数据一直在增长，比如token增加，channel的长度也会增加。</p>
+<p>对于K Per-token量化，对于V Per-Channel量化，重要的是怎么解决Per-Channel的问题。</p>
+<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><p>将每个K cache，进行分组每G个token一组，进行分组量化。余剩下的进行单独量化。<br>$$<br>group\_part \ X_{K_{g}} &#x3D; X_{K}[:l-r]<br>$$<br>$l$为token数量，$r$ 为$l%g$, $l-r$是$g$的整数倍<br>$$<br>residual\_part \  X_{K_{r}} &#x3D; X_{K}[l-r:]<br>$$</p>
+<p>只存储$Q(X_{K_{g}})$ 也就是分组的部分，进行量化。$X_{K_{r}}$ 不量化。在decoding 阶段，新的key_cache，会被添加到$X_{K_{r}}$中，当大小满$g$时，进行量化并添到$X_{K_{g}}$中。</p>
+<p>在做attention时，进行混合精度矩阵乘法<br>$$<br>A_g &#x3D; t_{Q} Q( X^\top_{ K_g} ) \\<br>X_{K_{r}} &#x3D; Concat([X_{K_r},t_{K}]) \\<br>A_{r} &#x3D; t_{Q}X^\top_{K_{r}} \\<br>A &#x3D; Concat([A_g,A_r])\\<br>$$<br>该矩阵乘法使用Triton实现。</p>
 
     
   </div>
@@ -369,7 +342,7 @@
   </p>
   <p class="copyright-item">
     <span>原文链接: </span>
-    <a href="https://weikangqi.github.io/neon/neon%20Instruction%20%E8%AF%AD%E6%B3%95/">https://weikangqi.github.io/neon/neon%20Instruction%20%E8%AF%AD%E6%B3%95/</a>
+    <a href="https://weikangqi.github.io/post/1a87fd41.html">https://weikangqi.github.io/post/1a87fd41.html</a>
   </p>
   <p class="copyright-item">
     <span>许可协议: </span>
@@ -387,7 +360,7 @@
     </p>
     <!-- <p class="copyright-item">
       <span>原文链接: </span>
-      <a href="https://weikangqi.github.io/neon/neon%20Instruction%20%E8%AF%AD%E6%B3%95/">https://weikangqi.github.io/neon/neon%20Instruction%20%E8%AF%AD%E6%B3%95/</a>
+      <a href="https://weikangqi.github.io/post/1a87fd41.html">https://weikangqi.github.io/post/1a87fd41.html</a>
     </p> -->
     <p class="copyright-item">
       <span>许可协议: </span>
@@ -405,26 +378,24 @@
     
     <div class="post-tags">
       
-      <a href="/tags/neon/">neon</a>
+      <a href="/tags/%E5%A4%A7%E6%A8%A1%E5%9E%8B/">大模型</a>
       
-      <a href="/tags/arm/">arm</a>
-      
-      <a href="/tags/simd/">simd</a>
+      <a href="/tags/%E9%87%8F%E5%8C%96/">量化</a>
       
     </div>
     
       
   <nav class="post-nav">  
       
-      <a class="prev" href="/neon/neon%20%E9%85%8D%E7%BD%AE/">  
+      <a class="prev" href="/post/fbf826c6.html">  
         <i class="iconfont icon-left"></i>  
-        <span class="prev-text nav-default">ARM neon 指令 （Android）代码环境配置</span>  
+        <span class="prev-text nav-default">SqueezeLLm量化笔记</span>  
         <span class="prev-text nav-mobile">上一篇</span>  
       </a>  
       
       
-      <a class="next" href="/%E6%9D%82%E9%A1%B9/frp%E4%BB%A3%E7%90%86/">  
-        <span class="next-text nav-default">frp 内网穿透配置</span>  
+      <a class="next" href="/post/2949e6de.html">  
+        <span class="next-text nav-default">ARM neon 指令 （Android）代码环境配置</span>  
         <span class="prev-text nav-mobile">下一篇</span>  
         <i class="iconfont icon-right"></i>  
       </a>  

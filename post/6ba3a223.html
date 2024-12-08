@@ -18,7 +18,7 @@
 
 <!-- Website description -->
 
-<meta name="description" content="frp 内网穿透配置" />
+<meta name="description" content="使用vscode调试coredump文件，配置以及使用" />
 
 
 <!-- Website keywords -->
@@ -39,7 +39,7 @@
 
 
 <!-- Canonical, good for google search engine -->
-<link rel="canonical" href="https://weikangqi.github.io/杂项/frp代理/" />
+<link rel="canonical" href="https://weikangqi.github.io/post/6ba3a223.html" />
 
 <!-- Fancybox styling -->
 
@@ -73,7 +73,7 @@
   window.config = {"leancloud":{"app_id":null,"app_key":null,"server_url":null,"cdn":null},"toc":true,"fancybox":true,"latex":true};
 </script>
   
-  <title>frp 内网穿透配置 - wkq&#39;s site</title>
+  <title>vscode 调试coredump 文件 - wkq&#39;s site</title>
 
 <meta name="generator" content="Hexo 7.3.0"><style>.mjpage .MJX-monospace {
   font-family: monospace;
@@ -269,7 +269,7 @@
   <header class="post-header">
     <h1 class="post-title">
       
-      frp 内网穿透配置
+      vscode 调试coredump 文件
       
     </h1>
 
@@ -290,61 +290,36 @@
   </header>
 
   
-  <div class="post-toc" id="post-toc">
-    <h2 class="post-toc-title">文章目录</h2>
-    <div class="post-toc-content">
-      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#frp-%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F%E9%85%8D%E7%BD%AE"><span class="toc-number">1.</span> <span class="toc-text">frp 内网穿透配置</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E6%B3%A8%E5%86%8C%E8%B4%A6%E6%88%B7"><span class="toc-number">1.1.</span> <span class="toc-text">1. 注册账户</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E5%BB%BA%E7%AB%8B%E9%9A%A7%E9%81%93"><span class="toc-number">1.2.</span> <span class="toc-text">2. 建立隧道</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E6%9C%8D%E5%8A%A1%E7%AB%AF"><span class="toc-number">1.3.</span> <span class="toc-text">3. 服务端</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E5%AE%A2%E6%88%B7%E7%AB%AF"><span class="toc-number">1.4.</span> <span class="toc-text">4. 客户端</span></a></li></ol></li></ol>
-    </div>
-  </div>
-  
 
   <div class="post-content">
     
-    <h1 id="frp-内网穿透配置"><a href="#frp-内网穿透配置" class="headerlink" title="frp 内网穿透配置"></a>frp 内网穿透配置</h1><blockquote>
-<p>要放暑假了，在家需要连接实验室服务器，之前通过云主机搭建frp中转，但是云主机比较贵，所以来白嫖Sakura Frp</p>
-</blockquote>
-<h2 id="1-注册账户"><a href="#1-注册账户" class="headerlink" title="1. 注册账户"></a>1. 注册账户</h2><p>普通用户有两个隧道，限速10M,一个月有10G流量，可以每日签到获取额外的流量，不过对于ssh来讲，基本上是够用的，代码文本也消耗不了多少流量。</p>
-<h2 id="2-建立隧道"><a href="#2-建立隧道" class="headerlink" title="2. 建立隧道"></a>2. 建立隧道</h2><p>实名制后，可以点击服务来创建一个隧道，来中转服务。</p>
-<img src="https://s2.loli.net/2024/07/30/uOVJQl7mUSLnt2C.png" alt="QQ_1722343688110" style="zoom: 80%;" div align="center" />
+    <ol>
+<li><p>设置<code>ulimit -c unlimited</code>，如果<code>ulimit -c </code>结果是0的话产生不了coredump文件</p>
+ <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ulimit -c [size]  //这里size一般修改为unlimited,或者是其他数字：2048</span><br></pre></td></tr></table></figure>
 
-<p>这样就创建了一个隧道</p>
-<p>frp本质上做的事情就是，将两端的流量进行转发，因为两端没有公网IP，也可以使用<code>zerotier</code></p>
-<p>来打洞，但是如果NAT层比较多，延时还是比较大，在学校里面使用延时比较低，如果在家延时比较高，体验不好。</p>
-<h2 id="3-服务端"><a href="#3-服务端" class="headerlink" title="3. 服务端"></a>3. 服务端</h2><p>我把你要访问的电脑称为服务端，也就是实验室的服务器</p>
-<p>服务端需要下载frp</p>
-<p><img src="https://s2.loli.net/2024/07/30/LdeWwjQl34Tn9r7.png" alt="QQ_1722342725796"></p>
-<ul>
-<li>击复制链接<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget 链接</span><br></pre></td></tr></table></figure></li>
-<li>将frp下载下来，使用<code>tar -xvf natfrp-service_linux_amd64.tar.zst </code>解压缩</li>
-<li><code>chmod +x ./frpc</code>来赋予可执行权限</li>
-<li>获取加密参数</li>
-</ul>
-<p><img src="https://s2.loli.net/2024/07/30/7W1t2ougqnmKOTQ.png" alt="QQ_1722342962407"></p>
-<ul>
-<li>启动</li>
-</ul>
-<p>  <code> ./frpc -f 参数</code></p>
-<ul>
-<li>可以使用<code>systemctl</code>来管理frp的服务，包括开机自动启动，开始，暂停等</li>
-<li>nohup开控制frpc后端执行 <code>nohup ./frpc -f 参数 &gt; runoob.log 2&gt;&amp;1 &amp;</code></li>
-</ul>
-<p><img src="https://s2.loli.net/2024/07/30/IgwdNfDqC9jY7sR.png" alt="QQ_1722343190952"></p>
-<p>可以获得访问服务器的<code>ip:port</code></p>
-<h2 id="4-客户端"><a href="#4-客户端" class="headerlink" title="4. 客户端"></a>4. 客户端</h2><ul>
-<li>下载认证</li>
-</ul>
-<p><img src="https://s2.loli.net/2024/07/30/EhS36gJaFVGfLle.png" alt="QQ_1722343257332"></p>
-<img src="https://s2.loli.net/2024/07/30/LRFC9bnuv1jlDZc.png" alt="QQ_1722343281279" style="zoom: 67%; " />
 
-<p>会生成一个exe，点击运行即可</p>
+<p> 上修改只对当前的shell有效，一旦关闭，则恢复原来的值</p>
+</li>
+<li><p><code>cat /var/log/apport.log</code> 可以看到生成的日志信息</p>
+</li>
+<li><p>core文件路径</p>
 <ul>
-<li>ssh 连接</li>
+<li>ubuntu20的生成coredump路径不在可执行路径下，而是在<code>/var/lib/apport/coredump</code>，因为没有写入权限，所以产生不了coredump文件，需要sudo，或者修改产生路径。</li>
+<li>修改core文件产生位置在可执行文件目录下<code>sudo bash -c &#39;echo core.%e.%p &gt; /proc/sys/kernel/core_pattern&#39;</code></li>
 </ul>
-<p>  注意这里ssh端口不是22</p>
-<p>  而是上面获得的那个IP和端口</p>
-  <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh -p port yourname@ip</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>vscode 配置</p>
+<ul>
+<li>gdb</li>
+</ul>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;(gdb) Launch&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;cppdbg&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;request&quot;</span><span class="punctuation">:</span> <span class="string">&quot;launch&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;program&quot;</span><span class="punctuation">:</span> <span class="string">&quot;$&#123;workspaceFolder&#125;/a.out&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;args&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;stopAtEntry&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">false</span></span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;cwd&quot;</span><span class="punctuation">:</span> <span class="string">&quot;$&#123;workspaceFolder&#125;&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;environment&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;externalConsole&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">false</span></span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;MIMode&quot;</span><span class="punctuation">:</span> <span class="string">&quot;gdb&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;setupCommands&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">                <span class="punctuation">&#123;</span></span><br><span class="line">                    <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Enable pretty-printing for gdb&quot;</span><span class="punctuation">,</span></span><br><span class="line">                    <span class="attr">&quot;text&quot;</span><span class="punctuation">:</span> <span class="string">&quot;-enable-pretty-printing&quot;</span><span class="punctuation">,</span></span><br><span class="line">                    <span class="attr">&quot;ignoreFailures&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span></span><br><span class="line">                <span class="punctuation">&#125;</span></span><br><span class="line">            <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;coreDumpPath&quot;</span><span class="punctuation">:</span> <span class="string">&quot;$&#123;workspaceFolder&#125;/core.a.out.372125&quot;</span></span><br><span class="line">        <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br></pre></td></tr></table></figure>
 
-<p>  这样就连接到服务器了。</p>
+<p>  虽然填了program，但是实际上是从coredump启动的</p>
+<ul>
+<li>codelldb</li>
+</ul>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">           <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;lldb&quot;</span><span class="punctuation">,</span></span><br><span class="line">           <span class="attr">&quot;request&quot;</span><span class="punctuation">:</span> <span class="string">&quot;custom&quot;</span><span class="punctuation">,</span></span><br><span class="line">           <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Open a core dump&quot;</span><span class="punctuation">,</span></span><br><span class="line">           <span class="attr">&quot;initCommands&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">               <span class="string">&quot;target create -c $&#123;workspaceFolder&#125;/core.a.out.372125&quot;</span></span><br><span class="line">           <span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure></li>
+</ol>
 
     
   </div>
@@ -359,7 +334,7 @@
   </p>
   <p class="copyright-item">
     <span>原文链接: </span>
-    <a href="https://weikangqi.github.io/%E6%9D%82%E9%A1%B9/frp%E4%BB%A3%E7%90%86/">https://weikangqi.github.io/%E6%9D%82%E9%A1%B9/frp%E4%BB%A3%E7%90%86/</a>
+    <a href="https://weikangqi.github.io/post/6ba3a223.html">https://weikangqi.github.io/post/6ba3a223.html</a>
   </p>
   <p class="copyright-item">
     <span>许可协议: </span>
@@ -377,7 +352,7 @@
     </p>
     <!-- <p class="copyright-item">
       <span>原文链接: </span>
-      <a href="https://weikangqi.github.io/%E6%9D%82%E9%A1%B9/frp%E4%BB%A3%E7%90%86/">https://weikangqi.github.io/%E6%9D%82%E9%A1%B9/frp%E4%BB%A3%E7%90%86/</a>
+      <a href="https://weikangqi.github.io/post/6ba3a223.html">https://weikangqi.github.io/post/6ba3a223.html</a>
     </p> -->
     <p class="copyright-item">
       <span>许可协议: </span>
@@ -404,15 +379,15 @@
       
   <nav class="post-nav">  
       
-      <a class="prev" href="/neon/neon%20Instruction%20%E8%AF%AD%E6%B3%95/">  
+      <a class="prev" href="/post/3fa21dd.html">  
         <i class="iconfont icon-left"></i>  
-        <span class="prev-text nav-default">ARM neon Instruction  语法</span>  
+        <span class="prev-text nav-default">frp 内网穿透配置</span>  
         <span class="prev-text nav-mobile">上一篇</span>  
       </a>  
       
       
-      <a class="next" href="/%E8%B0%83%E8%AF%95/vscode%20%E8%B0%83%E8%AF%95coredump%E6%96%87%E4%BB%B6/">  
-        <span class="next-text nav-default">vscode 调试coredump 文件</span>  
+      <a class="next" href="/post/a57df1a3.html">  
+        <span class="next-text nav-default">MNN源码分析5 Pre-inference</span>  
         <span class="prev-text nav-mobile">下一篇</span>  
         <i class="iconfont icon-right"></i>  
       </a>  
