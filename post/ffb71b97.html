@@ -300,7 +300,7 @@
 
   <div class="post-content">
     
-    <!-- <h1 id="Google-Test-学习笔记"><a href="#Google-Test-学习笔记" class="headerlink" title="Google Test 学习笔记"></a>Google Test 学习笔记</h1><h2 id="1-Google-Test-基础"><a href="#1-Google-Test-基础" class="headerlink" title="1. Google Test 基础"></a>1. Google Test 基础</h2><h3 id="1-1-TEST-和断言"><a href="#1-1-TEST-和断言" class="headerlink" title="1.1 TEST 和断言"></a>1.1 TEST 和断言</h3><p><code>TEST</code>：用于定义测试用例。</p>
+    <h1 id="Google-Test-学习笔记"><a href="#Google-Test-学习笔记" class="headerlink" title="Google Test 学习笔记"></a>Google Test 学习笔记</h1><h2 id="1-Google-Test-基础"><a href="#1-Google-Test-基础" class="headerlink" title="1. Google Test 基础"></a>1. Google Test 基础</h2><h3 id="1-1-TEST-和断言"><a href="#1-1-TEST-和断言" class="headerlink" title="1.1 TEST 和断言"></a>1.1 TEST 和断言</h3><p><code>TEST</code>：用于定义测试用例。</p>
 <ul>
 <li>第一个参数是测试套件名称。</li>
 <li>第二个参数是测试名称。</li>
@@ -407,7 +407,7 @@
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;chrono&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">TimeConsumingFunction</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    std::this_thread::<span class="built_in">sleep_for</span>(std::chrono::<span class="built_in">milliseconds</span>(<span class="number">100</span>));</span><br><span class="line">    <span class="keyword">return</span> <span class="number">42</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">TEST</span>(PerformanceTest, HandlesTimeout) &#123;</span><br><span class="line">    <span class="keyword">auto</span> start = std::chrono::high_resolution_clock::<span class="built_in">now</span>();</span><br><span class="line">    <span class="built_in">EXPECT_EQ</span>(<span class="built_in">TimeConsumingFunction</span>(), <span class="number">42</span>);</span><br><span class="line">    <span class="keyword">auto</span> end = std::chrono::high_resolution_clock::<span class="built_in">now</span>();</span><br><span class="line">    <span class="keyword">auto</span> duration = std::chrono::<span class="built_in">duration_cast</span>&lt;std::chrono::milliseconds&gt;(end - start).<span class="built_in">count</span>();</span><br><span class="line">    <span class="built_in">EXPECT_LE</span>(duration, <span class="number">200</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <hr>
- -->
+
     
   </div>
 

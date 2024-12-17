@@ -300,7 +300,7 @@
 
   <div class="post-content">
     
-    <!-- <p>高效地服务大型语言模型 (LLM) 需要对许多请求进行批处理，以降低每个请求的成本。然而，随着批量大小和上下文长度的增加，存储注意力键和值以避免重新计算的键值（KV）缓存显着增加了内存需求，并成为速度和内存使用的新瓶颈。此外，KV缓存的加载会导致计算核心空闲，从而限制了推理速度。减少 KV 缓存大小的一个直接有效的解决方案是量化，这会减少 KV 缓存占用的总字节数。然而，缺乏深入研究KV缓存的元素分布来了解KV缓存量化的难度和局限性。</p>
+    <p>高效地服务大型语言模型 (LLM) 需要对许多请求进行批处理，以降低每个请求的成本。然而，随着批量大小和上下文长度的增加，存储注意力键和值以避免重新计算的键值（KV）缓存显着增加了内存需求，并成为速度和内存使用的新瓶颈。此外，KV缓存的加载会导致计算核心空闲，从而限制了推理速度。减少 KV 缓存大小的一个直接有效的解决方案是量化，这会减少 KV 缓存占用的总字节数。然而，缺乏深入研究KV缓存的元素分布来了解KV缓存量化的难度和局限性。</p>
 <p><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2402.02750">KIVI: A Tuning-Free Asymmetric 2bit Quantization for KV Cache | PDF</a></p>
 <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><h2 id="per-token-and-per-channel-quantization"><a href="#per-token-and-per-channel-quantization" class="headerlink" title="per-token and per-channel quantization"></a>per-token and per-channel quantization</h2><img src="https://s2.loli.net/2024/11/04/ta69MmdWl2STDpE.png" alt="image-20241104102212250" style="zoom: 67%;" />
 
@@ -328,7 +328,7 @@
 <h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><p>将每个K cache，进行分组每G个token一组，进行分组量化。余剩下的进行单独量化。<br>$$<br>group\_part \ X_{K_{g}} &#x3D; X_{K}[:l-r]<br>$$<br>$l$为token数量，$r$ 为$l%g$, $l-r$是$g$的整数倍<br>$$<br>residual\_part \  X_{K_{r}} &#x3D; X_{K}[l-r:]<br>$$</p>
 <p>只存储$Q(X_{K_{g}})$ 也就是分组的部分，进行量化。$X_{K_{r}}$ 不量化。在decoding 阶段，新的key_cache，会被添加到$X_{K_{r}}$中，当大小满$g$时，进行量化并添到$X_{K_{g}}$中。</p>
 <p>在做attention时，进行混合精度矩阵乘法<br>$$<br>A_g &#x3D; t_{Q} Q( X^\top_{ K_g} ) \\<br>X_{K_{r}} &#x3D; Concat([X_{K_r},t_{K}]) \\<br>A_{r} &#x3D; t_{Q}X^\top_{K_{r}} \\<br>A &#x3D; Concat([A_g,A_r])\\<br>$$<br>该矩阵乘法使用Triton实现。</p>
- -->
+
     
   </div>
 

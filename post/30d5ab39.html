@@ -300,7 +300,7 @@
 
   <div class="post-content">
     
-    <!-- <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><ol>
+    <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><ol>
 <li>流行的量化方案LLM.int8(),SmoothQuant（例如 8 位权重激活量化）无法充分利用现代 GPU 的功能，例如 int4计算，从而导致性能不佳。例如，A100 GPU 可以达到 1248 TOPS（INT4）和 624 TOPS（INT8），而带有 Tensor Core 的 FP16 只能达到 312 TFLOPS。然而，INT8量化仍然无法利用低位运算，例如INT4 Tensor Core。</li>
 <li>OmniQuant等提出将 LLM 量化为 4 位，但是PPL增加很多。</li>
 </ol>
@@ -356,7 +356,7 @@
 <p>因此，Atom采用动态量化，在推理过程中为每个激活矩阵定制量化参数。为了控制动态量化的开销，我们将量化操作融合到先验运算符中，类似于 ZeroQuant 的实现。由于附加运算符是逐元素的（具有缩减和逐元素除法），因此与耗时的密集层和自注意力层相比，融合运算符的运行时间仍然可以忽略不计。如下图LLama-7b的模型推理</p>
 <p><img src="https://s2.loli.net/2024/11/12/z1ulxikPCeFIKyU.png" alt="image-20241112124849864"></p>
 <p>为了在吞吐量和准确性之间取得平衡，我们选择对称量化并仔细选择剪辑阈值。在量化权重矩阵时，结合了 GPTQ。</p>
- -->
+
     
   </div>
 
