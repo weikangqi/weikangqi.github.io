@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport" />
+  <link rel="alternate icon" type="image/png" href="/img/favicon.ico">
+  <title>
+    
+      LLama3 Python |
+     
+    Blog
+  </title>
+  
+<link rel="stylesheet" href="/css/maoblog.css">
+
+  
+<link rel="stylesheet" href="/css/partials/post.css">
+
+  
+<link rel="stylesheet" href="/css/partials/comment.css">
+
+  
+<link rel="stylesheet" href="/css/partials/search.css">
+
+  
+<link rel="stylesheet" href="/css/partials/meta.css">
+
+  
+<link rel="stylesheet" href="/css/partials/about.css">
+
+  
+<link rel="stylesheet" href="/fontawesome/css/font-awesome.min.css">
+
+  
+<link rel="stylesheet" href="/css/zoom.css">
+
+  
+<link rel="stylesheet" href="/css/prism.css">
+
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="/css/math/katex.min.css">
+
+<link rel="stylesheet" href="/css/math/style.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 5.4.2"><link rel="alternate" href="/atom.xml" title="Blog" type="application/atom+xml">
+</head>
+
+
+  <body>
+    <div class="body-container">
+      <div class="body-main">
+        <div class="header-wrapper"><div class="header">
+  <a class="logo" href="/">Blog</a>
+  <ul class="nav">
+    
+      
+        <li><a href="/">Posts</a></li>
+      
+    
+      
+        <li><a href="/tags">Tags</a></li>
+      
+    
+      
+        <li><a style="cursor: pointer;" onclick="openSearchBar()">Search</a></li>
+      
+    
+      
+        <li><a href="/about">About</a></li>
+      
+    
+    <!-- <li class="site-mode">light</i></li> -->
+  </ul>
+</div>
+<div class="search-bar-container">  
+    <div class="search-bar">
+        <input id="search-input" value="" class="search-input" autofocus placeholder="Search something..." type="text" onblur="hideSearchBar()" oninput="exportSearchContent()">
+    </div>
+    <div class="search-output">
+        <ul class="search-output-list">
+            <!-- 结果列表 -->
+            <!-- <span style="padding-left: 3px; margin-left: 3px;">无记录</span> -->
+            <li class="Searching">
+                <div class="content">
+                    Searching...
+                </div>
+            </li>
+        </ul>
+        <span style="padding-left: 3px; margin-left: 3px; font-size: 13px;"><em>Powered by <span  onclick="goToLink(this)"><a href="/search.xml" class="search-xml li-link">search.xml</a></span></em></span>
+    </div>
+</div></div>
+        <div class="main-wrapper"><main>
+  <div class="main-container">
+      <div class="post-details">
+          
+            <div class="post-title">
+              <h1>LLama3 Python</h1>
+            </div>
+          
+          <div class="post-content">
+            <pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token comment"># Copyright (c) Meta Platforms, Inc. and affiliates.</span>
+<span class="token comment"># This software may be used and distributed in accordance with the terms of the Llama 3 Community License Agreement.</span>
+
+<span class="token keyword">import</span> math
+<span class="token keyword">from</span> dataclasses <span class="token keyword">import</span> dataclass
+<span class="token keyword">from</span> typing <span class="token keyword">import</span> Optional<span class="token punctuation">,</span> Tuple
+
+<span class="token keyword">import</span> fairscale<span class="token punctuation">.</span>nn<span class="token punctuation">.</span>model_parallel<span class="token punctuation">.</span>initialize <span class="token keyword">as</span> fs_init
+<span class="token keyword">import</span> torch
+<span class="token keyword">import</span> torch<span class="token punctuation">.</span>nn<span class="token punctuation">.</span>functional <span class="token keyword">as</span> F
+<span class="token keyword">from</span> fairscale<span class="token punctuation">.</span>nn<span class="token punctuation">.</span>model_parallel<span class="token punctuation">.</span>layers <span class="token keyword">import</span> <span class="token punctuation">(</span>
+    ColumnParallelLinear<span class="token punctuation">,</span>
+    RowParallelLinear<span class="token punctuation">,</span>
+    VocabParallelEmbedding<span class="token punctuation">,</span>
+<span class="token punctuation">)</span>
+<span class="token keyword">from</span> torch <span class="token keyword">import</span> nn
+
+
+<span class="token decorator annotation punctuation">@dataclass</span>
+<span class="token keyword">class</span> <span class="token class-name">ModelArgs</span><span class="token punctuation">:</span>
+    dim<span class="token punctuation">:</span> <span class="token builtin">int</span> <span class="token operator">=</span> <span class="token number">4096</span>
+    n_layers<span class="token punctuation">:</span> <span class="token builtin">int</span> <span class="token operator">=</span> <span class="token number">32</span>
+    n_heads<span class="token punctuation">:</span> <span class="token builtin">int</span> <span class="token operator">=</span> <span class="token number">32</span>
+    n_kv_heads<span class="token punctuation">:</span> Optional<span class="token punctuation">[</span><span class="token builtin">int</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">None</span>
+    vocab_size<span class="token punctuation">:</span> <span class="token builtin">int</span> <span class="token operator">=</span> <span class="token operator">-</span><span class="token number">1</span>
+    multiple_of<span class="token punctuation">:</span> <span class="token builtin">int</span> <span class="token operator">=</span> <span class="token number">256</span>  <span class="token comment"># make SwiGLU hidden layer size multiple of large power of 2</span>
+    ffn_dim_multiplier<span class="token punctuation">:</span> Optional<span class="token punctuation">[</span><span class="token builtin">float</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">None</span>
+    norm_eps<span class="token punctuation">:</span> <span class="token builtin">float</span> <span class="token operator">=</span> <span class="token number">1e-5</span>
+    rope_theta<span class="token punctuation">:</span> <span class="token builtin">float</span> <span class="token operator">=</span> <span class="token number">500000</span>
+
+    max_batch_size<span class="token punctuation">:</span> <span class="token builtin">int</span> <span class="token operator">=</span> <span class="token number">32</span>
+    max_seq_len<span class="token punctuation">:</span> <span class="token builtin">int</span> <span class="token operator">=</span> <span class="token number">2048</span>
+
+
+<span class="token keyword">class</span> <span class="token class-name">RMSNorm</span><span class="token punctuation">(</span>torch<span class="token punctuation">.</span>nn<span class="token punctuation">.</span>Module<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token keyword">def</span> <span class="token function">__init__</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> dim<span class="token punctuation">:</span> <span class="token builtin">int</span><span class="token punctuation">,</span> eps<span class="token punctuation">:</span> <span class="token builtin">float</span> <span class="token operator">=</span> <span class="token number">1e-6</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token builtin">super</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span>__init__<span class="token punctuation">(</span><span class="token punctuation">)</span>
+        self<span class="token punctuation">.</span>eps <span class="token operator">=</span> eps
+        self<span class="token punctuation">.</span>weight <span class="token operator">=</span> nn<span class="token punctuation">.</span>Parameter<span class="token punctuation">(</span>torch<span class="token punctuation">.</span>ones<span class="token punctuation">(</span>dim<span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+    <span class="token keyword">def</span> <span class="token function">_norm</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> x<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token keyword">return</span> x <span class="token operator">*</span> torch<span class="token punctuation">.</span>rsqrt<span class="token punctuation">(</span>x<span class="token punctuation">.</span><span class="token builtin">pow</span><span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">.</span>mean<span class="token punctuation">(</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">,</span> keepdim<span class="token operator">=</span><span class="token boolean">True</span><span class="token punctuation">)</span> <span class="token operator">+</span> self<span class="token punctuation">.</span>eps<span class="token punctuation">)</span>
+
+    <span class="token keyword">def</span> <span class="token function">forward</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> x<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        output <span class="token operator">=</span> self<span class="token punctuation">.</span>_norm<span class="token punctuation">(</span>x<span class="token punctuation">.</span><span class="token builtin">float</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span>type_as<span class="token punctuation">(</span>x<span class="token punctuation">)</span>
+        <span class="token keyword">return</span> output <span class="token operator">*</span> self<span class="token punctuation">.</span>weight
+
+
+<span class="token keyword">def</span> <span class="token function">precompute_freqs_cis</span><span class="token punctuation">(</span>dim<span class="token punctuation">:</span> <span class="token builtin">int</span><span class="token punctuation">,</span> end<span class="token punctuation">:</span> <span class="token builtin">int</span><span class="token punctuation">,</span> theta<span class="token punctuation">:</span> <span class="token builtin">float</span> <span class="token operator">=</span> <span class="token number">10000.0</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+    freqs <span class="token operator">=</span> <span class="token number">1.0</span> <span class="token operator">/</span> <span class="token punctuation">(</span>theta <span class="token operator">**</span> <span class="token punctuation">(</span>torch<span class="token punctuation">.</span>arange<span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> dim<span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">[</span><span class="token punctuation">:</span> <span class="token punctuation">(</span>dim <span class="token operator">//</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token builtin">float</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">/</span> dim<span class="token punctuation">)</span><span class="token punctuation">)</span>
+    t <span class="token operator">=</span> torch<span class="token punctuation">.</span>arange<span class="token punctuation">(</span>end<span class="token punctuation">,</span> device<span class="token operator">=</span>freqs<span class="token punctuation">.</span>device<span class="token punctuation">,</span> dtype<span class="token operator">=</span>torch<span class="token punctuation">.</span>float32<span class="token punctuation">)</span>
+    freqs <span class="token operator">=</span> torch<span class="token punctuation">.</span>outer<span class="token punctuation">(</span>t<span class="token punctuation">,</span> freqs<span class="token punctuation">)</span>
+    freqs_cis <span class="token operator">=</span> torch<span class="token punctuation">.</span>polar<span class="token punctuation">(</span>torch<span class="token punctuation">.</span>ones_like<span class="token punctuation">(</span>freqs<span class="token punctuation">)</span><span class="token punctuation">,</span> freqs<span class="token punctuation">)</span>  <span class="token comment"># complex64</span>
+    <span class="token keyword">return</span> freqs_cis
+
+
+<span class="token keyword">def</span> <span class="token function">reshape_for_broadcast</span><span class="token punctuation">(</span>freqs_cis<span class="token punctuation">:</span> torch<span class="token punctuation">.</span>Tensor<span class="token punctuation">,</span> x<span class="token punctuation">:</span> torch<span class="token punctuation">.</span>Tensor<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    ndim <span class="token operator">=</span> x<span class="token punctuation">.</span>ndim
+    <span class="token keyword">assert</span> <span class="token number">0</span> <span class="token operator">&lt;=</span> <span class="token number">1</span> <span class="token operator">&lt;</span> ndim
+    <span class="token keyword">assert</span> freqs_cis<span class="token punctuation">.</span>shape <span class="token operator">==</span> <span class="token punctuation">(</span>x<span class="token punctuation">.</span>shape<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">,</span> x<span class="token punctuation">.</span>shape<span class="token punctuation">[</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+    shape <span class="token operator">=</span> <span class="token punctuation">[</span>d <span class="token keyword">if</span> i <span class="token operator">==</span> <span class="token number">1</span> <span class="token keyword">or</span> i <span class="token operator">==</span> ndim <span class="token operator">-</span> <span class="token number">1</span> <span class="token keyword">else</span> <span class="token number">1</span> <span class="token keyword">for</span> i<span class="token punctuation">,</span> d <span class="token keyword">in</span> <span class="token builtin">enumerate</span><span class="token punctuation">(</span>x<span class="token punctuation">.</span>shape<span class="token punctuation">)</span><span class="token punctuation">]</span>
+    <span class="token keyword">return</span> freqs_cis<span class="token punctuation">.</span>view<span class="token punctuation">(</span><span class="token operator">*</span>shape<span class="token punctuation">)</span>
+
+
+<span class="token keyword">def</span> <span class="token function">apply_rotary_emb</span><span class="token punctuation">(</span>
+    xq<span class="token punctuation">:</span> torch<span class="token punctuation">.</span>Tensor<span class="token punctuation">,</span>
+    xk<span class="token punctuation">:</span> torch<span class="token punctuation">.</span>Tensor<span class="token punctuation">,</span>
+    freqs_cis<span class="token punctuation">:</span> torch<span class="token punctuation">.</span>Tensor<span class="token punctuation">,</span>
+<span class="token punctuation">)</span> <span class="token operator">-</span><span class="token operator">></span> Tuple<span class="token punctuation">[</span>torch<span class="token punctuation">.</span>Tensor<span class="token punctuation">,</span> torch<span class="token punctuation">.</span>Tensor<span class="token punctuation">]</span><span class="token punctuation">:</span>
+    xq_ <span class="token operator">=</span> torch<span class="token punctuation">.</span>view_as_complex<span class="token punctuation">(</span>xq<span class="token punctuation">.</span><span class="token builtin">float</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span>reshape<span class="token punctuation">(</span><span class="token operator">*</span>xq<span class="token punctuation">.</span>shape<span class="token punctuation">[</span><span class="token punctuation">:</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+    xk_ <span class="token operator">=</span> torch<span class="token punctuation">.</span>view_as_complex<span class="token punctuation">(</span>xk<span class="token punctuation">.</span><span class="token builtin">float</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span>reshape<span class="token punctuation">(</span><span class="token operator">*</span>xk<span class="token punctuation">.</span>shape<span class="token punctuation">[</span><span class="token punctuation">:</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+    freqs_cis <span class="token operator">=</span> reshape_for_broadcast<span class="token punctuation">(</span>freqs_cis<span class="token punctuation">,</span> xq_<span class="token punctuation">)</span>
+    xq_out <span class="token operator">=</span> torch<span class="token punctuation">.</span>view_as_real<span class="token punctuation">(</span>xq_ <span class="token operator">*</span> freqs_cis<span class="token punctuation">)</span><span class="token punctuation">.</span>flatten<span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span>
+    xk_out <span class="token operator">=</span> torch<span class="token punctuation">.</span>view_as_real<span class="token punctuation">(</span>xk_ <span class="token operator">*</span> freqs_cis<span class="token punctuation">)</span><span class="token punctuation">.</span>flatten<span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span>
+    <span class="token keyword">return</span> xq_out<span class="token punctuation">.</span>type_as<span class="token punctuation">(</span>xq<span class="token punctuation">)</span><span class="token punctuation">,</span> xk_out<span class="token punctuation">.</span>type_as<span class="token punctuation">(</span>xk<span class="token punctuation">)</span>
+
+
+<span class="token keyword">def</span> <span class="token function">repeat_kv</span><span class="token punctuation">(</span>x<span class="token punctuation">:</span> torch<span class="token punctuation">.</span>Tensor<span class="token punctuation">,</span> n_rep<span class="token punctuation">:</span> <span class="token builtin">int</span><span class="token punctuation">)</span> <span class="token operator">-</span><span class="token operator">></span> torch<span class="token punctuation">.</span>Tensor<span class="token punctuation">:</span>
+    <span class="token triple-quoted-string string">"""torch.repeat_interleave(x, dim=2, repeats=n_rep)"""</span>
+    bs<span class="token punctuation">,</span> slen<span class="token punctuation">,</span> n_kv_heads<span class="token punctuation">,</span> head_dim <span class="token operator">=</span> x<span class="token punctuation">.</span>shape
+    <span class="token keyword">if</span> n_rep <span class="token operator">==</span> <span class="token number">1</span><span class="token punctuation">:</span>
+        <span class="token keyword">return</span> x
+    <span class="token keyword">return</span> <span class="token punctuation">(</span>
+        x<span class="token punctuation">[</span><span class="token punctuation">:</span><span class="token punctuation">,</span> <span class="token punctuation">:</span><span class="token punctuation">,</span> <span class="token punctuation">:</span><span class="token punctuation">,</span> <span class="token boolean">None</span><span class="token punctuation">,</span> <span class="token punctuation">:</span><span class="token punctuation">]</span>
+        <span class="token punctuation">.</span>expand<span class="token punctuation">(</span>bs<span class="token punctuation">,</span> slen<span class="token punctuation">,</span> n_kv_heads<span class="token punctuation">,</span> n_rep<span class="token punctuation">,</span> head_dim<span class="token punctuation">)</span>
+        <span class="token punctuation">.</span>reshape<span class="token punctuation">(</span>bs<span class="token punctuation">,</span> slen<span class="token punctuation">,</span> n_kv_heads <span class="token operator">*</span> n_rep<span class="token punctuation">,</span> head_dim<span class="token punctuation">)</span>
+    <span class="token punctuation">)</span>
+
+
+<span class="token keyword">class</span> <span class="token class-name">Attention</span><span class="token punctuation">(</span>nn<span class="token punctuation">.</span>Module<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token keyword">def</span> <span class="token function">__init__</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> args<span class="token punctuation">:</span> ModelArgs<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token builtin">super</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span>__init__<span class="token punctuation">(</span><span class="token punctuation">)</span>
+        self<span class="token punctuation">.</span>n_kv_heads <span class="token operator">=</span> args<span class="token punctuation">.</span>n_heads <span class="token keyword">if</span> args<span class="token punctuation">.</span>n_kv_heads <span class="token keyword">is</span> <span class="token boolean">None</span> <span class="token keyword">else</span> args<span class="token punctuation">.</span>n_kv_heads
+        model_parallel_size <span class="token operator">=</span> fs_init<span class="token punctuation">.</span>get_model_parallel_world_size<span class="token punctuation">(</span><span class="token punctuation">)</span>
+        self<span class="token punctuation">.</span>n_local_heads <span class="token operator">=</span> args<span class="token punctuation">.</span>n_heads <span class="token operator">//</span> model_parallel_size
+        self<span class="token punctuation">.</span>n_local_kv_heads <span class="token operator">=</span> self<span class="token punctuation">.</span>n_kv_heads <span class="token operator">//</span> model_parallel_size
+        self<span class="token punctuation">.</span>n_rep <span class="token operator">=</span> self<span class="token punctuation">.</span>n_local_heads <span class="token operator">//</span> self<span class="token punctuation">.</span>n_local_kv_heads
+        self<span class="token punctuation">.</span>head_dim <span class="token operator">=</span> args<span class="token punctuation">.</span>dim <span class="token operator">//</span> args<span class="token punctuation">.</span>n_heads
+
+        self<span class="token punctuation">.</span>wq <span class="token operator">=</span> ColumnParallelLinear<span class="token punctuation">(</span>
+            args<span class="token punctuation">.</span>dim<span class="token punctuation">,</span>
+            args<span class="token punctuation">.</span>n_heads <span class="token operator">*</span> self<span class="token punctuation">.</span>head_dim<span class="token punctuation">,</span>
+            bias<span class="token operator">=</span><span class="token boolean">False</span><span class="token punctuation">,</span>
+            gather_output<span class="token operator">=</span><span class="token boolean">False</span><span class="token punctuation">,</span>
+            init_method<span class="token operator">=</span><span class="token keyword">lambda</span> x<span class="token punctuation">:</span> x<span class="token punctuation">,</span>
+        <span class="token punctuation">)</span>
+        self<span class="token punctuation">.</span>wk <span class="token operator">=</span> ColumnParallelLinear<span class="token punctuation">(</span>
+            args<span class="token punctuation">.</span>dim<span class="token punctuation">,</span>
+            self<span class="token punctuation">.</span>n_kv_heads <span class="token operator">*</span> self<span class="token punctuation">.</span>head_dim<span class="token punctuation">,</span>
+            bias<span class="token operator">=</span><span class="token boolean">False</span><span class="token punctuation">,</span>
+            gather_output<span class="token operator">=</span><span class="token boolean">False</span><span class="token punctuation">,</span>
+            init_method<span class="token operator">=</span><span class="token keyword">lambda</span> x<span class="token punctuation">:</span> x<span class="token punctuation">,</span>
+        <span class="token punctuation">)</span>
+        self<span class="token punctuation">.</span>wv <span class="token operator">=</span> ColumnParallelLinear<span class="token punctuation">(</span>
+            args<span class="token punctuation">.</span>dim<span class="token punctuation">,</span>
+            self<span class="token punctuation">.</span>n_kv_heads <span class="token operator">*</span> self<span class="token punctuation">.</span>head_dim<span class="token punctuation">,</span>
+            bias<span class="token operator">=</span><span class="token boolean">False</span><span class="token punctuation">,</span>
+            gather_output<span class="token operator">=</span><span class="token boolean">False</span><span class="token punctuation">,</span>
+            init_method<span class="token operator">=</span><span class="token keyword">lambda</span> x<span class="token punctuation">:</span> x<span class="token punctuation">,</span>
+        <span class="token punctuation">)</span>
+        self<span class="token punctuation">.</span>wo <span class="token operator">=</span> RowParallelLinear<span class="token punctuation">(</span>
+            args<span class="token punctuation">.</span>n_heads <span class="token operator">*</span> self<span class="token punctuation">.</span>head_dim<span class="token punctuation">,</span>
+            args<span class="token punctuation">.</span>dim<span class="token punctuation">,</span>
+            bias<span class="token operator">=</span><span class="token boolean">False</span><span class="token punctuation">,</span>
+            input_is_parallel<span class="token operator">=</span><span class="token boolean">True</span><span class="token punctuation">,</span>
+            init_method<span class="token operator">=</span><span class="token keyword">lambda</span> x<span class="token punctuation">:</span> x<span class="token punctuation">,</span>
+        <span class="token punctuation">)</span>
+
+        self<span class="token punctuation">.</span>cache_k <span class="token operator">=</span> torch<span class="token punctuation">.</span>zeros<span class="token punctuation">(</span>
+            <span class="token punctuation">(</span>
+                args<span class="token punctuation">.</span>max_batch_size<span class="token punctuation">,</span>
+                args<span class="token punctuation">.</span>max_seq_len<span class="token punctuation">,</span>
+                self<span class="token punctuation">.</span>n_local_kv_heads<span class="token punctuation">,</span>
+                self<span class="token punctuation">.</span>head_dim<span class="token punctuation">,</span>
+            <span class="token punctuation">)</span>
+        <span class="token punctuation">)</span><span class="token punctuation">.</span>cuda<span class="token punctuation">(</span><span class="token punctuation">)</span>
+        self<span class="token punctuation">.</span>cache_v <span class="token operator">=</span> torch<span class="token punctuation">.</span>zeros<span class="token punctuation">(</span>
+            <span class="token punctuation">(</span>
+                args<span class="token punctuation">.</span>max_batch_size<span class="token punctuation">,</span>
+                args<span class="token punctuation">.</span>max_seq_len<span class="token punctuation">,</span>
+                self<span class="token punctuation">.</span>n_local_kv_heads<span class="token punctuation">,</span>
+                self<span class="token punctuation">.</span>head_dim<span class="token punctuation">,</span>
+            <span class="token punctuation">)</span>
+        <span class="token punctuation">)</span><span class="token punctuation">.</span>cuda<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+    <span class="token keyword">def</span> <span class="token function">forward</span><span class="token punctuation">(</span>
+        self<span class="token punctuation">,</span>
+        x<span class="token punctuation">:</span> torch<span class="token punctuation">.</span>Tensor<span class="token punctuation">,</span>
+        start_pos<span class="token punctuation">:</span> <span class="token builtin">int</span><span class="token punctuation">,</span>
+        freqs_cis<span class="token punctuation">:</span> torch<span class="token punctuation">.</span>Tensor<span class="token punctuation">,</span>
+        mask<span class="token punctuation">:</span> Optional<span class="token punctuation">[</span>torch<span class="token punctuation">.</span>Tensor<span class="token punctuation">]</span><span class="token punctuation">,</span>
+    <span class="token punctuation">)</span><span class="token punctuation">:</span>
+        bsz<span class="token punctuation">,</span> seqlen<span class="token punctuation">,</span> _ <span class="token operator">=</span> x<span class="token punctuation">.</span>shape
+        xq<span class="token punctuation">,</span> xk<span class="token punctuation">,</span> xv <span class="token operator">=</span> self<span class="token punctuation">.</span>wq<span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">,</span> self<span class="token punctuation">.</span>wk<span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">,</span> self<span class="token punctuation">.</span>wv<span class="token punctuation">(</span>x<span class="token punctuation">)</span>
+
+        xq <span class="token operator">=</span> xq<span class="token punctuation">.</span>view<span class="token punctuation">(</span>bsz<span class="token punctuation">,</span> seqlen<span class="token punctuation">,</span> self<span class="token punctuation">.</span>n_local_heads<span class="token punctuation">,</span> self<span class="token punctuation">.</span>head_dim<span class="token punctuation">)</span>
+        xk <span class="token operator">=</span> xk<span class="token punctuation">.</span>view<span class="token punctuation">(</span>bsz<span class="token punctuation">,</span> seqlen<span class="token punctuation">,</span> self<span class="token punctuation">.</span>n_local_kv_heads<span class="token punctuation">,</span> self<span class="token punctuation">.</span>head_dim<span class="token punctuation">)</span>
+        xv <span class="token operator">=</span> xv<span class="token punctuation">.</span>view<span class="token punctuation">(</span>bsz<span class="token punctuation">,</span> seqlen<span class="token punctuation">,</span> self<span class="token punctuation">.</span>n_local_kv_heads<span class="token punctuation">,</span> self<span class="token punctuation">.</span>head_dim<span class="token punctuation">)</span>
+
+        xq<span class="token punctuation">,</span> xk <span class="token operator">=</span> apply_rotary_emb<span class="token punctuation">(</span>xq<span class="token punctuation">,</span> xk<span class="token punctuation">,</span> freqs_cis<span class="token operator">=</span>freqs_cis<span class="token punctuation">)</span>
+
+        self<span class="token punctuation">.</span>cache_k <span class="token operator">=</span> self<span class="token punctuation">.</span>cache_k<span class="token punctuation">.</span>to<span class="token punctuation">(</span>xq<span class="token punctuation">)</span>
+        self<span class="token punctuation">.</span>cache_v <span class="token operator">=</span> self<span class="token punctuation">.</span>cache_v<span class="token punctuation">.</span>to<span class="token punctuation">(</span>xq<span class="token punctuation">)</span>
+
+        self<span class="token punctuation">.</span>cache_k<span class="token punctuation">[</span><span class="token punctuation">:</span>bsz<span class="token punctuation">,</span> start_pos <span class="token punctuation">:</span> start_pos <span class="token operator">+</span> seqlen<span class="token punctuation">]</span> <span class="token operator">=</span> xk
+        self<span class="token punctuation">.</span>cache_v<span class="token punctuation">[</span><span class="token punctuation">:</span>bsz<span class="token punctuation">,</span> start_pos <span class="token punctuation">:</span> start_pos <span class="token operator">+</span> seqlen<span class="token punctuation">]</span> <span class="token operator">=</span> xv
+
+        keys <span class="token operator">=</span> self<span class="token punctuation">.</span>cache_k<span class="token punctuation">[</span><span class="token punctuation">:</span>bsz<span class="token punctuation">,</span> <span class="token punctuation">:</span> start_pos <span class="token operator">+</span> seqlen<span class="token punctuation">]</span>
+        values <span class="token operator">=</span> self<span class="token punctuation">.</span>cache_v<span class="token punctuation">[</span><span class="token punctuation">:</span>bsz<span class="token punctuation">,</span> <span class="token punctuation">:</span> start_pos <span class="token operator">+</span> seqlen<span class="token punctuation">]</span>
+
+        <span class="token comment"># repeat k/v heads if n_kv_heads &lt; n_heads</span>
+        keys <span class="token operator">=</span> repeat_kv<span class="token punctuation">(</span>
+            keys<span class="token punctuation">,</span> self<span class="token punctuation">.</span>n_rep
+        <span class="token punctuation">)</span>  <span class="token comment"># (bs, cache_len + seqlen, n_local_heads, head_dim)</span>
+        values <span class="token operator">=</span> repeat_kv<span class="token punctuation">(</span>
+            values<span class="token punctuation">,</span> self<span class="token punctuation">.</span>n_rep
+        <span class="token punctuation">)</span>  <span class="token comment"># (bs, cache_len + seqlen, n_local_heads, head_dim)</span>
+
+        xq <span class="token operator">=</span> xq<span class="token punctuation">.</span>transpose<span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span>  <span class="token comment"># (bs, n_local_heads, seqlen, head_dim)</span>
+        keys <span class="token operator">=</span> keys<span class="token punctuation">.</span>transpose<span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span>  <span class="token comment"># (bs, n_local_heads, cache_len + seqlen, head_dim)</span>
+        values <span class="token operator">=</span> values<span class="token punctuation">.</span>transpose<span class="token punctuation">(</span>
+            <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span>
+        <span class="token punctuation">)</span>  <span class="token comment"># (bs, n_local_heads, cache_len + seqlen, head_dim)</span>
+        scores <span class="token operator">=</span> torch<span class="token punctuation">.</span>matmul<span class="token punctuation">(</span>xq<span class="token punctuation">,</span> keys<span class="token punctuation">.</span>transpose<span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">/</span> math<span class="token punctuation">.</span>sqrt<span class="token punctuation">(</span>self<span class="token punctuation">.</span>head_dim<span class="token punctuation">)</span>
+        <span class="token keyword">if</span> mask <span class="token keyword">is</span> <span class="token keyword">not</span> <span class="token boolean">None</span><span class="token punctuation">:</span>
+            scores <span class="token operator">=</span> scores <span class="token operator">+</span> mask  <span class="token comment"># (bs, n_local_heads, seqlen, cache_len + seqlen)</span>
+        scores <span class="token operator">=</span> F<span class="token punctuation">.</span>softmax<span class="token punctuation">(</span>scores<span class="token punctuation">.</span><span class="token builtin">float</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> dim<span class="token operator">=</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">.</span>type_as<span class="token punctuation">(</span>xq<span class="token punctuation">)</span>
+        output <span class="token operator">=</span> torch<span class="token punctuation">.</span>matmul<span class="token punctuation">(</span>scores<span class="token punctuation">,</span> values<span class="token punctuation">)</span>  <span class="token comment"># (bs, n_local_heads, seqlen, head_dim)</span>
+        output <span class="token operator">=</span> output<span class="token punctuation">.</span>transpose<span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">.</span>contiguous<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span>view<span class="token punctuation">(</span>bsz<span class="token punctuation">,</span> seqlen<span class="token punctuation">,</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span>
+        <span class="token keyword">return</span> self<span class="token punctuation">.</span>wo<span class="token punctuation">(</span>output<span class="token punctuation">)</span>
+
+
+<span class="token keyword">class</span> <span class="token class-name">FeedForward</span><span class="token punctuation">(</span>nn<span class="token punctuation">.</span>Module<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token keyword">def</span> <span class="token function">__init__</span><span class="token punctuation">(</span>
+        self<span class="token punctuation">,</span>
+        dim<span class="token punctuation">:</span> <span class="token builtin">int</span><span class="token punctuation">,</span>
+        hidden_dim<span class="token punctuation">:</span> <span class="token builtin">int</span><span class="token punctuation">,</span>
+        multiple_of<span class="token punctuation">:</span> <span class="token builtin">int</span><span class="token punctuation">,</span>
+        ffn_dim_multiplier<span class="token punctuation">:</span> Optional<span class="token punctuation">[</span><span class="token builtin">float</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+    <span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token builtin">super</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span>__init__<span class="token punctuation">(</span><span class="token punctuation">)</span>
+        hidden_dim <span class="token operator">=</span> <span class="token builtin">int</span><span class="token punctuation">(</span><span class="token number">2</span> <span class="token operator">*</span> hidden_dim <span class="token operator">/</span> <span class="token number">3</span><span class="token punctuation">)</span>
+        <span class="token comment"># custom dim factor multiplier</span>
+        <span class="token keyword">if</span> ffn_dim_multiplier <span class="token keyword">is</span> <span class="token keyword">not</span> <span class="token boolean">None</span><span class="token punctuation">:</span>
+            hidden_dim <span class="token operator">=</span> <span class="token builtin">int</span><span class="token punctuation">(</span>ffn_dim_multiplier <span class="token operator">*</span> hidden_dim<span class="token punctuation">)</span>
+        hidden_dim <span class="token operator">=</span> multiple_of <span class="token operator">*</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>hidden_dim <span class="token operator">+</span> multiple_of <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">//</span> multiple_of<span class="token punctuation">)</span>
+
+        self<span class="token punctuation">.</span>w1 <span class="token operator">=</span> ColumnParallelLinear<span class="token punctuation">(</span>
+            dim<span class="token punctuation">,</span> hidden_dim<span class="token punctuation">,</span> bias<span class="token operator">=</span><span class="token boolean">False</span><span class="token punctuation">,</span> gather_output<span class="token operator">=</span><span class="token boolean">False</span><span class="token punctuation">,</span> init_method<span class="token operator">=</span><span class="token keyword">lambda</span> x<span class="token punctuation">:</span> x
+        <span class="token punctuation">)</span>
+        self<span class="token punctuation">.</span>w2 <span class="token operator">=</span> RowParallelLinear<span class="token punctuation">(</span>
+            hidden_dim<span class="token punctuation">,</span> dim<span class="token punctuation">,</span> bias<span class="token operator">=</span><span class="token boolean">False</span><span class="token punctuation">,</span> input_is_parallel<span class="token operator">=</span><span class="token boolean">True</span><span class="token punctuation">,</span> init_method<span class="token operator">=</span><span class="token keyword">lambda</span> x<span class="token punctuation">:</span> x
+        <span class="token punctuation">)</span>
+        self<span class="token punctuation">.</span>w3 <span class="token operator">=</span> ColumnParallelLinear<span class="token punctuation">(</span>
+            dim<span class="token punctuation">,</span> hidden_dim<span class="token punctuation">,</span> bias<span class="token operator">=</span><span class="token boolean">False</span><span class="token punctuation">,</span> gather_output<span class="token operator">=</span><span class="token boolean">False</span><span class="token punctuation">,</span> init_method<span class="token operator">=</span><span class="token keyword">lambda</span> x<span class="token punctuation">:</span> x
+        <span class="token punctuation">)</span>
+
+    <span class="token keyword">def</span> <span class="token function">forward</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> x<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token keyword">return</span> self<span class="token punctuation">.</span>w2<span class="token punctuation">(</span>F<span class="token punctuation">.</span>silu<span class="token punctuation">(</span>self<span class="token punctuation">.</span>w1<span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">*</span> self<span class="token punctuation">.</span>w3<span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+
+<span class="token keyword">class</span> <span class="token class-name">TransformerBlock</span><span class="token punctuation">(</span>nn<span class="token punctuation">.</span>Module<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token keyword">def</span> <span class="token function">__init__</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> layer_id<span class="token punctuation">:</span> <span class="token builtin">int</span><span class="token punctuation">,</span> args<span class="token punctuation">:</span> ModelArgs<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token builtin">super</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span>__init__<span class="token punctuation">(</span><span class="token punctuation">)</span>
+        self<span class="token punctuation">.</span>n_heads <span class="token operator">=</span> args<span class="token punctuation">.</span>n_heads
+        self<span class="token punctuation">.</span>dim <span class="token operator">=</span> args<span class="token punctuation">.</span>dim
+        self<span class="token punctuation">.</span>head_dim <span class="token operator">=</span> args<span class="token punctuation">.</span>dim <span class="token operator">//</span> args<span class="token punctuation">.</span>n_heads
+        self<span class="token punctuation">.</span>attention <span class="token operator">=</span> Attention<span class="token punctuation">(</span>args<span class="token punctuation">)</span>
+        self<span class="token punctuation">.</span>feed_forward <span class="token operator">=</span> FeedForward<span class="token punctuation">(</span>
+            dim<span class="token operator">=</span>args<span class="token punctuation">.</span>dim<span class="token punctuation">,</span>
+            hidden_dim<span class="token operator">=</span><span class="token number">4</span> <span class="token operator">*</span> args<span class="token punctuation">.</span>dim<span class="token punctuation">,</span>
+            multiple_of<span class="token operator">=</span>args<span class="token punctuation">.</span>multiple_of<span class="token punctuation">,</span>
+            ffn_dim_multiplier<span class="token operator">=</span>args<span class="token punctuation">.</span>ffn_dim_multiplier<span class="token punctuation">,</span>
+        <span class="token punctuation">)</span>
+        self<span class="token punctuation">.</span>layer_id <span class="token operator">=</span> layer_id
+        self<span class="token punctuation">.</span>attention_norm <span class="token operator">=</span> RMSNorm<span class="token punctuation">(</span>args<span class="token punctuation">.</span>dim<span class="token punctuation">,</span> eps<span class="token operator">=</span>args<span class="token punctuation">.</span>norm_eps<span class="token punctuation">)</span>
+        self<span class="token punctuation">.</span>ffn_norm <span class="token operator">=</span> RMSNorm<span class="token punctuation">(</span>args<span class="token punctuation">.</span>dim<span class="token punctuation">,</span> eps<span class="token operator">=</span>args<span class="token punctuation">.</span>norm_eps<span class="token punctuation">)</span>
+
+    <span class="token keyword">def</span> <span class="token function">forward</span><span class="token punctuation">(</span>
+        self<span class="token punctuation">,</span>
+        x<span class="token punctuation">:</span> torch<span class="token punctuation">.</span>Tensor<span class="token punctuation">,</span>
+        start_pos<span class="token punctuation">:</span> <span class="token builtin">int</span><span class="token punctuation">,</span>
+        freqs_cis<span class="token punctuation">:</span> torch<span class="token punctuation">.</span>Tensor<span class="token punctuation">,</span>
+        mask<span class="token punctuation">:</span> Optional<span class="token punctuation">[</span>torch<span class="token punctuation">.</span>Tensor<span class="token punctuation">]</span><span class="token punctuation">,</span>
+    <span class="token punctuation">)</span><span class="token punctuation">:</span>
+        h <span class="token operator">=</span> x <span class="token operator">+</span> self<span class="token punctuation">.</span>attention<span class="token punctuation">(</span>self<span class="token punctuation">.</span>attention_norm<span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">,</span> start_pos<span class="token punctuation">,</span> freqs_cis<span class="token punctuation">,</span> mask<span class="token punctuation">)</span>
+        out <span class="token operator">=</span> h <span class="token operator">+</span> self<span class="token punctuation">.</span>feed_forward<span class="token punctuation">(</span>self<span class="token punctuation">.</span>ffn_norm<span class="token punctuation">(</span>h<span class="token punctuation">)</span><span class="token punctuation">)</span>
+        <span class="token keyword">return</span> out
+
+
+<span class="token keyword">class</span> <span class="token class-name">Transformer</span><span class="token punctuation">(</span>nn<span class="token punctuation">.</span>Module<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token keyword">def</span> <span class="token function">__init__</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> params<span class="token punctuation">:</span> ModelArgs<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token builtin">super</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span>__init__<span class="token punctuation">(</span><span class="token punctuation">)</span>
+        self<span class="token punctuation">.</span>params <span class="token operator">=</span> params
+        self<span class="token punctuation">.</span>vocab_size <span class="token operator">=</span> params<span class="token punctuation">.</span>vocab_size
+        self<span class="token punctuation">.</span>n_layers <span class="token operator">=</span> params<span class="token punctuation">.</span>n_layers
+
+        self<span class="token punctuation">.</span>tok_embeddings <span class="token operator">=</span> VocabParallelEmbedding<span class="token punctuation">(</span>
+            params<span class="token punctuation">.</span>vocab_size<span class="token punctuation">,</span> params<span class="token punctuation">.</span>dim<span class="token punctuation">,</span> init_method<span class="token operator">=</span><span class="token keyword">lambda</span> x<span class="token punctuation">:</span> x
+        <span class="token punctuation">)</span>
+
+        self<span class="token punctuation">.</span>layers <span class="token operator">=</span> torch<span class="token punctuation">.</span>nn<span class="token punctuation">.</span>ModuleList<span class="token punctuation">(</span><span class="token punctuation">)</span>
+        <span class="token keyword">for</span> layer_id <span class="token keyword">in</span> <span class="token builtin">range</span><span class="token punctuation">(</span>params<span class="token punctuation">.</span>n_layers<span class="token punctuation">)</span><span class="token punctuation">:</span>
+            self<span class="token punctuation">.</span>layers<span class="token punctuation">.</span>append<span class="token punctuation">(</span>TransformerBlock<span class="token punctuation">(</span>layer_id<span class="token punctuation">,</span> params<span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+        self<span class="token punctuation">.</span>norm <span class="token operator">=</span> RMSNorm<span class="token punctuation">(</span>params<span class="token punctuation">.</span>dim<span class="token punctuation">,</span> eps<span class="token operator">=</span>params<span class="token punctuation">.</span>norm_eps<span class="token punctuation">)</span>
+        self<span class="token punctuation">.</span>output <span class="token operator">=</span> ColumnParallelLinear<span class="token punctuation">(</span>
+            params<span class="token punctuation">.</span>dim<span class="token punctuation">,</span> params<span class="token punctuation">.</span>vocab_size<span class="token punctuation">,</span> bias<span class="token operator">=</span><span class="token boolean">False</span><span class="token punctuation">,</span> init_method<span class="token operator">=</span><span class="token keyword">lambda</span> x<span class="token punctuation">:</span> x
+        <span class="token punctuation">)</span>
+
+        self<span class="token punctuation">.</span>freqs_cis <span class="token operator">=</span> precompute_freqs_cis<span class="token punctuation">(</span>
+            params<span class="token punctuation">.</span>dim <span class="token operator">//</span> params<span class="token punctuation">.</span>n_heads<span class="token punctuation">,</span>
+            params<span class="token punctuation">.</span>max_seq_len <span class="token operator">*</span> <span class="token number">2</span><span class="token punctuation">,</span>
+            params<span class="token punctuation">.</span>rope_theta<span class="token punctuation">,</span>
+        <span class="token punctuation">)</span>
+
+    <span class="token decorator annotation punctuation">@torch<span class="token punctuation">.</span>inference_mode</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token keyword">def</span> <span class="token function">forward</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> tokens<span class="token punctuation">:</span> torch<span class="token punctuation">.</span>Tensor<span class="token punctuation">,</span> start_pos<span class="token punctuation">:</span> <span class="token builtin">int</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+        _bsz<span class="token punctuation">,</span> seqlen <span class="token operator">=</span> tokens<span class="token punctuation">.</span>shape
+        h <span class="token operator">=</span> self<span class="token punctuation">.</span>tok_embeddings<span class="token punctuation">(</span>tokens<span class="token punctuation">)</span>
+        self<span class="token punctuation">.</span>freqs_cis <span class="token operator">=</span> self<span class="token punctuation">.</span>freqs_cis<span class="token punctuation">.</span>to<span class="token punctuation">(</span>h<span class="token punctuation">.</span>device<span class="token punctuation">)</span>
+        freqs_cis <span class="token operator">=</span> self<span class="token punctuation">.</span>freqs_cis<span class="token punctuation">[</span>start_pos <span class="token punctuation">:</span> start_pos <span class="token operator">+</span> seqlen<span class="token punctuation">]</span>
+
+        mask <span class="token operator">=</span> <span class="token boolean">None</span>
+        <span class="token keyword">if</span> seqlen <span class="token operator">></span> <span class="token number">1</span><span class="token punctuation">:</span>
+            mask <span class="token operator">=</span> torch<span class="token punctuation">.</span>full<span class="token punctuation">(</span><span class="token punctuation">(</span>seqlen<span class="token punctuation">,</span> seqlen<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token builtin">float</span><span class="token punctuation">(</span><span class="token string">"-inf"</span><span class="token punctuation">)</span><span class="token punctuation">,</span> device<span class="token operator">=</span>tokens<span class="token punctuation">.</span>device<span class="token punctuation">)</span>
+
+            mask <span class="token operator">=</span> torch<span class="token punctuation">.</span>triu<span class="token punctuation">(</span>mask<span class="token punctuation">,</span> diagonal<span class="token operator">=</span><span class="token number">1</span><span class="token punctuation">)</span>
+
+            <span class="token comment"># When performing key-value caching, we compute the attention scores</span>
+            <span class="token comment"># only for the new sequence. Thus, the matrix of scores is of size</span>
+            <span class="token comment"># (seqlen, cache_len + seqlen), and the only masked entries are (i, j) for</span>
+            <span class="token comment"># j > cache_len + i, since row i corresponds to token cache_len + i.</span>
+            mask <span class="token operator">=</span> torch<span class="token punctuation">.</span>hstack<span class="token punctuation">(</span>
+                <span class="token punctuation">[</span>torch<span class="token punctuation">.</span>zeros<span class="token punctuation">(</span><span class="token punctuation">(</span>seqlen<span class="token punctuation">,</span> start_pos<span class="token punctuation">)</span><span class="token punctuation">,</span> device<span class="token operator">=</span>tokens<span class="token punctuation">.</span>device<span class="token punctuation">)</span><span class="token punctuation">,</span> mask<span class="token punctuation">]</span>
+            <span class="token punctuation">)</span><span class="token punctuation">.</span>type_as<span class="token punctuation">(</span>h<span class="token punctuation">)</span>
+
+        <span class="token keyword">for</span> layer <span class="token keyword">in</span> self<span class="token punctuation">.</span>layers<span class="token punctuation">:</span>
+            h <span class="token operator">=</span> layer<span class="token punctuation">(</span>h<span class="token punctuation">,</span> start_pos<span class="token punctuation">,</span> freqs_cis<span class="token punctuation">,</span> mask<span class="token punctuation">)</span>
+        h <span class="token operator">=</span> self<span class="token punctuation">.</span>norm<span class="token punctuation">(</span>h<span class="token punctuation">)</span>
+        output <span class="token operator">=</span> self<span class="token punctuation">.</span>output<span class="token punctuation">(</span>h<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token builtin">float</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+        <span class="token keyword">return</span> output
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+          </div>
+          
+            <div class="dot-line"></div>
+            <div class="post-meta">
+              <div class="post-date">
+                <i class="fa fa-calendar"></i>&nbsp;&nbsp;<span class="post-date">2025/05/07</span>
+              </div>
+              <div class="post-tags">
+                 
+                  
+                    <div class="tag-item">
+                      <a href="/tags/LLM/"><i class="fa fa-tag"></i>&nbsp;&nbsp;LLM</a>
+                    </div>
+                  
+                
+              </div>
+            </div>
+          
+      </div>
+  </div>
+</main>
+
+<script src="https://giscus.app/client.js"
+        data-repo="maodaisuki/hexo-theme-maoblog"
+        data-repo-id="R_kgDOKICkkw"
+        data-category="Announcements"
+        data-category-id="DIC_kwDOKICkk84CZEWg"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="0"
+        data-emit-metadata="0"
+        data-input-position="top"
+        data-theme="light"
+        data-lang="en"
+        crossorigin="anonymous"
+        async>
+</script>
+<!-- 前往 https://giscus.app 获取配置代码 -->
+
+
+  
+<script src="/js/mermaid.min.js"></script>
+
+
+
+<script src="/js/zoom/jquery.min.js"></script>
+
+
+<script src="/js/zoom/bootstrap.min.js"></script>
+
+
+<script src="/js/zoom/zoom.js"></script>
+
+
+<script src="/js/maoblog.js"></script>
+
+
+<script src="/js/prism.js"></script>
+</div>
+        <div class="footer-wrapper"><footer>
+  <div class="footer-container">
+    <div class="footer-meta">
+      
+        <div class="footer-meta-copyright">
+          &copy; 2025 mao.
+        </div>
+      
+      
+        <div class="footer-meta-licenese">
+          Licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC-BY-NC-SA 4.0</a>
+        </div>
+      
+      
+        <div class="footer-meta-rss">
+          <a href="/atom.xml"><i class="fa fa-rss"></i></a>
+        </div>
+      
+    </div>
+  </div>
+</footer>
+</div>
+      </div>
+    </div>
+  </body>
+  <script type="text/javascript">
+    var searchXMLPath = "https://weikangqi.github.io" + "/" + "search.xml"
+    console.log(searchXMLPath)
+  </script>
+  
+<script src="/js/search/search.js"></script>
+
+</html>

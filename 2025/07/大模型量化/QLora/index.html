@@ -6,7 +6,7 @@
   <link rel="alternate icon" type="image/png" href="/img/favicon.ico">
   <title>
     
-      Jacobi Decoding |
+      QLora |
      
     Blog
   </title>
@@ -93,27 +93,60 @@
       <div class="post-details">
           
             <div class="post-title">
-              <h1>Jacobi Decoding</h1>
+              <h1>QLora</h1>
             </div>
           
           <div class="post-content">
-            <h1 id="jacobi-decoding"><a class="markdownIt-Anchor" href="#jacobi-decoding"></a> Jacobi Decoding</h1>
-<p>在神经机器翻译（NMT）中，Transformer 模型已成为主流。然而，虽然 Transformer 在训练阶段可以高度并行化，但在推理阶段却依赖<strong>自回归解码</strong>（autoregressive decoding），即一次生成一个 token，每个新 token 又依赖前面已经生成的 token。这种<strong>顺序依赖</strong>导致推理速度成为瓶颈，特别是在需要低延迟的实际应用中。以往的研究多集中在 <strong>非自回归翻译（NAT）</strong>，它可以一次性并行生成整句翻译。但 NAT 方法往往需要重新设计模型结构、消耗大量训练资源，而且翻译质量通常会有所下降。</p>
-<p>这篇 ACL 2023 的论文提出了一条<strong>全新的路径</strong>：与其重新训练模型，不如<strong>改变解码算法本身</strong>，让现有的自回归模型也能“并行解码”。</p>
-<img src="https://raw.githubusercontent.com/weikangqi/picgo/main/equations.png" alt="img" style="zoom: 50%;" />
+            <h1 id="qlora"><a class="markdownIt-Anchor" href="#qlora"></a> <strong>QLora</strong></h1>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/666234324">zhuanlan.zhihu.com/…</a></p>
+<p>QLora属于非线性量化，使用NF4量化策略。基于分块的分位数量化的量化策略；其次是双重量化，包含对普通参数的一次量化和对量化常数的再一次量化，可以进一步减小缓存占用；具有k-比特的有损最小熵编码具有如下特性：<strong>当将输入数据进行量化时，每个可能的k-bit的整数值出现的频率是相等的（k-bit 如4bit，16个整型数字出现的频率一样，所有数字被均匀分配到这16个数字，这样具有最小损失）</strong>。如果我们粗暴的使用round操作去低精度的更近的值，我们可能造成大量的数据都被量化到同一个数上，这样特征之间的差异性在量化过程中就被丢失了。</p>
+<h3 id="分位数量化"><a class="markdownIt-Anchor" href="#分位数量化"></a> <strong>分位数量化</strong></h3>
+<p>首先将参数进行分布统计，以下是正态分布图</p>
+<p>​            <img src="https://raw.githubusercontent.com/weikangqi/picgo/main/MTMxMDI2NjQyOTU5MTk3NjM_330702_ND9XoBvHEZaNxz_U_1754895845" alt="img" style="zoom: 33%;" /></p>
+<p>​</p>
+<p>x轴代表了参数范围，y轴代表了出现的概率，如果我们要量化成4bit，那么x轴应该分成16份。每一份的面积相等。下一步需要确定分为数值。预训练模型的参数往往是符合正态分布的，累积分布函数的反函数来简化分位数计算。</p>
+<p>以下是累计分布函数，以4bit为例，讲y轴分成16份，求出x轴坐标。</p>
+<p>​            <img src="https://raw.githubusercontent.com/weikangqi/picgo/main/MTMxMDI2NjQyOTU5MTk3NjM_358076_FNsq37BJqEx0ESBM_1754898669" alt="img" style="zoom: 33%;" /></p>
+<p>​</p>
+<p>i是指bin的边界（0 - 1）有17，16个区间，使用16个点来代表。每个点的值是两个边界的平均值。于是可以得到qi。0和1的CDF的反函数的解分别是负无穷和正无穷，因此我们不能将0和1代入式(3)。为了解决这个问题，我们可以设置一个偏移（offset）位。使用偏移位后我们计算的区间不再是[0,1]，而是[1-offerset,offset]</p>
+<p>量化步骤</p>
+<ol>
+<li>对参数进行归一化，x/x_max</li>
+<li>对参数找到最接近的qi</li>
+<li>将i 整型代表浮点数，存储到张量中</li>
+</ol>
+<h3 id="分块"><a class="markdownIt-Anchor" href="#分块"></a> 分块</h3>
+<p>分块k位量化的策略是通过将张量分成若干个块，让每个块都有独立的量化常数c，从而解决模型参数的极大极小的异常值的问题。分块量化的另外一个好处是减少了核之间的通信，可以实现更好的并行性，并充分利用硬件的多核的能力。</p>
+<h3 id="存储"><a class="markdownIt-Anchor" href="#存储"></a> 存储</h3>
+<p>需要存储一个归一化参数C  =x_max，以及一张整型到浮点数的映射表。</p>
+<h3 id="双重量化"><a class="markdownIt-Anchor" href="#双重量化"></a> 双重量化</h3>
+<p>双重量化就是除了上面的量化再量化一次，归一化参数C，可以进行8bit量化减小存储。</p>
+<p>累计分布函数CDF：x轴如下从小到大表示数据分布，y轴代表了累计分布的概率</p>
+<p>​            <img src="https://raw.githubusercontent.com/weikangqi/picgo/main/MTMxMDI2NjQyOTU5MTk3NjM_220726_46YxVCtYclWW7bHO_1754896591" alt="img" style="zoom: 23%;" /></p>
+<p>​</p>
+<p>逆累计分布函数ICDF</p>
+<p>所以“逆累积分布函数”的意思其实是“反累积分布函数”</p>
+<p><strong>累积分布：分位点－&gt;概率，</strong></p>
+<p><strong>逆累积分布：概率－&gt;分位点。</strong></p>
 
           </div>
           
             <div class="dot-line"></div>
             <div class="post-meta">
               <div class="post-date">
-                <i class="fa fa-calendar"></i>&nbsp;&nbsp;<span class="post-date">2013/12/02</span>
+                <i class="fa fa-calendar"></i>&nbsp;&nbsp;<span class="post-date">2025/07/02</span>
               </div>
               <div class="post-tags">
-                
-                  <div class="tag-item">
-                    <a href="#"><i class="fa fa-tag"></i>&nbsp;&nbsp;Untagged</a>
-                  </div>
+                 
+                  
+                    <div class="tag-item">
+                      <a href="/tags/LLM/"><i class="fa fa-tag"></i>&nbsp;&nbsp;LLM</a>
+                    </div>
+                  
+                    <div class="tag-item">
+                      <a href="/tags/%E9%87%8F%E5%8C%96/"><i class="fa fa-tag"></i>&nbsp;&nbsp;量化</a>
+                    </div>
+                  
                 
               </div>
             </div>

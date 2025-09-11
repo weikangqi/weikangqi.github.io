@@ -6,7 +6,7 @@
   <link rel="alternate icon" type="image/png" href="/img/favicon.ico">
   <title>
     
-      Hello World |
+      Lookahead |
      
     Blog
   </title>
@@ -93,39 +93,48 @@
       <div class="post-details">
           
             <div class="post-title">
-              <h1>Hello World</h1>
+              <h1>Lookahead</h1>
             </div>
           
           <div class="post-content">
-            <p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a target="_blank" rel="noopener" href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a target="_blank" rel="noopener" href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="quick-start"><a class="markdownIt-Anchor" href="#quick-start"></a> Quick Start</h2>
-<h3 id="create-a-new-post"><a class="markdownIt-Anchor" href="#create-a-new-post"></a> Create a new post</h3>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;iostream></span></span>
-<span class="token keyword">using</span> <span class="token keyword">namespace</span> std<span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="run-server"><a class="markdownIt-Anchor" href="#run-server"></a> Run server</h3>
-<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ hexo server<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="generate-static-files"><a class="markdownIt-Anchor" href="#generate-static-files"></a> Generate static files</h3>
-<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ hexo generate<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="deploy-to-remote-sites"><a class="markdownIt-Anchor" href="#deploy-to-remote-sites"></a> Deploy to remote sites</h3>
-<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ hexo deploy<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<img src="https://raw.githubusercontent.com/weikangqi/picgo/main/lookahead-decoding.gif" alt="lookahead-decoding" style="zoom:50%;" />
-<p>![image-20250822002821998](C:</p>
+            <p>Jacobi 迭代把自回归的N次迭代转换为N个方程，然后联合求解。而 <a target="_blank" rel="noopener" href="https://zhida.zhihu.com/search?content_id=257559026&amp;content_type=Article&amp;match_order=1&amp;q=Jacobi+Decoding&amp;zhida_source=entity">Jacobi Decoding</a> 将每次迭代上一次的输出整体作为下一次的输入，其实就是把每一个 token 上的输出视作一个 2-gram，并以此作为Draft Model。论文“Break the Sequential Dependency of LLM Inference Using Lookahead Decoding”的作者想到，如果可以记录下更多的历史信息，就可以制造一个 N-gram 作为 Draft Model，这样就能提高 Speculative Decoding 的准确率。这就是Lookahead Decoding。简要来说，Lookahead=N-gram+Jacobi iteration+parallel verification，其利用 jacobi 迭代法同时提取和验证 n-grams，打破自回归解码的顺序依赖性，从而降低解码次数，实现推理加速。相比之前的并行解码，Lookahead Decoding即不需要草稿模型，也不需要像Medusa那样微调head。论文作者将 Jacobi Decoding 视为Lookahead Decoding在 2-gram 情况下的特例。</p>
+<img src="https://github.com/hao-ai-lab/LookaheadDecoding/raw/main/media/lookahead-decoding.gif" alt="img" style="zoom: 33%;" />
+<p>为了加速解码过程，每个Lookahead Decoding步骤被分为两个并行分支：生成n-gram的lookahead分支和验证n-gram的verification分支，两者都在一个前向传播过程中执行。</p>
+<ul>
+<li>Lookahead（前瞻）分支：这是原始雅可比解码的过程。因为不一致性的问题，此过程不会被用作主要投机验证的机制，而是作为一种采样收集或者说生成 n-gram 的并行解码过程。Lookahead 分支的目的是生成新的 N-Grams，加上其中新生成的 Token 就可以用于构建下一次 Verify 分支的候选序列。</li>
+<li>Verification（验证）分支：这个分支从n-gram集合中匹配的多个candidates作为投机验证输入，完成具体的投机采样过程。verification分支会选择并验证有希望的 n-gram ，并且会将其用于更新下一次 Lookahead 分支的序列。</li>
+</ul>
+<h2 id="推理"><a class="markdownIt-Anchor" href="#推理"></a> 推理</h2>
+<img src="https://raw.githubusercontent.com/weikangqi/picgo/main/image-20250902163700561.png" alt="image-20250902163700561" style="zoom:50%;" />
+<p>推理时，由于 LLM 解码主要受内存带宽限制，因此我们在同一步骤中合并前瞻和验证分支，利用 GPU 的并行处理能力来隐藏开销。 mask就是并行解码的关键。本示例的mask具体如上图所示。</p>
+<h2 id="prepare-for-next-iteration"><a class="markdownIt-Anchor" href="#prepare-for-next-iteration"></a> <strong>Prepare for next iteration</strong></h2>
+<p>当前迭代结束之后，会为下一次迭代做好准备。具体是：</p>
+<ul>
+<li>更新 2D Window。用后一层替代前一层（最后一层由最新输出得到的logits填充），并根据被接受的 tokens 的数量截断每一层。在当前的序列中随机采样填充被截断的部分。</li>
+<li>更新 n-gram。如何生成新的n-gram？其实就是就是在2d-window里面从上往下找。</li>
+<li>更新下一次前向的 Attention Mask 和 KV Cache。假设接受了 k 个 tokens，就据此扩展 Attention Mask，并将这 k 个 tokens 的 cache 拼接到 KV Cache 上。</li>
+<li>当满足退出条件，例如生成的 tokens 长度达到<code>max_length</code>时，返回结果。</li>
+</ul>
+<img src="https://raw.githubusercontent.com/weikangqi/picgo/main/lookahead-perf.png" alt="img" style="zoom: 33%;" />
 
           </div>
           
             <div class="dot-line"></div>
             <div class="post-meta">
               <div class="post-date">
-                <i class="fa fa-calendar"></i>&nbsp;&nbsp;<span class="post-date">2013/12/02</span>
+                <i class="fa fa-calendar"></i>&nbsp;&nbsp;<span class="post-date">2025/07/03</span>
               </div>
               <div class="post-tags">
-                
-                  <div class="tag-item">
-                    <a href="#"><i class="fa fa-tag"></i>&nbsp;&nbsp;Untagged</a>
-                  </div>
+                 
+                  
+                    <div class="tag-item">
+                      <a href="/tags/LLM/"><i class="fa fa-tag"></i>&nbsp;&nbsp;LLM</a>
+                    </div>
+                  
+                    <div class="tag-item">
+                      <a href="/tags/%E6%8A%95%E6%9C%BA%E8%A7%A3%E7%A0%81/"><i class="fa fa-tag"></i>&nbsp;&nbsp;投机解码</a>
+                    </div>
+                  
                 
               </div>
             </div>
