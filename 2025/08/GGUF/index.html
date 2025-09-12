@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport" />
+  <link rel="alternate icon" type="image/png" href="/img/favicon.ico">
+  <title>
+    
+      GGUF格式 |
+     
+    Blog
+  </title>
+  
+<link rel="stylesheet" href="/css/maoblog.css">
+
+  
+<link rel="stylesheet" href="/css/partials/post.css">
+
+  
+<link rel="stylesheet" href="/css/partials/comment.css">
+
+  
+<link rel="stylesheet" href="/css/partials/search.css">
+
+  
+<link rel="stylesheet" href="/css/partials/meta.css">
+
+  
+<link rel="stylesheet" href="/css/partials/about.css">
+
+  
+<link rel="stylesheet" href="/fontawesome/css/font-awesome.min.css">
+
+  
+<link rel="stylesheet" href="/css/zoom.css">
+
+  
+<link rel="stylesheet" href="/css/prism.css">
+
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="/css/math/katex.min.css">
+
+<link rel="stylesheet" href="/css/math/style.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 5.4.2"><link rel="alternate" href="/atom.xml" title="Blog" type="application/atom+xml">
+</head>
+
+
+  <body>
+    <div class="body-container">
+      <div class="body-main">
+        <div class="header-wrapper"><div class="header">
+  <a class="logo" href="/">Blog</a>
+  <ul class="nav">
+    
+      
+        <li><a href="/">Posts</a></li>
+      
+    
+      
+        <li><a href="/tags">Tags</a></li>
+      
+    
+      
+        <li><a style="cursor: pointer;" onclick="openSearchBar()">Search</a></li>
+      
+    
+      
+        <li><a href="/about">About</a></li>
+      
+    
+    <!-- <li class="site-mode">light</i></li> -->
+  </ul>
+</div>
+<div class="search-bar-container">  
+    <div class="search-bar">
+        <input id="search-input" value="" class="search-input" autofocus placeholder="Search something..." type="text" onblur="hideSearchBar()" oninput="exportSearchContent()">
+    </div>
+    <div class="search-output">
+        <ul class="search-output-list">
+            <!-- 结果列表 -->
+            <!-- <span style="padding-left: 3px; margin-left: 3px;">无记录</span> -->
+            <li class="Searching">
+                <div class="content">
+                    Searching...
+                </div>
+            </li>
+        </ul>
+        <span style="padding-left: 3px; margin-left: 3px; font-size: 13px;"><em>Powered by <span  onclick="goToLink(this)"><a href="/search.xml" class="search-xml li-link">search.xml</a></span></em></span>
+    </div>
+</div></div>
+        <div class="main-wrapper"><main>
+  <div class="main-container">
+      <div class="post-details">
+          
+            <div class="post-title">
+              <h1>GGUF格式</h1>
+            </div>
+          
+          <div class="post-content">
+            <h1 id=""><a class="markdownIt-Anchor" href="#"></a> </h1>
+<p>Hugging Face Hub 支持所有文件格式，但具有 GGUF 格式的内置功能，GGUF 是一种二进制格式，针对快速加载和保存模型进行了优化，使其能够高效地用于推理目的。 GGUF 设计用于与 GGML 和其他执行器一起使用。 GGUF 由 @ggerganov 开发，他也是流行的 C/C++ LLM 推理框架 llama.cpp 的开发者。最初在 PyTorch 等框架中开发的模型可以转换为 GGUF 格式，以便与这些引擎一起使用。</p>
+<p><img src="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/gguf-spec.png" alt="来自huggin face" /></p>
+<p>正如我们在此图中看到的，与仅张量的文件格式（例如 safetensors）不同（这也是 Hub 的推荐模型格式），GGUF 对张量和一组标准化元数据进行编码。</p>
+<h2 id="quantization-types"><a class="markdownIt-Anchor" href="#quantization-types"></a> Quantization Types</h2>
+<table>
+<thead>
+<tr>
+<th>type</th>
+<th>source</th>
+<th style="text-align:left">description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>F64</td>
+<td><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Double-precision_floating-point_format">Wikipedia</a></td>
+<td style="text-align:left">64-bit standard IEEE 754 double-precision floating-point number.</td>
+</tr>
+<tr>
+<td>I64</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/ggerganov/llama.cpp/pull/6062">GH</a></td>
+<td style="text-align:left">64-bit fixed-width integer number.</td>
+</tr>
+<tr>
+<td>F32</td>
+<td><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Single-precision_floating-point_format">Wikipedia</a></td>
+<td style="text-align:left">32-bit standard IEEE 754 single-precision floating-point number.</td>
+</tr>
+<tr>
+<td>I32</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/ggerganov/llama.cpp/pull/6045">GH</a></td>
+<td style="text-align:left">32-bit fixed-width integer number.</td>
+</tr>
+<tr>
+<td>F16</td>
+<td><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Half-precision_floating-point_format">Wikipedia</a></td>
+<td style="text-align:left">16-bit standard IEEE 754 half-precision floating-point number.</td>
+</tr>
+<tr>
+<td>BF16</td>
+<td><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Bfloat16_floating-point_format">Wikipedia</a></td>
+<td style="text-align:left">16-bit shortened version of the 32-bit IEEE 754 single-precision floating-point number.</td>
+</tr>
+<tr>
+<td>I16</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/ggerganov/llama.cpp/pull/6045">GH</a></td>
+<td style="text-align:left">16-bit fixed-width integer number.</td>
+</tr>
+<tr>
+<td>Q8_0</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/huggingface/huggingface.js/pull/615#discussion_r1557654249">GH</a></td>
+<td style="text-align:left">8-bit round-to-nearest quantization (<code>q</code>). Each block has 32 weights. Weight formula: <code>w = q * block_scale</code>. Legacy quantization method (not used widely as of today).</td>
+</tr>
+<tr>
+<td>Q8_1</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/huggingface/huggingface.js/pull/615#discussion_r1557682290">GH</a></td>
+<td style="text-align:left">8-bit round-to-nearest quantization (<code>q</code>). Each block has 32 weights. Weight formula: <code>w = q * block_scale + block_minimum</code>. Legacy quantization method (not used widely as of today)</td>
+</tr>
+<tr>
+<td>Q8_K</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/ggerganov/llama.cpp/pull/1684#issue-1739619305">GH</a></td>
+<td style="text-align:left">8-bit quantization (<code>q</code>). Each block has 256 weights. Only used for quantizing intermediate results. All 2-6 bit dot products are implemented for this quantization type. Weight formula: <code>w = q * block_scale</code>.</td>
+</tr>
+<tr>
+<td>I8</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/ggerganov/llama.cpp/pull/6045">GH</a></td>
+<td style="text-align:left">8-bit fixed-width integer number.</td>
+</tr>
+<tr>
+<td>Q6_K</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/ggerganov/llama.cpp/pull/1684#issue-1739619305">GH</a></td>
+<td style="text-align:left">6-bit quantization (<code>q</code>). Super-blocks with 16 blocks, each block has 16 weights. Weight formula: <code>w = q * block_scale(8-bit)</code>, resulting in 6.5625 bits-per-weight.</td>
+</tr>
+<tr>
+<td>Q5_0</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/huggingface/huggingface.js/pull/615#discussion_r1557654249">GH</a></td>
+<td style="text-align:left">5-bit round-to-nearest quantization (<code>q</code>). Each block has 32 weights. Weight formula: <code>w = q * block_scale</code>. Legacy quantization method (not used widely as of today).</td>
+</tr>
+<tr>
+<td>Q5_1</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/huggingface/huggingface.js/pull/615#discussion_r1557682290">GH</a></td>
+<td style="text-align:left">5-bit round-to-nearest quantization (<code>q</code>). Each block has 32 weights. Weight formula: <code>w = q * block_scale + block_minimum</code>. Legacy quantization method (not used widely as of today).</td>
+</tr>
+<tr>
+<td>Q5_K</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/ggerganov/llama.cpp/pull/1684#issue-1739619305">GH</a></td>
+<td style="text-align:left">5-bit quantization (<code>q</code>). Super-blocks with 8 blocks, each block has 32 weights. Weight formula: <code>w = q * block_scale(6-bit) + block_min(6-bit)</code>, resulting in 5.5 bits-per-weight.</td>
+</tr>
+<tr>
+<td>Q4_0</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/huggingface/huggingface.js/pull/615#discussion_r1557654249">GH</a></td>
+<td style="text-align:left">4-bit round-to-nearest quantization (<code>q</code>). Each block has 32 weights. Weight formula: <code>w = q * block_scale</code>. Legacy quantization method (not used widely as of today).</td>
+</tr>
+<tr>
+<td>Q4_1</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/huggingface/huggingface.js/pull/615#discussion_r1557682290">GH</a></td>
+<td style="text-align:left">4-bit round-to-nearest quantization (<code>q</code>). Each block has 32 weights. Weight formula: <code>w = q * block_scale + block_minimum</code>. Legacy quantization method (not used widely as of today).</td>
+</tr>
+<tr>
+<td>Q4_K</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/ggerganov/llama.cpp/pull/1684#issue-1739619305">GH</a></td>
+<td style="text-align:left">4-bit quantization (<code>q</code>). Super-blocks with 8 blocks, each block has 32 weights. Weight formula: <code>w = q * block_scale(6-bit) + block_min(6-bit)</code>, resulting in 4.5 bits-per-weight.</td>
+</tr>
+<tr>
+<td>Q3_K</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/ggerganov/llama.cpp/pull/1684#issue-1739619305">GH</a></td>
+<td style="text-align:left">3-bit quantization (<code>q</code>). Super-blocks with 16 blocks, each block has 16 weights. Weight formula: <code>w = q * block_scale(6-bit)</code>, resulting. 3.4375 bits-per-weight.</td>
+</tr>
+<tr>
+<td>Q2_K</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/ggerganov/llama.cpp/pull/1684#issue-1739619305">GH</a></td>
+<td style="text-align:left">2-bit quantization (<code>q</code>). Super-blocks with 16 blocks, each block has 16 weight. Weight formula: <code>w = q * block_scale(4-bit) + block_min(4-bit)</code>, resulting in 2.5625 bits-per-weight.</td>
+</tr>
+<tr>
+<td>IQ4_NL</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/ggerganov/llama.cpp/pull/5590">GH</a></td>
+<td style="text-align:left">4-bit quantization (<code>q</code>). Super-blocks with 256 weights. Weight <code>w</code> is obtained using <code>super_block_scale</code> &amp; <code>importance matrix</code>.</td>
+</tr>
+<tr>
+<td>IQ4_XS</td>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/CISCai/OpenCodeInterpreter-DS-6.7B-SOTA-GGUF/blob/main/README.md?code=true#L59-L70">HF</a></td>
+<td style="text-align:left">4-bit quantization (<code>q</code>). Super-blocks with 256 weights. Weight <code>w</code> is obtained using <code>super_block_scale</code> &amp; <code>importance matrix</code>, resulting in 4.25 bits-per-weight.</td>
+</tr>
+<tr>
+<td>IQ3_S</td>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/CISCai/OpenCodeInterpreter-DS-6.7B-SOTA-GGUF/blob/main/README.md?code=true#L59-L70">HF</a></td>
+<td style="text-align:left">3-bit quantization (<code>q</code>). Super-blocks with 256 weights. Weight <code>w</code> is obtained using <code>super_block_scale</code> &amp; <code>importance matrix</code>, resulting in 3.44 bits-per-weight.</td>
+</tr>
+<tr>
+<td>IQ3_XXS</td>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/CISCai/OpenCodeInterpreter-DS-6.7B-SOTA-GGUF/blob/main/README.md?code=true#L59-L70">HF</a></td>
+<td style="text-align:left">3-bit quantization (<code>q</code>). Super-blocks with 256 weights. Weight <code>w</code> is obtained using <code>super_block_scale</code> &amp; <code>importance matrix</code>, resulting in 3.06 bits-per-weight.</td>
+</tr>
+<tr>
+<td>IQ2_XXS</td>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/CISCai/OpenCodeInterpreter-DS-6.7B-SOTA-GGUF/blob/main/README.md?code=true#L59-L70">HF</a></td>
+<td style="text-align:left">2-bit quantization (<code>q</code>). Super-blocks with 256 weights. Weight <code>w</code> is obtained using <code>super_block_scale</code> &amp; <code>importance matrix</code>, resulting in 2.06 bits-per-weight.</td>
+</tr>
+<tr>
+<td>IQ2_S</td>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/CISCai/OpenCodeInterpreter-DS-6.7B-SOTA-GGUF/blob/main/README.md?code=true#L59-L70">HF</a></td>
+<td style="text-align:left">2-bit quantization (<code>q</code>). Super-blocks with 256 weights. Weight <code>w</code> is obtained using <code>super_block_scale</code> &amp; <code>importance matrix</code>, resulting in 2.5 bits-per-weight.</td>
+</tr>
+<tr>
+<td>IQ2_XS</td>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/CISCai/OpenCodeInterpreter-DS-6.7B-SOTA-GGUF/blob/main/README.md?code=true#L59-L70">HF</a></td>
+<td style="text-align:left">2-bit quantization (<code>q</code>). Super-blocks with 256 weights. Weight <code>w</code> is obtained using <code>super_block_scale</code> &amp; <code>importance matrix</code>, resulting in 2.31 bits-per-weight.</td>
+</tr>
+<tr>
+<td>IQ1_S</td>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/CISCai/OpenCodeInterpreter-DS-6.7B-SOTA-GGUF/blob/main/README.md?code=true#L59-L70">HF</a></td>
+<td style="text-align:left">1-bit quantization (<code>q</code>). Super-blocks with 256 weights. Weight <code>w</code> is obtained using <code>super_block_scale</code> &amp; <code>importance matrix</code>, resulting in 1.56 bits-per-weight.</td>
+</tr>
+<tr>
+<td>IQ1_M</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/ggerganov/llama.cpp/pull/6302">GH</a></td>
+<td style="text-align:left">1-bit quantization (<code>q</code>). Super-blocks with 256 weights. Weight <code>w</code> is obtained using <code>super_block_scale</code> &amp; <code>importance matrix</code>, resulting in 1.75 bits-per-weight.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="provided-files"><a class="markdownIt-Anchor" href="#provided-files"></a> Provided files</h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Quant method</th>
+<th>Bits</th>
+<th>Size</th>
+<th>Max RAM required</th>
+<th>Use case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/TheBloke/Llama-2-13B-chat-GGML/blob/main/llama-2-13b-chat.ggmlv3.q2_K.bin">llama-2-13b-chat.ggmlv3.q2_K.bin</a></td>
+<td>q2_K</td>
+<td>2</td>
+<td>5.51 GB</td>
+<td>8.01 GB</td>
+<td>New k-quant method. Uses GGML_TYPE_Q4_K for the attention.vw and feed_forward.w2 tensors, GGML_TYPE_Q2_K for the other tensors.</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/TheBloke/Llama-2-13B-chat-GGML/blob/main/llama-2-13b-chat.ggmlv3.q3_K_S.bin">llama-2-13b-chat.ggmlv3.q3_K_S.bin</a></td>
+<td>q3_K_S</td>
+<td>3</td>
+<td>5.66 GB</td>
+<td>8.16 GB</td>
+<td>New k-quant method. Uses GGML_TYPE_Q3_K for all tensors</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/TheBloke/Llama-2-13B-chat-GGML/blob/main/llama-2-13b-chat.ggmlv3.q3_K_M.bin">llama-2-13b-chat.ggmlv3.q3_K_M.bin</a></td>
+<td>q3_K_M</td>
+<td>3</td>
+<td>6.31 GB</td>
+<td>8.81 GB</td>
+<td>New k-quant method. Uses GGML_TYPE_Q4_K for the attention.wv, attention.wo, and feed_forward.w2 tensors, else GGML_TYPE_Q3_K</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/TheBloke/Llama-2-13B-chat-GGML/blob/main/llama-2-13b-chat.ggmlv3.q3_K_L.bin">llama-2-13b-chat.ggmlv3.q3_K_L.bin</a></td>
+<td>q3_K_L</td>
+<td>3</td>
+<td>6.93 GB</td>
+<td>9.43 GB</td>
+<td>New k-quant method. Uses GGML_TYPE_Q5_K for the attention.wv, attention.wo, and feed_forward.w2 tensors, else GGML_TYPE_Q3_K</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/TheBloke/Llama-2-13B-chat-GGML/blob/main/llama-2-13b-chat.ggmlv3.q4_0.bin">llama-2-13b-chat.ggmlv3.q4_0.bin</a></td>
+<td>q4_0</td>
+<td>4</td>
+<td>7.32 GB</td>
+<td>9.82 GB</td>
+<td>Original quant method, 4-bit.</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/TheBloke/Llama-2-13B-chat-GGML/blob/main/llama-2-13b-chat.ggmlv3.q4_K_S.bin">llama-2-13b-chat.ggmlv3.q4_K_S.bin</a></td>
+<td>q4_K_S</td>
+<td>4</td>
+<td>7.37 GB</td>
+<td>9.87 GB</td>
+<td>New k-quant method. Uses GGML_TYPE_Q4_K for all tensors</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/TheBloke/Llama-2-13B-chat-GGML/blob/main/llama-2-13b-chat.ggmlv3.q4_K_M.bin">llama-2-13b-chat.ggmlv3.q4_K_M.bin</a></td>
+<td>q4_K_M</td>
+<td>4</td>
+<td>7.87 GB</td>
+<td>10.37 GB</td>
+<td>New k-quant method. Uses GGML_TYPE_Q6_K for half of the attention.wv and feed_forward.w2 tensors, else GGML_TYPE_Q4_K</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/TheBloke/Llama-2-13B-chat-GGML/blob/main/llama-2-13b-chat.ggmlv3.q4_1.bin">llama-2-13b-chat.ggmlv3.q4_1.bin</a></td>
+<td>q4_1</td>
+<td>4</td>
+<td>8.14 GB</td>
+<td>10.64 GB</td>
+<td>Original quant method, 4-bit. Higher accuracy than q4_0 but not as high as q5_0. However has quicker inference than q5 models.</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/TheBloke/Llama-2-13B-chat-GGML/blob/main/llama-2-13b-chat.ggmlv3.q5_0.bin">llama-2-13b-chat.ggmlv3.q5_0.bin</a></td>
+<td>q5_0</td>
+<td>5</td>
+<td>8.95 GB</td>
+<td>11.45 GB</td>
+<td>Original quant method, 5-bit. Higher accuracy, higher resource usage and slower inference.</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/TheBloke/Llama-2-13B-chat-GGML/blob/main/llama-2-13b-chat.ggmlv3.q5_K_S.bin">llama-2-13b-chat.ggmlv3.q5_K_S.bin</a></td>
+<td>q5_K_S</td>
+<td>5</td>
+<td>8.97 GB</td>
+<td>11.47 GB</td>
+<td>New k-quant method. Uses GGML_TYPE_Q5_K for all tensors</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/TheBloke/Llama-2-13B-chat-GGML/blob/main/llama-2-13b-chat.ggmlv3.q5_K_M.bin">llama-2-13b-chat.ggmlv3.q5_K_M.bin</a></td>
+<td>q5_K_M</td>
+<td>5</td>
+<td>9.23 GB</td>
+<td>11.73 GB</td>
+<td>New k-quant method. Uses GGML_TYPE_Q6_K for half of the attention.wv and feed_forward.w2 tensors, else GGML_TYPE_Q5_K</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/TheBloke/Llama-2-13B-chat-GGML/blob/main/llama-2-13b-chat.ggmlv3.q5_1.bin">llama-2-13b-chat.ggmlv3.q5_1.bin</a></td>
+<td>q5_1</td>
+<td>5</td>
+<td>9.76 GB</td>
+<td>12.26 GB</td>
+<td>Original quant method, 5-bit. Even higher accuracy, resource usage and slower inference.</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/TheBloke/Llama-2-13B-chat-GGML/blob/main/llama-2-13b-chat.ggmlv3.q6_K.bin">llama-2-13b-chat.ggmlv3.q6_K.bin</a></td>
+<td>q6_K</td>
+<td>6</td>
+<td>10.68 GB</td>
+<td>13.18 GB</td>
+<td>New k-quant method. Uses GGML_TYPE_Q8_K for all tensors - 6-bit quantization</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/TheBloke/Llama-2-13B-chat-GGML/blob/main/llama-2-13b-chat.ggmlv3.q8_0.bin">llama-2-13b-chat.ggmlv3.q8_0.bin</a></td>
+<td>q8_0</td>
+<td>8</td>
+<td>13.83 GB</td>
+<td>16.33 GB</td>
+<td>Original quant method, 8-bit. Almost indistinguishable from float16. High resource use and slow. Not recommended for most users.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Note</strong>: the above RAM figures assume no GPU offloading. If layers are offloaded to the GPU, this will reduce RAM usage and use VRAM instead.</p>
+
+          </div>
+          
+            <div class="dot-line"></div>
+            <div class="post-meta">
+              <div class="post-date">
+                <i class="fa fa-calendar"></i>&nbsp;&nbsp;<span class="post-date">2025/08/02</span>
+              </div>
+              <div class="post-tags">
+                 
+                  
+                    <div class="tag-item">
+                      <a href="/tags/LLM/"><i class="fa fa-tag"></i>&nbsp;&nbsp;LLM</a>
+                    </div>
+                  
+                
+              </div>
+            </div>
+          
+      </div>
+  </div>
+</main>
+
+<script src="https://giscus.app/client.js"
+        data-repo="maodaisuki/hexo-theme-maoblog"
+        data-repo-id="R_kgDOKICkkw"
+        data-category="Announcements"
+        data-category-id="DIC_kwDOKICkk84CZEWg"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="0"
+        data-emit-metadata="0"
+        data-input-position="top"
+        data-theme="light"
+        data-lang="en"
+        crossorigin="anonymous"
+        async>
+</script>
+<!-- 前往 https://giscus.app 获取配置代码 -->
+
+
+  
+<script src="/js/mermaid.min.js"></script>
+
+
+
+<script src="/js/zoom/jquery.min.js"></script>
+
+
+<script src="/js/zoom/bootstrap.min.js"></script>
+
+
+<script src="/js/zoom/zoom.js"></script>
+
+
+<script src="/js/maoblog.js"></script>
+
+
+<script src="/js/prism.js"></script>
+</div>
+        <div class="footer-wrapper"><footer>
+  <div class="footer-container">
+    <div class="footer-meta">
+      
+        <div class="footer-meta-copyright">
+          &copy; 2025 mao.
+        </div>
+      
+      
+        <div class="footer-meta-licenese">
+          Licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC-BY-NC-SA 4.0</a>
+        </div>
+      
+      
+        <div class="footer-meta-rss">
+          <a href="/atom.xml"><i class="fa fa-rss"></i></a>
+        </div>
+      
+    </div>
+  </div>
+</footer>
+</div>
+      </div>
+    </div>
+  </body>
+  <script type="text/javascript">
+    var searchXMLPath = "https://weikangqi.github.io" + "/" + "search.xml"
+    console.log(searchXMLPath)
+  </script>
+  
+<script src="/js/search/search.js"></script>
+
+</html>

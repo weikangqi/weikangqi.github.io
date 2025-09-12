@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport" />
+  <link rel="alternate icon" type="image/png" href="/img/favicon.ico">
+  <title>
+    
+      MNN fp32 &lt;--&gt; fp8 |
+     
+    Blog
+  </title>
+  
+<link rel="stylesheet" href="/css/maoblog.css">
+
+  
+<link rel="stylesheet" href="/css/partials/post.css">
+
+  
+<link rel="stylesheet" href="/css/partials/comment.css">
+
+  
+<link rel="stylesheet" href="/css/partials/search.css">
+
+  
+<link rel="stylesheet" href="/css/partials/meta.css">
+
+  
+<link rel="stylesheet" href="/css/partials/about.css">
+
+  
+<link rel="stylesheet" href="/fontawesome/css/font-awesome.min.css">
+
+  
+<link rel="stylesheet" href="/css/zoom.css">
+
+  
+<link rel="stylesheet" href="/css/prism.css">
+
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="/css/math/katex.min.css">
+
+<link rel="stylesheet" href="/css/math/style.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 5.4.2"><link rel="alternate" href="/atom.xml" title="Blog" type="application/atom+xml">
+</head>
+
+
+  <body>
+    <div class="body-container">
+      <div class="body-main">
+        <div class="header-wrapper"><div class="header">
+  <a class="logo" href="/">Blog</a>
+  <ul class="nav">
+    
+      
+        <li><a href="/">Posts</a></li>
+      
+    
+      
+        <li><a href="/tags">Tags</a></li>
+      
+    
+      
+        <li><a style="cursor: pointer;" onclick="openSearchBar()">Search</a></li>
+      
+    
+      
+        <li><a href="/about">About</a></li>
+      
+    
+    <!-- <li class="site-mode">light</i></li> -->
+  </ul>
+</div>
+<div class="search-bar-container">  
+    <div class="search-bar">
+        <input id="search-input" value="" class="search-input" autofocus placeholder="Search something..." type="text" onblur="hideSearchBar()" oninput="exportSearchContent()">
+    </div>
+    <div class="search-output">
+        <ul class="search-output-list">
+            <!-- 结果列表 -->
+            <!-- <span style="padding-left: 3px; margin-left: 3px;">无记录</span> -->
+            <li class="Searching">
+                <div class="content">
+                    Searching...
+                </div>
+            </li>
+        </ul>
+        <span style="padding-left: 3px; margin-left: 3px; font-size: 13px;"><em>Powered by <span  onclick="goToLink(this)"><a href="/search.xml" class="search-xml li-link">search.xml</a></span></em></span>
+    </div>
+</div></div>
+        <div class="main-wrapper"><main>
+  <div class="main-container">
+      <div class="post-details">
+          
+            <div class="post-title">
+              <h1>MNN fp32 &lt;--&gt; fp8</h1>
+            </div>
+          
+          <div class="post-content">
+            <pre class="line-numbers language-Cpp" data-language="Cpp"><code class="language-Cpp">static const int FP32_EXP_BIAS &#x3D; 127;
+static const int FP8_EXP_BIAS &#x3D; 24;   &#x2F;&#x2F; [0, 31] --&gt; [-24, 7] --&gt; [1 &#x2F; 2^24, 2^7]
+void MNNFp32ToFp8(uint8_t* dst, const float* src, size_t size) &#123;
+    for (int i &#x3D; 0; i &lt; size; i++) &#123;
+
+        &#x2F;&#x2F; 1. 获取 FP32 的二进制表示（IEEE 754 32-bit）
+        &#x2F;&#x2F; float 在内存中占 4 字节，将其 reinterpret 成 uint32_t 方便位操作
+        uint32_t rawData &#x3D; *((uint32_t *)(&amp;src[i]));
+
+        &#x2F;&#x2F; 2. 提取符号位 S（最高位 31）
+        &#x2F;&#x2F; 0 表示正数，1 表示负数
+        uint32_t sign &#x3D; (rawData &gt;&gt; 31) &amp; 1U;
+
+        &#x2F;&#x2F; 3. 提取指数位 E (8 bit)
+        &#x2F;&#x2F; FP32 的指数在 bit 23~30
+        uint32_t exp &#x3D; (rawData &gt;&gt; 23) &amp; 0xFFU;
+
+        &#x2F;&#x2F; 4. 提取尾数位 M
+        &#x2F;&#x2F; FP32 尾数有 23 bit，这里只取高 2 bit 来适配 FP8(s1e5m2)
+        uint32_t mant &#x3D; (rawData &gt;&gt; 21) &amp; 0x3U;
+
+        &#x2F;&#x2F; 5. 计算 FP32 的真实指数
+        &#x2F;&#x2F; FP32 的 Bias &#x3D; 127，减去 Bias 得到真实指数
+        int realExp &#x3D; (int)exp - FP32_EXP_BIAS;
+
+        &#x2F;&#x2F; 6. 指数范围截断（clamp）
+        &#x2F;&#x2F; FP8(s1e5m2) 指数范围 [-15,16]，Bias &#x3D; 15
+        &#x2F;&#x2F; 下限截断：如果 realExp 小于 -15，就设置为 -15
+        realExp &#x3D; ALIMAX(realExp, 0 - FP8_EXP_BIAS);
+
+        &#x2F;&#x2F; 上限截断：如果 realExp 大于 16，就设置为 16
+        realExp &#x3D; ALIMIN(realExp, 31 - FP8_EXP_BIAS);
+
+        &#x2F;&#x2F; 7. 加回 FP8 Bias，得到 FP8 的指数 E&#39;
+        exp &#x3D; (uint32_t)(realExp + FP8_EXP_BIAS);
+
+        &#x2F;&#x2F; 8. 拼接 FP8 (8 bit)
+        &#x2F;&#x2F; FP8 格式： [1bit sign | 5bit exponent | 2bit mantissa]
+        dst[i] &#x3D; (int8_t)((sign &lt;&lt; 7) | (exp &lt;&lt; 2) | mant);
+
+   
+    &#125;
+&#125;
+
+void MNNFp8ToFp32(float* dst, const uint8_t* src, size_t size) &#123;
+    for (int i &#x3D; 0; i &lt; size; i++) &#123;
+        uint32_t sign &#x3D; (src[i] &gt;&gt; 7) &amp; 1U;
+        uint32_t exp &#x3D; (int)((src[i] &gt;&gt; 2) &amp; 0x1fU);
+        uint32_t mant &#x3D; (src[i] &amp; 3U) &lt;&lt; 21;
+        int realExp &#x3D; (int)exp - FP8_EXP_BIAS;
+        exp &#x3D; (uint32_t)(realExp + FP32_EXP_BIAS);
+        uint32_t rawData &#x3D; (sign &lt;&lt; 31) | (exp &lt;&lt; 23) | mant;
+        dst[i] &#x3D; *((float *)(&amp;rawData));
+    &#125;
+&#125;
+&#x2F;&#x2F; fp16 &lt;--&gt; fp8
+void MNNFp16ToFp8(uint8_t* dst, const uint16_t* src, size_t size) &#123;
+#ifdef MNN_USE_NEON
+#ifdef __aarch64__
+    int loopN &#x3D; size &#x2F; 16;
+    for (int i &#x3D; 0; i &lt; loopN; i++) &#123;
+        uint8x16_t v1 &#x3D; vld1q_u8((uint8_t*)(src + i * 16));
+        uint8x16_t v2 &#x3D; vld1q_u8((uint8_t*)(src + i * 16 + 8));
+        uint8x16_t res &#x3D; vuzp2q_u8(v1, v2);
+        vst1q_u8(dst + i * 16, res);
+    &#125;
+    for (int i &#x3D; loopN * 16; i &lt; size; i++) &#123;
+        dst[i] &#x3D; static_cast&lt;int8_t&gt;(src[i] &gt;&gt; 8);
+    &#125;
+#else
+    int loopN &#x3D; size &#x2F; 8;
+    for (int i &#x3D; 0; i &lt; loopN; i++) &#123;
+        uint16x8_t vec &#x3D; vld1q_u16(src + i * 8);
+        uint8x8_t  res &#x3D; vshrn_n_u16(vec, 8);
+        vst1_u8(dst + i * 8, res);
+    &#125;
+    for (int i &#x3D; loopN * 8; i &lt; size; i++) &#123;
+        dst[i] &#x3D; static_cast&lt;int8_t&gt;(src[i] &gt;&gt; 8);
+    &#125;
+#endif &#x2F;&#x2F; ARM64
+#else
+    for (int i &#x3D; 0; i &lt; size; i++) &#123;
+        dst[i] &#x3D; static_cast&lt;int8_t&gt;(src[i] &gt;&gt; 8);
+    &#125;
+#endif &#x2F;&#x2F; USE_NEON
+&#125;
+void MNNFp8ToFp16(uint16_t* dst, const uint8_t* src, size_t size) &#123;
+#ifdef MNN_USE_NEON
+    int loopN &#x3D; size &#x2F; 8;
+    for (int i &#x3D; 0; i &lt; loopN; i++) &#123;
+        uint8x8_t vec8x8 &#x3D; vld1_u8(src + i * 8);
+        uint16x8_t vec16x8 &#x3D; vshll_n_u8(vec8x8, 8);
+        vst1q_u16(dst + i * 8, vec16x8);
+    &#125;
+    for (int i &#x3D; loopN * 8; i &lt; size; i++) &#123;
+        dst[i] &#x3D; static_cast&lt;int16_t&gt;(src[i]) &lt;&lt; 8;
+    &#125;
+#else
+    for (int i &#x3D; 0; i &lt; size; i++) &#123;
+        dst[i] &#x3D; static_cast&lt;int16_t&gt;(src[i]) &lt;&lt; 8;
+    &#125;
+#endif &#x2F;&#x2F; USE_NEON
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+          </div>
+          
+            <div class="dot-line"></div>
+            <div class="post-meta">
+              <div class="post-date">
+                <i class="fa fa-calendar"></i>&nbsp;&nbsp;<span class="post-date">2025/08/01</span>
+              </div>
+              <div class="post-tags">
+                 
+                  
+                    <div class="tag-item">
+                      <a href="/tags/ARM/"><i class="fa fa-tag"></i>&nbsp;&nbsp;ARM</a>
+                    </div>
+                  
+                    <div class="tag-item">
+                      <a href="/tags/MNN/"><i class="fa fa-tag"></i>&nbsp;&nbsp;MNN</a>
+                    </div>
+                  
+                
+              </div>
+            </div>
+          
+      </div>
+  </div>
+</main>
+
+<script src="https://giscus.app/client.js"
+        data-repo="maodaisuki/hexo-theme-maoblog"
+        data-repo-id="R_kgDOKICkkw"
+        data-category="Announcements"
+        data-category-id="DIC_kwDOKICkk84CZEWg"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="0"
+        data-emit-metadata="0"
+        data-input-position="top"
+        data-theme="light"
+        data-lang="en"
+        crossorigin="anonymous"
+        async>
+</script>
+<!-- 前往 https://giscus.app 获取配置代码 -->
+
+
+  
+<script src="/js/mermaid.min.js"></script>
+
+
+
+<script src="/js/zoom/jquery.min.js"></script>
+
+
+<script src="/js/zoom/bootstrap.min.js"></script>
+
+
+<script src="/js/zoom/zoom.js"></script>
+
+
+<script src="/js/maoblog.js"></script>
+
+
+<script src="/js/prism.js"></script>
+</div>
+        <div class="footer-wrapper"><footer>
+  <div class="footer-container">
+    <div class="footer-meta">
+      
+        <div class="footer-meta-copyright">
+          &copy; 2025 mao.
+        </div>
+      
+      
+        <div class="footer-meta-licenese">
+          Licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC-BY-NC-SA 4.0</a>
+        </div>
+      
+      
+        <div class="footer-meta-rss">
+          <a href="/atom.xml"><i class="fa fa-rss"></i></a>
+        </div>
+      
+    </div>
+  </div>
+</footer>
+</div>
+      </div>
+    </div>
+  </body>
+  <script type="text/javascript">
+    var searchXMLPath = "https://weikangqi.github.io" + "/" + "search.xml"
+    console.log(searchXMLPath)
+  </script>
+  
+<script src="/js/search/search.js"></script>
+
+</html>

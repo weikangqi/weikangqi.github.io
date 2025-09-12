@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport" />
+  <link rel="alternate icon" type="image/png" href="/img/favicon.ico">
+  <title>
+    
+      gdb 调试多线程 |
+     
+    Blog
+  </title>
+  
+<link rel="stylesheet" href="/css/maoblog.css">
+
+  
+<link rel="stylesheet" href="/css/partials/post.css">
+
+  
+<link rel="stylesheet" href="/css/partials/comment.css">
+
+  
+<link rel="stylesheet" href="/css/partials/search.css">
+
+  
+<link rel="stylesheet" href="/css/partials/meta.css">
+
+  
+<link rel="stylesheet" href="/css/partials/about.css">
+
+  
+<link rel="stylesheet" href="/fontawesome/css/font-awesome.min.css">
+
+  
+<link rel="stylesheet" href="/css/zoom.css">
+
+  
+<link rel="stylesheet" href="/css/prism.css">
+
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="/css/math/katex.min.css">
+
+<link rel="stylesheet" href="/css/math/style.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 5.4.2"><link rel="alternate" href="/atom.xml" title="Blog" type="application/atom+xml">
+</head>
+
+
+  <body>
+    <div class="body-container">
+      <div class="body-main">
+        <div class="header-wrapper"><div class="header">
+  <a class="logo" href="/">Blog</a>
+  <ul class="nav">
+    
+      
+        <li><a href="/">Posts</a></li>
+      
+    
+      
+        <li><a href="/tags">Tags</a></li>
+      
+    
+      
+        <li><a style="cursor: pointer;" onclick="openSearchBar()">Search</a></li>
+      
+    
+      
+        <li><a href="/about">About</a></li>
+      
+    
+    <!-- <li class="site-mode">light</i></li> -->
+  </ul>
+</div>
+<div class="search-bar-container">  
+    <div class="search-bar">
+        <input id="search-input" value="" class="search-input" autofocus placeholder="Search something..." type="text" onblur="hideSearchBar()" oninput="exportSearchContent()">
+    </div>
+    <div class="search-output">
+        <ul class="search-output-list">
+            <!-- 结果列表 -->
+            <!-- <span style="padding-left: 3px; margin-left: 3px;">无记录</span> -->
+            <li class="Searching">
+                <div class="content">
+                    Searching...
+                </div>
+            </li>
+        </ul>
+        <span style="padding-left: 3px; margin-left: 3px; font-size: 13px;"><em>Powered by <span  onclick="goToLink(this)"><a href="/search.xml" class="search-xml li-link">search.xml</a></span></em></span>
+    </div>
+</div></div>
+        <div class="main-wrapper"><main>
+  <div class="main-container">
+      <div class="post-details">
+          
+            <div class="post-title">
+              <h1>gdb 调试多线程</h1>
+            </div>
+          
+          <div class="post-content">
+            <h2 id="多线程程序"><a class="markdownIt-Anchor" href="#多线程程序"></a> 多线程程序</h2>
+<pre class="line-numbers language-Cpp" data-language="Cpp"><code class="language-Cpp">#include &lt;stdio.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;pthread.h&gt;
+
+void* thread_entry_funcA(void* arg)&#123;
+    int i &#x3D; 0;
+    for(; i &lt; 10; i++)&#123;
+        printf(&quot;[thread_entry_funcA]: %d\n&quot;, i);
+        sleep(1);
+    &#125;
+    return NULL;
+&#125;
+
+void* thread_entry_funcB(void* arg)&#123;
+    int i &#x3D; 0;
+    for(; i &lt; 10; i++)&#123;
+        printf(&quot;[thread_entry_funcB]: %d\n&quot;, i);
+        sleep(1);
+    &#125;
+    return NULL;
+&#125;
+
+int main()&#123;
+    pthread_t tidA, tidB;
+
+    int ret &#x3D; pthread_create(&amp;tidA, NULL, thread_entry_funcA, NULL);
+    if(ret &lt; 0)&#123;
+        perror(&quot;pthread_create&quot;);
+        return 0;
+    &#125;
+
+    ret &#x3D; pthread_create(&amp;tidB, NULL, thread_entry_funcB, NULL);
+    if(ret &lt; 0)&#123;
+        perror(&quot;pthread_create&quot;);
+        return 0;
+    &#125;
+
+    pthread_join(tidA, NULL);
+    pthread_join(tidB, NULL);
+    return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>编译</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">gcc thread_gdb.c <span class="token parameter variable">-o</span> thread_gdb <span class="token parameter variable">-lpthread</span> <span class="token parameter variable">-g</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><code>pstack</code>命令 观察多线程</p>
+<h2 id="查看多线程信息"><a class="markdownIt-Anchor" href="#查看多线程信息"></a> 查看多线程信息</h2>
+<pre class="line-numbers language-none"><code class="language-none">(gdb) info threads<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<h2 id="切换线程"><a class="markdownIt-Anchor" href="#切换线程"></a> 切换线程</h2>
+<pre class="line-numbers language-none"><code class="language-none">t [线程ID]<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><img src="https://s2.loli.net/2024/05/20/oSielhwcb14jIms.png" alt="image-20240520213157159" /></p>
+<h2 id="切换到每一层堆栈"><a class="markdownIt-Anchor" href="#切换到每一层堆栈"></a> 切换到每一层堆栈</h2>
+<h4 id="查看调用堆栈"><a class="markdownIt-Anchor" href="#查看调用堆栈"></a> 查看调用堆栈</h4>
+<p>打印堆栈信息</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">bt <span class="token comment">#查看调用堆栈</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<h4 id="切换堆栈"><a class="markdownIt-Anchor" href="#切换堆栈"></a> 切换堆栈</h4>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">f <span class="token number">0</span> <span class="token comment"># 切换到0号堆栈</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<img src="https://s2.loli.net/2024/05/20/L6JSKsy1nmHUfzZ.png" alt="image-20240520213456485" style="zoom:50%;" />
+<p>这时<code>(gdb) n</code>会让所有线程继续运行。我只想让一个线程继续运行，使用<em>调度器锁模式</em></p>
+<h2 id="调度器锁模式"><a class="markdownIt-Anchor" href="#调度器锁模式"></a> 调度器锁模式</h2>
+<p>调试时除了当前线程在运行，想要规定其他线程的运行情况， 可以使用**set scheduler-locking [mode]**命令来进行设置</p>
+<ol>
+<li>
+<p><code>set scheduler-locking off</code> 不锁定任何线程，所有线程都可以继续执行。</p>
+</li>
+<li>
+<p><code>set scheduler-locking on</code> 只有当前线程可以执行，其他线程暂停运行。</p>
+</li>
+<li>
+<p><code>set scheduler-locking step</code></p>
+<ul>
+<li>当单步执行某一线程时，保证在调试过程中当前线程不会发生切换（B线程在调试，A线程也会运行，但是不会A运行就会切换到A）。其他线程也会随着被调试线程的单步执行而执行。</li>
+<li>但如果该模式下执行 continue、until、finish 命令，则其它线程也会执行，并且如果某一线程执行过程遇到断点，则 GDB 调试器会将该线程作为当前线程。</li>
+</ul>
+<p>必须在线程创建之后，在一开始设置是不成功的</p>
+</li>
+</ol>
+<pre class="line-numbers language-none"><code class="language-none">show scheduler-locking<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+          </div>
+          
+            <div class="dot-line"></div>
+            <div class="post-meta">
+              <div class="post-date">
+                <i class="fa fa-calendar"></i>&nbsp;&nbsp;<span class="post-date">2025/08/01</span>
+              </div>
+              <div class="post-tags">
+                 
+                  
+                    <div class="tag-item">
+                      <a href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/"><i class="fa fa-tag"></i>&nbsp;&nbsp;多线程</a>
+                    </div>
+                  
+                    <div class="tag-item">
+                      <a href="/tags/gdb/"><i class="fa fa-tag"></i>&nbsp;&nbsp;gdb</a>
+                    </div>
+                  
+                
+              </div>
+            </div>
+          
+      </div>
+  </div>
+</main>
+
+<script src="https://giscus.app/client.js"
+        data-repo="maodaisuki/hexo-theme-maoblog"
+        data-repo-id="R_kgDOKICkkw"
+        data-category="Announcements"
+        data-category-id="DIC_kwDOKICkk84CZEWg"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="0"
+        data-emit-metadata="0"
+        data-input-position="top"
+        data-theme="light"
+        data-lang="en"
+        crossorigin="anonymous"
+        async>
+</script>
+<!-- 前往 https://giscus.app 获取配置代码 -->
+
+
+  
+<script src="/js/mermaid.min.js"></script>
+
+
+
+<script src="/js/zoom/jquery.min.js"></script>
+
+
+<script src="/js/zoom/bootstrap.min.js"></script>
+
+
+<script src="/js/zoom/zoom.js"></script>
+
+
+<script src="/js/maoblog.js"></script>
+
+
+<script src="/js/prism.js"></script>
+</div>
+        <div class="footer-wrapper"><footer>
+  <div class="footer-container">
+    <div class="footer-meta">
+      
+        <div class="footer-meta-copyright">
+          &copy; 2025 mao.
+        </div>
+      
+      
+        <div class="footer-meta-licenese">
+          Licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC-BY-NC-SA 4.0</a>
+        </div>
+      
+      
+        <div class="footer-meta-rss">
+          <a href="/atom.xml"><i class="fa fa-rss"></i></a>
+        </div>
+      
+    </div>
+  </div>
+</footer>
+</div>
+      </div>
+    </div>
+  </body>
+  <script type="text/javascript">
+    var searchXMLPath = "https://weikangqi.github.io" + "/" + "search.xml"
+    console.log(searchXMLPath)
+  </script>
+  
+<script src="/js/search/search.js"></script>
+
+</html>

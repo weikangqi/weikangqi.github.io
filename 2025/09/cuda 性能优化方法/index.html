@@ -5,6 +5,8 @@
   <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport" />
   <link rel="alternate icon" type="image/png" href="/img/favicon.ico">
   <title>
+    
+      cuda 优化的性能的目标 |
      
     Blog
   </title>
@@ -91,23 +93,55 @@
       <div class="post-details">
           
             <div class="post-title">
-              <h1></h1>
+              <h1>cuda 优化的性能的目标</h1>
             </div>
           
           <div class="post-content">
-            
+            <h1 id="优化的性能的目标"><a class="markdownIt-Anchor" href="#优化的性能的目标"></a> 优化的性能的目标</h1>
+<ol>
+<li>足够的并行度： thread 内部的 instructions 并行， warp 的并行（occupancy），SM 并行（更多的 block）</li>
+<li>合并（coalesce）memory 访问：针对 global memory 的访问 pattern，warp 内线程访问要在一个 cache line（32 byte）内</li>
+<li>warp 内的 thread 具有一致的 branch 分支。</li>
+</ol>
+<h1 id="衡量维度"><a class="markdownIt-Anchor" href="#衡量维度"></a> 衡量维度</h1>
+<ol>
+<li>memory bandwidth</li>
+<li>instructions bandwidth</li>
+<li>latency</li>
+</ol>
+<p><strong>Memory 维度</strong></p>
+<p>Global memory： 每次以 32byte 的粒度读取到 cache line。warp 内针对 global memory 的 read 会合并。</p>
+<p>可以关注 transaction per request，表示每次 warp 请求产生的 transaction 个数。主要是考虑到如果 warp 内访问 pattern 不合理会导致产生额外的 transaction，从而读取额外的数据，造成资源浪费。</p>
+<p>shared memory： 比 global memory 快 10 倍，但是空间比较小。一般是 64K 32-bit。shared memory 在 block 内共享，所以一般用在 thread 可以复用的场景。对于需要在 thread 内做内存 transpose 的情况，也可以用 shared memory 缓存，提升访问速度。</p>
+<p>使用 vector 数据类型，vector 数据类型（例如 float4, int4）等，可以使用一条指令读取或写入多个数。能够减少指令数，提升读写速度。但是在保证 access pattern 的情况下，使用 vector 也不会有质的提升。</p>
+<h2 id="instructions-维度"><a class="markdownIt-Anchor" href="#instructions-维度"></a> Instructions 维度</h2>
+<p>这里主要是单个 thread 内部的逻辑：</p>
+<ol>
+<li>增加指令的并行度，减小指令之间的依赖。通常这样会需要更多的 register。</li>
+<li>另外 thread 内部尽量使用确定的 branch 条件，因为 branch 分支会导致 warp 分裂，使 warp 内的线程串行执行。降低并行度。</li>
+<li>减小耗时的指令使用，例如使用 intrinsic 替换具体函数（精度会差一些，但是速度更快），使用单精度替换双精度，使用 flush to zero。</li>
+<li>减小 thread 内部的 sync</li>
+</ol>
+<p>指令的 throughput 指的是单个 SM 内的 per cycle 指令数。是 num of operation per cycle 除以 32，因为 warp 执行一个指令相当于执行了 32 个 operation。</p>
+<h2 id="latency-维度"><a class="markdownIt-Anchor" href="#latency-维度"></a> Latency 维度</h2>
+<p>这里主要是 occupancy。thread 内的指令操作延迟可以通过更多的 thread 并行来隐藏掉。这样的指令延迟包括内存读取，所以如果是带宽瓶颈型 kernel，提高 occupancy 也可以提高性能。</p>
+<p>occupancy 是一个静态值，根据 kernel 的 thread/block，register/thread，sharedmemory/block 来计算的，但实际上不会跑到理论最高值。可以把它看作是评价 kernel 静态配置的并行度指标。 Occupancy 则代表了, GPU 的 SM 上能驻留的线程数量(我今天在干的活的数量), 和该 SM 的最大能驻留的线程数量的(我累死最大能同时干的活的数量)的比值。这是 occupancy 的定义(实际上略微有差异, 特别是涉及到 achieved occupancy 的时候)。</p>
+<p>另外提高并行度，除了把 register，thread 个数，sharedmemory 控制在 SM 的限制之内，还需要启动足够多的 block，从而来占用更多的 SM 计算资源。</p>
+
           </div>
           
             <div class="dot-line"></div>
             <div class="post-meta">
               <div class="post-date">
-                <i class="fa fa-calendar"></i>&nbsp;&nbsp;<span class="post-date">2025/09/11</span>
+                <i class="fa fa-calendar"></i>&nbsp;&nbsp;<span class="post-date">2025/09/06</span>
               </div>
               <div class="post-tags">
-                
-                  <div class="tag-item">
-                    <a href="#"><i class="fa fa-tag"></i>&nbsp;&nbsp;Untagged</a>
-                  </div>
+                 
+                  
+                    <div class="tag-item">
+                      <a href="/tags/cuda/"><i class="fa fa-tag"></i>&nbsp;&nbsp;cuda</a>
+                    </div>
+                  
                 
               </div>
             </div>

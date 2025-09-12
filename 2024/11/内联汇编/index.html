@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport" />
+  <link rel="alternate icon" type="image/png" href="/img/favicon.ico">
+  <title>
+    
+      ARM 内联汇编 |
+     
+    Blog
+  </title>
+  
+<link rel="stylesheet" href="/css/maoblog.css">
+
+  
+<link rel="stylesheet" href="/css/partials/post.css">
+
+  
+<link rel="stylesheet" href="/css/partials/comment.css">
+
+  
+<link rel="stylesheet" href="/css/partials/search.css">
+
+  
+<link rel="stylesheet" href="/css/partials/meta.css">
+
+  
+<link rel="stylesheet" href="/css/partials/about.css">
+
+  
+<link rel="stylesheet" href="/fontawesome/css/font-awesome.min.css">
+
+  
+<link rel="stylesheet" href="/css/zoom.css">
+
+  
+<link rel="stylesheet" href="/css/prism.css">
+
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="/css/math/katex.min.css">
+
+<link rel="stylesheet" href="/css/math/style.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 5.4.2"><link rel="alternate" href="/atom.xml" title="Blog" type="application/atom+xml">
+</head>
+
+
+  <body>
+    <div class="body-container">
+      <div class="body-main">
+        <div class="header-wrapper"><div class="header">
+  <a class="logo" href="/">Blog</a>
+  <ul class="nav">
+    
+      
+        <li><a href="/">Posts</a></li>
+      
+    
+      
+        <li><a href="/tags">Tags</a></li>
+      
+    
+      
+        <li><a style="cursor: pointer;" onclick="openSearchBar()">Search</a></li>
+      
+    
+      
+        <li><a href="/about">About</a></li>
+      
+    
+    <!-- <li class="site-mode">light</i></li> -->
+  </ul>
+</div>
+<div class="search-bar-container">  
+    <div class="search-bar">
+        <input id="search-input" value="" class="search-input" autofocus placeholder="Search something..." type="text" onblur="hideSearchBar()" oninput="exportSearchContent()">
+    </div>
+    <div class="search-output">
+        <ul class="search-output-list">
+            <!-- 结果列表 -->
+            <!-- <span style="padding-left: 3px; margin-left: 3px;">无记录</span> -->
+            <li class="Searching">
+                <div class="content">
+                    Searching...
+                </div>
+            </li>
+        </ul>
+        <span style="padding-left: 3px; margin-left: 3px; font-size: 13px;"><em>Powered by <span  onclick="goToLink(this)"><a href="/search.xml" class="search-xml li-link">search.xml</a></span></em></span>
+    </div>
+</div></div>
+        <div class="main-wrapper"><main>
+  <div class="main-container">
+      <div class="post-details">
+          
+            <div class="post-title">
+              <h1>ARM 内联汇编</h1>
+            </div>
+          
+          <div class="post-content">
+            <h1 id="arm-内联汇编"><a class="markdownIt-Anchor" href="#arm-内联汇编"></a> ARM 内联汇编</h1>
+<p><a target="_blank" rel="noopener" href="https://www.ic.unicamp.br/~celio/mc404-s2-2015/docs/ARM-GCC-Inline-Assembler-Cookbook.pdf">ARM-GCC-Inline-Assembler-Cookbook.pdf</a></p>
+<h2 id="基本结构"><a class="markdownIt-Anchor" href="#基本结构"></a> 基本结构</h2>
+<pre class="line-numbers language-Cpp" data-language="Cpp"><code class="language-Cpp">asm volatile(
+    &quot;汇编指令&quot; 
+    : 输出操作数 
+    : 输入操作数 
+    : 被修改的寄存器
+);
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="input-and-output-operands"><a class="markdownIt-Anchor" href="#input-and-output-operands"></a> Input and Output Operands</h2>
+<table>
+<thead>
+<tr>
+<th>修饰符</th>
+<th>限定</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>=</td>
+<td>只写操作数，通常用于所有输出操作数。</td>
+</tr>
+<tr>
+<td>+</td>
+<td>读写操作数（内联汇编器不支持）</td>
+</tr>
+<tr>
+<td>&amp;</td>
+<td>寄存器只能用于输出</td>
+</tr>
+</tbody>
+</table>
+<p><strong><code>=</code></strong>：表示该操作数是输出操作数，指示编译器为其分配寄存器，并将结果存入该寄存器。</p>
+<p><strong><code>&amp;</code></strong>：确保输出操作数分配一个新的寄存器，避免与其他操作数冲突。</p>
+<h3 id="为什么需要"><a class="markdownIt-Anchor" href="#为什么需要"></a> 为什么需要 <code>&amp;</code>？</h3>
+<ul>
+<li>
+<p><strong>确保寄存器不会作为输入和输出的寄存器</strong>：<code>&amp;</code> 确保寄存器被分配为<strong>仅用于输出</strong>。在没有 <code>&amp;</code> 的情况下，编译器可能会选择一个已经作为输入使用的寄存器来作为输出寄存器，这样会导致寄存器冲突或者覆盖输入数据。</p>
+<p>例如，假设我们不使用 <code>&amp;</code>：</p>
+<pre class="line-numbers language-none"><code class="language-none">asm(&quot;add %0, %1, %2&quot; : &quot;&#x3D;r&quot;(c) : &quot;r&quot;(a), &quot;r&quot;(b));<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>在这种情况下，编译器可能会选择 <code>a</code> 或 <code>b</code> 的寄存器来存储 <code>c</code>，而这可能会覆盖其中一个输入寄存器的值。如果不希望发生这种情况，可以使用 <code>&amp;</code> 来强制为输出分配一个新的寄存器。</p>
+</li>
+</ul>
+<h2 id="在汇编代码中引用操作数"><a class="markdownIt-Anchor" href="#在汇编代码中引用操作数"></a> 在汇编代码中引用操作数</h2>
+<p>方法一： <code>&quot;0&quot;</code>、<code>&quot;1&quot;</code>、<code>&quot;2&quot;</code> 等约束符</p>
+<pre class="line-numbers language-Cpp" data-language="Cpp"><code class="language-Cpp">int a &#x3D; 5, b &#x3D; 3, result;
+
+asm volatile (
+    &quot;ADD %0, %1, %2\n&quot;   &#x2F;&#x2F; result &#x3D; a + b
+    : &quot;&#x3D;r&quot; (result), &quot;&#x3D;r&quot; (b)  &#x2F;&#x2F; 输出部分：result 和 b 都是输出，且要绑定到同一寄存器
+    : &quot;0&quot; (a), &quot;r&quot; (b)    &#x2F;&#x2F; 输入部分：a 使用第一个输出操作数的寄存器，b 使用不同寄存器
+);
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>在这个例子中：</p>
+<ul>
+<li><code>&quot;0&quot;</code> 约束符表示 <code>a</code> 和第一个输出操作数（<code>result</code>）共享同一个寄存器。</li>
+<li><code>b</code> 会被分配到一个独立的寄存器中，因为它在输入部分使用了 <code>&quot;r&quot;</code> 约束符。</li>
+</ul>
+<p>方法二：%[操作数名称]</p>
+<pre class="line-numbers language-Cpp" data-language="Cpp"><code class="language-Cpp">int res &#x3D; 0;
+&#x2F;&#x2F; result，input_i，input_j 就是操作数名称
+__asm (&quot;ADD %[result], %[input_i], %[input_j]&quot;
+    : [result] &quot;&#x3D;r&quot; (res)
+    : [input_i] &quot;r&quot; (i), [input_j] &quot;r&quot; (j)
+);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="clobber-列表"><a class="markdownIt-Anchor" href="#clobber-列表"></a> clobber 列表</h2>
+<p>在内联汇编中，<code>memory</code> 关键字用于告知编译器：</p>
+<ul>
+<li>汇编代码可能会对内存进行 <strong>读写操作</strong>，并且这些操作可能会影响外部变量。</li>
+<li>编译器需要对内存进行适当的优化，避免错误的寄存器重排（register reordering）或缓存（cache）行为，确保内存操作的正确性。</li>
+</ul>
+<p>通常，<code>memory</code> 关键字在以下情况下使用：</p>
+<ul>
+<li>当汇编代码显式地 <strong>修改内存</strong>，例如通过 <code>store</code>（存储）或 <code>load</code>（加载）指令。</li>
+<li>当内联汇编代码可能会改变程序中某些变量的值，尤其是那些 <strong>未直接出现在汇编代码中的变量</strong>。</li>
+</ul>
+<p>使用 <code>memory</code> 时，编译器会考虑到 <strong>内存屏障</strong> 和 <strong>数据依赖性</strong>，并确保汇编操作与其上下文的一致性。</p>
+<p>memory 强制 gcc 编译器假设 RAM 所有内存单元均被汇编指令修改，这样 cpu 中的 registers 和 cache 中已缓存的内存单元中的数据将作废。cpu 将不得不在需要的时候重新读取内存中的数据。这就阻止了 cpu 又将 registers, cache 中的数据用于去优化指令，而避免去访问内存。</p>
+<h4 id="语法示例"><a class="markdownIt-Anchor" href="#语法示例"></a> 语法示例：</h4>
+<pre class="line-numbers language-Cpp" data-language="Cpp"><code class="language-Cpp">asm volatile (
+    &quot;prfm   pldl1keep, [%0, #512]   \n&quot;
+    &quot;ld1    &#123;v0.4s, v1.4s, v2.4s, v3.4s&#125;, [%0] \n&quot;
+    &quot;fabs   v0.4s, v0.4s            \n&quot;
+    &quot;fabs   v1.4s, v1.4s            \n&quot;
+    &quot;fabs   v2.4s, v2.4s            \n&quot;
+    &quot;fabs   v3.4s, v3.4s            \n&quot;
+    &quot;st1    &#123;v0.4s, v1.4s, v2.4s, v3.4s&#125;, [%0], #64 \n&quot;
+    : &quot;&#x3D;r&quot;(ptr) &#x2F;&#x2F; 输出部分
+    : &quot;0&quot;(ptr)  &#x2F;&#x2F; 输入部分
+    : &quot;memory&quot;, &quot;v0&quot;, &quot;v1&quot;, &quot;v2&quot;, &quot;v3&quot;  &#x2F;&#x2F; clobber 部分
+);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>在这个例子中：</p>
+<ul>
+<li><code>&quot;memory&quot;</code> 表示内联汇编中 <strong>会修改内存</strong>。在这里，内存的修改是通过 <code>ld1</code>（加载）和 <code>st1</code>（存储）指令完成的，它们会访问 <code>ptr</code> 指向的内存。</li>
+<li><code>&quot;v0&quot;, &quot;v1&quot;, &quot;v2&quot;, &quot;v3&quot;</code> 表示这些寄存器会被修改，编译器需要确保这些寄存器不会被错误地优化。</li>
+</ul>
+<p>此外</p>
+<ul>
+<li><code>cc</code> 表示内联汇编代码修改了标志寄存器</li>
+</ul>
+
+          </div>
+          
+            <div class="dot-line"></div>
+            <div class="post-meta">
+              <div class="post-date">
+                <i class="fa fa-calendar"></i>&nbsp;&nbsp;<span class="post-date">2024/11/01</span>
+              </div>
+              <div class="post-tags">
+                 
+                  
+                    <div class="tag-item">
+                      <a href="/tags/ARM/"><i class="fa fa-tag"></i>&nbsp;&nbsp;ARM</a>
+                    </div>
+                  
+                
+              </div>
+            </div>
+          
+      </div>
+  </div>
+</main>
+
+<script src="https://giscus.app/client.js"
+        data-repo="maodaisuki/hexo-theme-maoblog"
+        data-repo-id="R_kgDOKICkkw"
+        data-category="Announcements"
+        data-category-id="DIC_kwDOKICkk84CZEWg"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="0"
+        data-emit-metadata="0"
+        data-input-position="top"
+        data-theme="light"
+        data-lang="en"
+        crossorigin="anonymous"
+        async>
+</script>
+<!-- 前往 https://giscus.app 获取配置代码 -->
+
+
+  
+<script src="/js/mermaid.min.js"></script>
+
+
+
+<script src="/js/zoom/jquery.min.js"></script>
+
+
+<script src="/js/zoom/bootstrap.min.js"></script>
+
+
+<script src="/js/zoom/zoom.js"></script>
+
+
+<script src="/js/maoblog.js"></script>
+
+
+<script src="/js/prism.js"></script>
+</div>
+        <div class="footer-wrapper"><footer>
+  <div class="footer-container">
+    <div class="footer-meta">
+      
+        <div class="footer-meta-copyright">
+          &copy; 2025 mao.
+        </div>
+      
+      
+        <div class="footer-meta-licenese">
+          Licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC-BY-NC-SA 4.0</a>
+        </div>
+      
+      
+        <div class="footer-meta-rss">
+          <a href="/atom.xml"><i class="fa fa-rss"></i></a>
+        </div>
+      
+    </div>
+  </div>
+</footer>
+</div>
+      </div>
+    </div>
+  </body>
+  <script type="text/javascript">
+    var searchXMLPath = "https://weikangqi.github.io" + "/" + "search.xml"
+    console.log(searchXMLPath)
+  </script>
+  
+<script src="/js/search/search.js"></script>
+
+</html>
