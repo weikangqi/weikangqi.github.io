@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"weikangqi.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":300,"display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Jacobi 迭代把自回归的N次迭代转换为N个方程，然后联合求解。而 Jacobi Decoding 将每次迭代上一次的输出整体作为下一次的输入，其实就是把每一个 token 上的输出视作一个 2-gram，并以此作为Draft Model。论文“Break the Sequential Dependency of LLM Inference Using Lookahead Decoding”的作">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Lookahead">
+<meta property="og:url" content="https://weikangqi.github.io/2025/07/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86/Lookahead/index.html">
+<meta property="og:site_name" content="Blog">
+<meta property="og:description" content="Jacobi 迭代把自回归的N次迭代转换为N个方程，然后联合求解。而 Jacobi Decoding 将每次迭代上一次的输出整体作为下一次的输入，其实就是把每一个 token 上的输出视作一个 2-gram，并以此作为Draft Model。论文“Break the Sequential Dependency of LLM Inference Using Lookahead Decoding”的作">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://github.com/hao-ai-lab/LookaheadDecoding/raw/main/media/lookahead-decoding.gif">
+<meta property="og:image" content="https://raw.githubusercontent.com/weikangqi/picgo/main/image-20250902163700561.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/weikangqi/picgo/main/lookahead-perf.png">
+<meta property="article:published_time" content="2025-07-03T15:30:16.000Z">
+<meta property="article:modified_time" content="2025-10-03T03:33:09.853Z">
+<meta property="article:author" content="Klay">
+<meta property="article:tag" content="LLM">
+<meta property="article:tag" content="投机解码">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/hao-ai-lab/LookaheadDecoding/raw/main/media/lookahead-decoding.gif">
+
+<link rel="canonical" href="https://weikangqi.github.io/2025/07/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86/Lookahead/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Lookahead | Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="/css/math/katex.min.css">
+
+<link rel="stylesheet" href="/css/math/style.css">
+<!-- hexo injector head_end end --><link rel="alternate" href="/atom.xml" title="Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Klay's Blog </p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://weikangqi.github.io/2025/07/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86/Lookahead/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="Klay">
+      <meta itemprop="description" content="喜乐绷坏麻">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Lookahead
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2025-07-03 15:30:16" itemprop="dateCreated datePublished" datetime="2025-07-03T15:30:16+00:00">2025-07-03</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2025-10-03 03:33:09" itemprop="dateModified" datetime="2025-10-03T03:33:09+00:00">2025-10-03</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>Jacobi 迭代把自回归的N次迭代转换为N个方程，然后联合求解。而 <a target="_blank" rel="noopener" href="https://zhida.zhihu.com/search?content_id=257559026&amp;content_type=Article&amp;match_order=1&amp;q=Jacobi+Decoding&amp;zhida_source=entity">Jacobi Decoding</a> 将每次迭代上一次的输出整体作为下一次的输入，其实就是把每一个 token 上的输出视作一个 2-gram，并以此作为Draft Model。论文“Break the Sequential Dependency of LLM Inference Using Lookahead Decoding”的作者想到，如果可以记录下更多的历史信息，就可以制造一个 N-gram 作为 Draft Model，这样就能提高 Speculative Decoding 的准确率。这就是Lookahead Decoding。简要来说，Lookahead=N-gram+Jacobi iteration+parallel verification，其利用 jacobi 迭代法同时提取和验证 n-grams，打破自回归解码的顺序依赖性，从而降低解码次数，实现推理加速。相比之前的并行解码，Lookahead Decoding即不需要草稿模型，也不需要像Medusa那样微调head。论文作者将 Jacobi Decoding 视为Lookahead Decoding在 2-gram 情况下的特例。</p>
+<img src="https://github.com/hao-ai-lab/LookaheadDecoding/raw/main/media/lookahead-decoding.gif" alt="img" style="zoom: 33%;" />
+<p>为了加速解码过程，每个Lookahead Decoding步骤被分为两个并行分支：生成n-gram的lookahead分支和验证n-gram的verification分支，两者都在一个前向传播过程中执行。</p>
+<ul>
+<li>Lookahead（前瞻）分支：这是原始雅可比解码的过程。因为不一致性的问题，此过程不会被用作主要投机验证的机制，而是作为一种采样收集或者说生成 n-gram 的并行解码过程。Lookahead 分支的目的是生成新的 N-Grams，加上其中新生成的 Token 就可以用于构建下一次 Verify 分支的候选序列。</li>
+<li>Verification（验证）分支：这个分支从n-gram集合中匹配的多个candidates作为投机验证输入，完成具体的投机采样过程。verification分支会选择并验证有希望的 n-gram ，并且会将其用于更新下一次 Lookahead 分支的序列。</li>
+</ul>
+<h2 id="推理"><a class="markdownIt-Anchor" href="#推理"></a> 推理</h2>
+<img src="https://raw.githubusercontent.com/weikangqi/picgo/main/image-20250902163700561.png" alt="image-20250902163700561" style="zoom:50%;" />
+<p>推理时，由于 LLM 解码主要受内存带宽限制，因此我们在同一步骤中合并前瞻和验证分支，利用 GPU 的并行处理能力来隐藏开销。 mask就是并行解码的关键。本示例的mask具体如上图所示。</p>
+<h2 id="prepare-for-next-iteration"><a class="markdownIt-Anchor" href="#prepare-for-next-iteration"></a> <strong>Prepare for next iteration</strong></h2>
+<p>当前迭代结束之后，会为下一次迭代做好准备。具体是：</p>
+<ul>
+<li>更新 2D Window。用后一层替代前一层（最后一层由最新输出得到的logits填充），并根据被接受的 tokens 的数量截断每一层。在当前的序列中随机采样填充被截断的部分。</li>
+<li>更新 n-gram。如何生成新的n-gram？其实就是就是在2d-window里面从上往下找。</li>
+<li>更新下一次前向的 Attention Mask 和 KV Cache。假设接受了 k 个 tokens，就据此扩展 Attention Mask，并将这 k 个 tokens 的 cache 拼接到 KV Cache 上。</li>
+<li>当满足退出条件，例如生成的 tokens 长度达到<code>max_length</code>时，返回结果。</li>
+</ul>
+<img src="https://raw.githubusercontent.com/weikangqi/picgo/main/lookahead-perf.png" alt="img" style="zoom: 33%;" />
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/LLM/" rel="tag"># LLM</a>
+              <a href="/tags/%E6%8A%95%E6%9C%BA%E8%A7%A3%E7%A0%81/" rel="tag"># 投机解码</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/07/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%8E%A8%E7%90%86/jacobi%20decoding/" rel="prev" title="Jacobi Decoding">
+      <i class="fa fa-chevron-left"></i> Jacobi Decoding
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/08/gdb%E8%B0%83%E8%AF%95%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%96%87%E4%BB%B6/" rel="next" title="gdb 调试多线程">
+      gdb 调试多线程 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8E%A8%E7%90%86"><span class="nav-number">1.</span> <span class="nav-text"> 推理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#prepare-for-next-iteration"><span class="nav-number">2.</span> <span class="nav-text"> Prepare for next iteration</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Klay"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">Klay</p>
+  <div class="site-description" itemprop="description">喜乐绷坏麻</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">21</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yourname" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yourname" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yourname@gmail.com" title="E-Mail → mailto:yourname@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Klay</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

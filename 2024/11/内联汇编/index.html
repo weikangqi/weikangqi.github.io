@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"weikangqi.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":300,"display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="ARM 内联汇编 ARM-GCC-Inline-Assembler-Cookbook.pdf  基本结构 asm volatile(     &quot;汇编指令&quot;      : 输出操作数      : 输入操作数      : 被修改的寄存器 );   Input and Output Operands    修饰符 限定     &#x3D; 只写操作数，通常用于所有输出操作数。   +">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ARM 内联汇编">
+<meta property="og:url" content="https://weikangqi.github.io/2024/11/%E5%86%85%E8%81%94%E6%B1%87%E7%BC%96/index.html">
+<meta property="og:site_name" content="Blog">
+<meta property="og:description" content="ARM 内联汇编 ARM-GCC-Inline-Assembler-Cookbook.pdf  基本结构 asm volatile(     &quot;汇编指令&quot;      : 输出操作数      : 输入操作数      : 被修改的寄存器 );   Input and Output Operands    修饰符 限定     &#x3D; 只写操作数，通常用于所有输出操作数。   +">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2024-11-01T15:30:16.000Z">
+<meta property="article:modified_time" content="2025-10-03T03:33:09.852Z">
+<meta property="article:author" content="Klay">
+<meta property="article:tag" content="ARM">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://weikangqi.github.io/2024/11/%E5%86%85%E8%81%94%E6%B1%87%E7%BC%96/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>ARM 内联汇编 | Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="/css/math/katex.min.css">
+
+<link rel="stylesheet" href="/css/math/style.css">
+<!-- hexo injector head_end end --><link rel="alternate" href="/atom.xml" title="Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Klay's Blog </p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://weikangqi.github.io/2024/11/%E5%86%85%E8%81%94%E6%B1%87%E7%BC%96/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="Klay">
+      <meta itemprop="description" content="喜乐绷坏麻">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ARM 内联汇编
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2024-11-01 15:30:16" itemprop="dateCreated datePublished" datetime="2024-11-01T15:30:16+00:00">2024-11-01</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2025-10-03 03:33:09" itemprop="dateModified" datetime="2025-10-03T03:33:09+00:00">2025-10-03</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="arm-内联汇编"><a class="markdownIt-Anchor" href="#arm-内联汇编"></a> ARM 内联汇编</h1>
+<p><a target="_blank" rel="noopener" href="https://www.ic.unicamp.br/~celio/mc404-s2-2015/docs/ARM-GCC-Inline-Assembler-Cookbook.pdf">ARM-GCC-Inline-Assembler-Cookbook.pdf</a></p>
+<h2 id="基本结构"><a class="markdownIt-Anchor" href="#基本结构"></a> 基本结构</h2>
+<pre class="line-numbers language-Cpp" data-language="Cpp"><code class="language-Cpp">asm volatile(
+    &quot;汇编指令&quot; 
+    : 输出操作数 
+    : 输入操作数 
+    : 被修改的寄存器
+);
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="input-and-output-operands"><a class="markdownIt-Anchor" href="#input-and-output-operands"></a> Input and Output Operands</h2>
+<table>
+<thead>
+<tr>
+<th>修饰符</th>
+<th>限定</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>=</td>
+<td>只写操作数，通常用于所有输出操作数。</td>
+</tr>
+<tr>
+<td>+</td>
+<td>读写操作数（内联汇编器不支持）</td>
+</tr>
+<tr>
+<td>&amp;</td>
+<td>寄存器只能用于输出</td>
+</tr>
+</tbody>
+</table>
+<p><strong><code>=</code></strong>：表示该操作数是输出操作数，指示编译器为其分配寄存器，并将结果存入该寄存器。</p>
+<p><strong><code>&amp;</code></strong>：确保输出操作数分配一个新的寄存器，避免与其他操作数冲突。</p>
+<h3 id="为什么需要"><a class="markdownIt-Anchor" href="#为什么需要"></a> 为什么需要 <code>&amp;</code>？</h3>
+<ul>
+<li>
+<p><strong>确保寄存器不会作为输入和输出的寄存器</strong>：<code>&amp;</code> 确保寄存器被分配为<strong>仅用于输出</strong>。在没有 <code>&amp;</code> 的情况下，编译器可能会选择一个已经作为输入使用的寄存器来作为输出寄存器，这样会导致寄存器冲突或者覆盖输入数据。</p>
+<p>例如，假设我们不使用 <code>&amp;</code>：</p>
+<pre class="line-numbers language-none"><code class="language-none">asm(&quot;add %0, %1, %2&quot; : &quot;&#x3D;r&quot;(c) : &quot;r&quot;(a), &quot;r&quot;(b));<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>在这种情况下，编译器可能会选择 <code>a</code> 或 <code>b</code> 的寄存器来存储 <code>c</code>，而这可能会覆盖其中一个输入寄存器的值。如果不希望发生这种情况，可以使用 <code>&amp;</code> 来强制为输出分配一个新的寄存器。</p>
+</li>
+</ul>
+<h2 id="在汇编代码中引用操作数"><a class="markdownIt-Anchor" href="#在汇编代码中引用操作数"></a> 在汇编代码中引用操作数</h2>
+<p>方法一： <code>&quot;0&quot;</code>、<code>&quot;1&quot;</code>、<code>&quot;2&quot;</code> 等约束符</p>
+<pre class="line-numbers language-Cpp" data-language="Cpp"><code class="language-Cpp">int a &#x3D; 5, b &#x3D; 3, result;
+
+asm volatile (
+    &quot;ADD %0, %1, %2\n&quot;   &#x2F;&#x2F; result &#x3D; a + b
+    : &quot;&#x3D;r&quot; (result), &quot;&#x3D;r&quot; (b)  &#x2F;&#x2F; 输出部分：result 和 b 都是输出，且要绑定到同一寄存器
+    : &quot;0&quot; (a), &quot;r&quot; (b)    &#x2F;&#x2F; 输入部分：a 使用第一个输出操作数的寄存器，b 使用不同寄存器
+);
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>在这个例子中：</p>
+<ul>
+<li><code>&quot;0&quot;</code> 约束符表示 <code>a</code> 和第一个输出操作数（<code>result</code>）共享同一个寄存器。</li>
+<li><code>b</code> 会被分配到一个独立的寄存器中，因为它在输入部分使用了 <code>&quot;r&quot;</code> 约束符。</li>
+</ul>
+<p>方法二：%[操作数名称]</p>
+<pre class="line-numbers language-Cpp" data-language="Cpp"><code class="language-Cpp">int res &#x3D; 0;
+&#x2F;&#x2F; result，input_i，input_j 就是操作数名称
+__asm (&quot;ADD %[result], %[input_i], %[input_j]&quot;
+    : [result] &quot;&#x3D;r&quot; (res)
+    : [input_i] &quot;r&quot; (i), [input_j] &quot;r&quot; (j)
+);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="clobber-列表"><a class="markdownIt-Anchor" href="#clobber-列表"></a> clobber 列表</h2>
+<p>在内联汇编中，<code>memory</code> 关键字用于告知编译器：</p>
+<ul>
+<li>汇编代码可能会对内存进行 <strong>读写操作</strong>，并且这些操作可能会影响外部变量。</li>
+<li>编译器需要对内存进行适当的优化，避免错误的寄存器重排（register reordering）或缓存（cache）行为，确保内存操作的正确性。</li>
+</ul>
+<p>通常，<code>memory</code> 关键字在以下情况下使用：</p>
+<ul>
+<li>当汇编代码显式地 <strong>修改内存</strong>，例如通过 <code>store</code>（存储）或 <code>load</code>（加载）指令。</li>
+<li>当内联汇编代码可能会改变程序中某些变量的值，尤其是那些 <strong>未直接出现在汇编代码中的变量</strong>。</li>
+</ul>
+<p>使用 <code>memory</code> 时，编译器会考虑到 <strong>内存屏障</strong> 和 <strong>数据依赖性</strong>，并确保汇编操作与其上下文的一致性。</p>
+<p>memory 强制 gcc 编译器假设 RAM 所有内存单元均被汇编指令修改，这样 cpu 中的 registers 和 cache 中已缓存的内存单元中的数据将作废。cpu 将不得不在需要的时候重新读取内存中的数据。这就阻止了 cpu 又将 registers, cache 中的数据用于去优化指令，而避免去访问内存。</p>
+<h4 id="语法示例"><a class="markdownIt-Anchor" href="#语法示例"></a> 语法示例：</h4>
+<pre class="line-numbers language-Cpp" data-language="Cpp"><code class="language-Cpp">asm volatile (
+    &quot;prfm   pldl1keep, [%0, #512]   \n&quot;
+    &quot;ld1    &#123;v0.4s, v1.4s, v2.4s, v3.4s&#125;, [%0] \n&quot;
+    &quot;fabs   v0.4s, v0.4s            \n&quot;
+    &quot;fabs   v1.4s, v1.4s            \n&quot;
+    &quot;fabs   v2.4s, v2.4s            \n&quot;
+    &quot;fabs   v3.4s, v3.4s            \n&quot;
+    &quot;st1    &#123;v0.4s, v1.4s, v2.4s, v3.4s&#125;, [%0], #64 \n&quot;
+    : &quot;&#x3D;r&quot;(ptr) &#x2F;&#x2F; 输出部分
+    : &quot;0&quot;(ptr)  &#x2F;&#x2F; 输入部分
+    : &quot;memory&quot;, &quot;v0&quot;, &quot;v1&quot;, &quot;v2&quot;, &quot;v3&quot;  &#x2F;&#x2F; clobber 部分
+);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>在这个例子中：</p>
+<ul>
+<li><code>&quot;memory&quot;</code> 表示内联汇编中 <strong>会修改内存</strong>。在这里，内存的修改是通过 <code>ld1</code>（加载）和 <code>st1</code>（存储）指令完成的，它们会访问 <code>ptr</code> 指向的内存。</li>
+<li><code>&quot;v0&quot;, &quot;v1&quot;, &quot;v2&quot;, &quot;v3&quot;</code> 表示这些寄存器会被修改，编译器需要确保这些寄存器不会被错误地优化。</li>
+</ul>
+<p>此外</p>
+<ul>
+<li><code>cc</code> 表示内联汇编代码修改了标志寄存器</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ARM/" rel="tag"># ARM</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/08/opencl%20cl_arm_import_memory/" rel="prev" title="opencl cl_arm_import_memory">
+      <i class="fa fa-chevron-left"></i> opencl cl_arm_import_memory
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2024/12/flashattention/" rel="next" title="flash attention">
+      flash attention <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#arm-%E5%86%85%E8%81%94%E6%B1%87%E7%BC%96"><span class="nav-number">1.</span> <span class="nav-text"> ARM 内联汇编</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E7%BB%93%E6%9E%84"><span class="nav-number">1.1.</span> <span class="nav-text"> 基本结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#input-and-output-operands"><span class="nav-number">1.2.</span> <span class="nav-text"> Input and Output Operands</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81"><span class="nav-number">1.2.1.</span> <span class="nav-text"> 为什么需要 &amp;？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9C%A8%E6%B1%87%E7%BC%96%E4%BB%A3%E7%A0%81%E4%B8%AD%E5%BC%95%E7%94%A8%E6%93%8D%E4%BD%9C%E6%95%B0"><span class="nav-number">1.3.</span> <span class="nav-text"> 在汇编代码中引用操作数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#clobber-%E5%88%97%E8%A1%A8"><span class="nav-number">1.4.</span> <span class="nav-text"> clobber 列表</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AF%AD%E6%B3%95%E7%A4%BA%E4%BE%8B"><span class="nav-number">1.4.0.1.</span> <span class="nav-text"> 语法示例：</span></a></li></ol></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Klay"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">Klay</p>
+  <div class="site-description" itemprop="description">喜乐绷坏麻</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">21</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yourname" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yourname" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yourname@gmail.com" title="E-Mail → mailto:yourname@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Klay</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

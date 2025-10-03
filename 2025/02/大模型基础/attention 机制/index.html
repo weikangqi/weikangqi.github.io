@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"weikangqi.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":300,"display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Attention: MHA, MLA, GQA,MQA   MHA import torch from torch import nn from typing import Optional   def apply_rope(x: torch.Tensor, *args, **kwargs):     return x   def update_kv_cache(key_states: tor">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Attention(MHA, MLA, GQA, MQA)">
+<meta property="og:url" content="https://weikangqi.github.io/2025/02/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%9F%BA%E7%A1%80/attention%20%E6%9C%BA%E5%88%B6/index.html">
+<meta property="og:site_name" content="Blog">
+<meta property="og:description" content="Attention: MHA, MLA, GQA,MQA   MHA import torch from torch import nn from typing import Optional   def apply_rope(x: torch.Tensor, *args, **kwargs):     return x   def update_kv_cache(key_states: tor">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://github.com/haukzero/from-mha-to-mla/blob/master/img/mha_mqa_gqa.png?raw=true">
+<meta property="og:image" content="https://raw.githubusercontent.com/weikangqi/picgo/main/mla_cc.png">
+<meta property="article:published_time" content="2025-02-07T15:30:16.000Z">
+<meta property="article:modified_time" content="2025-10-03T03:33:09.852Z">
+<meta property="article:author" content="Klay">
+<meta property="article:tag" content="LLM">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/haukzero/from-mha-to-mla/blob/master/img/mha_mqa_gqa.png?raw=true">
+
+<link rel="canonical" href="https://weikangqi.github.io/2025/02/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%9F%BA%E7%A1%80/attention%20%E6%9C%BA%E5%88%B6/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Attention(MHA, MLA, GQA, MQA) | Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="/css/math/katex.min.css">
+
+<link rel="stylesheet" href="/css/math/style.css">
+<!-- hexo injector head_end end --><link rel="alternate" href="/atom.xml" title="Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Klay's Blog </p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://weikangqi.github.io/2025/02/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%9F%BA%E7%A1%80/attention%20%E6%9C%BA%E5%88%B6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="Klay">
+      <meta itemprop="description" content="喜乐绷坏麻">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Attention(MHA, MLA, GQA, MQA)
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2025-02-07 15:30:16" itemprop="dateCreated datePublished" datetime="2025-02-07T15:30:16+00:00">2025-02-07</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2025-10-03 03:33:09" itemprop="dateModified" datetime="2025-10-03T03:33:09+00:00">2025-10-03</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="attention-mha-mla-gqamqa"><a class="markdownIt-Anchor" href="#attention-mha-mla-gqamqa"></a> Attention: MHA, MLA, GQA,MQA</h1>
+<p><img src="https://github.com/haukzero/from-mha-to-mla/blob/master/img/mha_mqa_gqa.png?raw=true" alt="mha_mqa_gqa.png" /></p>
+<h2 id="mha"><a class="markdownIt-Anchor" href="#mha"></a> MHA</h2>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">import</span> torch
+<span class="token keyword">from</span> torch <span class="token keyword">import</span> nn
+<span class="token keyword">from</span> typing <span class="token keyword">import</span> Optional
+
+
+<span class="token keyword">def</span> <span class="token function">apply_rope</span><span class="token punctuation">(</span>x<span class="token punctuation">:</span> torch<span class="token punctuation">.</span>Tensor<span class="token punctuation">,</span> <span class="token operator">*</span>args<span class="token punctuation">,</span> <span class="token operator">**</span>kwargs<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token keyword">return</span> x
+
+
+<span class="token keyword">def</span> <span class="token function">update_kv_cache</span><span class="token punctuation">(</span>key_states<span class="token punctuation">:</span> torch<span class="token punctuation">.</span>Tensor<span class="token punctuation">,</span> value_states<span class="token punctuation">:</span> torch<span class="token punctuation">.</span>Tensor<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token keyword">return</span> key_states<span class="token punctuation">.</span>repeat<span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">,</span> value_states<span class="token punctuation">.</span>repeat<span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span>
+
+
+<span class="token keyword">class</span> <span class="token class-name">MultiHeadAttention</span><span class="token punctuation">(</span>nn<span class="token punctuation">.</span>Module<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token keyword">def</span> <span class="token function">__init__</span><span class="token punctuation">(</span>
+        self<span class="token punctuation">,</span>
+        hidden_size<span class="token punctuation">:</span> <span class="token builtin">int</span><span class="token punctuation">,</span>
+        num_heads<span class="token punctuation">:</span> <span class="token builtin">int</span><span class="token punctuation">,</span>
+        head_dim<span class="token punctuation">:</span> Optional<span class="token punctuation">[</span><span class="token builtin">int</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">None</span><span class="token punctuation">,</span>
+        use_cache<span class="token punctuation">:</span> Optional<span class="token punctuation">[</span><span class="token builtin">bool</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">False</span><span class="token punctuation">,</span>
+    <span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token builtin">super</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span>__init__<span class="token punctuation">(</span><span class="token punctuation">)</span>
+        self<span class="token punctuation">.</span>hidden_size <span class="token operator">=</span> hidden_size
+        self<span class="token punctuation">.</span>num_heads <span class="token operator">=</span> num_heads
+        self<span class="token punctuation">.</span>head_dim <span class="token operator">=</span> head_dim <span class="token keyword">or</span> hidden_size <span class="token operator">//</span> num_heads
+        self<span class="token punctuation">.</span>scale <span class="token operator">=</span> self<span class="token punctuation">.</span>head_dim<span class="token operator">**</span><span class="token operator">-</span><span class="token number">0.5</span>
+        self<span class="token punctuation">.</span>use_cache <span class="token operator">=</span> use_cache
+
+        self<span class="token punctuation">.</span>q_proj <span class="token operator">=</span> nn<span class="token punctuation">.</span>Linear<span class="token punctuation">(</span>self<span class="token punctuation">.</span>hidden_size<span class="token punctuation">,</span> self<span class="token punctuation">.</span>num_heads <span class="token operator">*</span> self<span class="token punctuation">.</span>head_dim<span class="token punctuation">)</span>
+        self<span class="token punctuation">.</span>k_proj <span class="token operator">=</span> nn<span class="token punctuation">.</span>Linear<span class="token punctuation">(</span>self<span class="token punctuation">.</span>hidden_size<span class="token punctuation">,</span> self<span class="token punctuation">.</span>num_heads <span class="token operator">*</span> self<span class="token punctuation">.</span>head_dim<span class="token punctuation">)</span>
+        self<span class="token punctuation">.</span>v_proj <span class="token operator">=</span> nn<span class="token punctuation">.</span>Linear<span class="token punctuation">(</span>self<span class="token punctuation">.</span>hidden_size<span class="token punctuation">,</span> self<span class="token punctuation">.</span>num_heads <span class="token operator">*</span> self<span class="token punctuation">.</span>head_dim<span class="token punctuation">)</span>
+        self<span class="token punctuation">.</span>o_proj <span class="token operator">=</span> nn<span class="token punctuation">.</span>Linear<span class="token punctuation">(</span>self<span class="token punctuation">.</span>num_heads <span class="token operator">*</span> self<span class="token punctuation">.</span>head_dim<span class="token punctuation">,</span> self<span class="token punctuation">.</span>hidden_size<span class="token punctuation">)</span>
+
+    <span class="token keyword">def</span> <span class="token function">forward</span><span class="token punctuation">(</span>
+        self<span class="token punctuation">,</span>
+        hidden_states<span class="token punctuation">:</span> torch<span class="token punctuation">.</span>Tensor<span class="token punctuation">,</span>
+        position_ids<span class="token punctuation">:</span> Optional<span class="token punctuation">[</span>torch<span class="token punctuation">.</span>LongTensor<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">None</span><span class="token punctuation">,</span>
+    <span class="token punctuation">)</span><span class="token punctuation">:</span>
+        bsz<span class="token punctuation">,</span> q_len<span class="token punctuation">,</span> _ <span class="token operator">=</span> hidden_states<span class="token punctuation">.</span>size<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+        <span class="token comment"># q: (bsz, num_heads, q_len, head_dim)</span>
+        query_states <span class="token operator">=</span> <span class="token punctuation">(</span>
+            self<span class="token punctuation">.</span>q_proj<span class="token punctuation">(</span>hidden_states<span class="token punctuation">)</span>
+            <span class="token punctuation">.</span>view<span class="token punctuation">(</span>bsz<span class="token punctuation">,</span> q_len<span class="token punctuation">,</span> self<span class="token punctuation">.</span>num_heads<span class="token punctuation">,</span> self<span class="token punctuation">.</span>head_dim<span class="token punctuation">)</span>
+            <span class="token punctuation">.</span>transpose<span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span>
+        <span class="token punctuation">)</span>
+        key_states <span class="token operator">=</span> <span class="token punctuation">(</span>
+            self<span class="token punctuation">.</span>k_proj<span class="token punctuation">(</span>hidden_states<span class="token punctuation">)</span>
+            <span class="token punctuation">.</span>view<span class="token punctuation">(</span>bsz<span class="token punctuation">,</span> q_len<span class="token punctuation">,</span> self<span class="token punctuation">.</span>num_heads<span class="token punctuation">,</span> self<span class="token punctuation">.</span>head_dim<span class="token punctuation">)</span>
+            <span class="token punctuation">.</span>transpose<span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span>
+        <span class="token punctuation">)</span>
+        value_states <span class="token operator">=</span> <span class="token punctuation">(</span>
+            self<span class="token punctuation">.</span>v_proj<span class="token punctuation">(</span>hidden_states<span class="token punctuation">)</span>
+            <span class="token punctuation">.</span>view<span class="token punctuation">(</span>bsz<span class="token punctuation">,</span> q_len<span class="token punctuation">,</span> self<span class="token punctuation">.</span>num_heads<span class="token punctuation">,</span> self<span class="token punctuation">.</span>head_dim<span class="token punctuation">)</span>
+            <span class="token punctuation">.</span>transpose<span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span>
+        <span class="token punctuation">)</span>
+
+        <span class="token comment"># RoPE</span>
+        query_states <span class="token operator">=</span> apply_rope<span class="token punctuation">(</span>query_states<span class="token punctuation">)</span>
+        key_states <span class="token operator">=</span> apply_rope<span class="token punctuation">(</span>key_states<span class="token punctuation">)</span>
+
+        <span class="token keyword">if</span> self<span class="token punctuation">.</span>use_cache<span class="token punctuation">:</span>
+            <span class="token comment"># Update KV Cache and get full kv</span>
+            <span class="token comment"># k/v: (bsz, num_heads, kv_len, head_dim)</span>
+            key_states<span class="token punctuation">,</span> value_states <span class="token operator">=</span> update_kv_cache<span class="token punctuation">(</span>key_states<span class="token punctuation">,</span> value_states<span class="token punctuation">)</span>
+        kv_len <span class="token operator">=</span> key_states<span class="token punctuation">.</span>shape<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span>
+
+        <span class="token comment"># Softmax(Q @ K^T / sqrt(d_k))</span>
+        <span class="token comment"># attn: (bsz, num_heads, q_len, kv_len)</span>
+        attn_weights <span class="token operator">=</span> <span class="token punctuation">(</span>
+            torch<span class="token punctuation">.</span>einsum<span class="token punctuation">(</span><span class="token string">"bhld, bhnd -> bhln"</span><span class="token punctuation">,</span> query_states<span class="token punctuation">,</span> key_states<span class="token punctuation">)</span> <span class="token operator">*</span> self<span class="token punctuation">.</span>scale
+        <span class="token punctuation">)</span>
+        attn_weights <span class="token operator">=</span> attn_weights<span class="token punctuation">.</span>softmax<span class="token punctuation">(</span>dim<span class="token operator">=</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span>
+
+        <span class="token comment"># A @ V</span>
+        <span class="token comment"># attn: (bsz, num_heads, q_len, head_dim)</span>
+        attn_weights <span class="token operator">=</span> torch<span class="token punctuation">.</span>einsum<span class="token punctuation">(</span><span class="token string">"bhln, bhnd -> bhld"</span><span class="token punctuation">,</span> attn_weights<span class="token punctuation">,</span> value_states<span class="token punctuation">)</span>
+
+        <span class="token comment"># output: (bsz, q_len, hidden_size)</span>
+        attn_output <span class="token operator">=</span> self<span class="token punctuation">.</span>o_proj<span class="token punctuation">(</span>
+            attn_weights<span class="token punctuation">.</span>transpose<span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span>
+            <span class="token punctuation">.</span>contiguous<span class="token punctuation">(</span><span class="token punctuation">)</span>
+            <span class="token punctuation">.</span>view<span class="token punctuation">(</span>bsz<span class="token punctuation">,</span> q_len<span class="token punctuation">,</span> self<span class="token punctuation">.</span>num_heads <span class="token operator">*</span> self<span class="token punctuation">.</span>head_dim<span class="token punctuation">)</span>
+        <span class="token punctuation">)</span>
+        <span class="token keyword">return</span> attn_output<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="gqa-grouped-query-attention"><a class="markdownIt-Anchor" href="#gqa-grouped-query-attention"></a> GQA (Grouped-query Attention)</h2>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">import</span> torch
+<span class="token keyword">from</span> torch <span class="token keyword">import</span> nn
+<span class="token keyword">from</span> typing <span class="token keyword">import</span> Optional
+
+
+<span class="token keyword">def</span> <span class="token function">apply_rope</span><span class="token punctuation">(</span>x<span class="token punctuation">:</span> torch<span class="token punctuation">.</span>Tensor<span class="token punctuation">,</span> <span class="token operator">*</span>args<span class="token punctuation">,</span> <span class="token operator">**</span>kwargs<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token keyword">return</span> x
+
+
+<span class="token keyword">def</span> <span class="token function">update_kv_cache</span><span class="token punctuation">(</span>key_states<span class="token punctuation">:</span> torch<span class="token punctuation">.</span>Tensor<span class="token punctuation">,</span> value_states<span class="token punctuation">:</span> torch<span class="token punctuation">.</span>Tensor<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token keyword">return</span> key_states<span class="token punctuation">.</span>repeat<span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">,</span> value_states<span class="token punctuation">.</span>repeat<span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span>
+
+
+<span class="token keyword">def</span> <span class="token function">repeat_kv</span><span class="token punctuation">(</span>hidden_states<span class="token punctuation">:</span> torch<span class="token punctuation">.</span>Tensor<span class="token punctuation">,</span> n_rep<span class="token punctuation">:</span> Optional<span class="token punctuation">[</span><span class="token builtin">int</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+    batch<span class="token punctuation">,</span> num_key_value_heads<span class="token punctuation">,</span> slen<span class="token punctuation">,</span> head_dim <span class="token operator">=</span> hidden_states<span class="token punctuation">.</span>shape
+    <span class="token keyword">if</span> n_rep <span class="token operator">==</span> <span class="token number">1</span><span class="token punctuation">:</span>
+        <span class="token keyword">return</span> hidden_states
+    hidden_states <span class="token operator">=</span> hidden_states<span class="token punctuation">[</span><span class="token punctuation">:</span><span class="token punctuation">,</span> <span class="token punctuation">:</span><span class="token punctuation">,</span> <span class="token boolean">None</span><span class="token punctuation">,</span> <span class="token punctuation">:</span><span class="token punctuation">,</span> <span class="token punctuation">:</span><span class="token punctuation">]</span><span class="token punctuation">.</span>expand<span class="token punctuation">(</span>
+        batch<span class="token punctuation">,</span> num_key_value_heads<span class="token punctuation">,</span> n_rep<span class="token punctuation">,</span> slen<span class="token punctuation">,</span> head_dim
+    <span class="token punctuation">)</span>
+    <span class="token keyword">return</span> hidden_states<span class="token punctuation">.</span>reshape<span class="token punctuation">(</span>batch<span class="token punctuation">,</span> num_key_value_heads <span class="token operator">*</span> n_rep<span class="token punctuation">,</span> slen<span class="token punctuation">,</span> head_dim<span class="token punctuation">)</span>
+
+
+<span class="token keyword">class</span> <span class="token class-name">GroupQueryAttention</span><span class="token punctuation">(</span>nn<span class="token punctuation">.</span>Module<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token keyword">def</span> <span class="token function">__init__</span><span class="token punctuation">(</span>
+        self<span class="token punctuation">,</span>
+        hidden_size<span class="token punctuation">:</span> <span class="token builtin">int</span><span class="token punctuation">,</span>
+        num_heads<span class="token punctuation">:</span> <span class="token builtin">int</span><span class="token punctuation">,</span>
+        num_kv_heads<span class="token punctuation">:</span> <span class="token builtin">int</span><span class="token punctuation">,</span>
+        head_dim<span class="token punctuation">:</span> Optional<span class="token punctuation">[</span><span class="token builtin">int</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">None</span><span class="token punctuation">,</span>
+        use_cache<span class="token punctuation">:</span> Optional<span class="token punctuation">[</span><span class="token builtin">bool</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">False</span><span class="token punctuation">,</span>
+    <span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token builtin">super</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span>__init__<span class="token punctuation">(</span><span class="token punctuation">)</span>
+        self<span class="token punctuation">.</span>hidden_size <span class="token operator">=</span> hidden_size
+        self<span class="token punctuation">.</span>num_heads <span class="token operator">=</span> num_heads
+        self<span class="token punctuation">.</span>num_kv_heads <span class="token operator">=</span> num_kv_heads
+        self<span class="token punctuation">.</span>num_groups <span class="token operator">=</span> num_heads <span class="token operator">//</span> num_kv_heads
+        self<span class="token punctuation">.</span>head_dim <span class="token operator">=</span> head_dim <span class="token keyword">or</span> hidden_size <span class="token operator">//</span> num_heads
+        self<span class="token punctuation">.</span>scale <span class="token operator">=</span> self<span class="token punctuation">.</span>head_dim<span class="token operator">**</span><span class="token operator">-</span><span class="token number">0.5</span>
+        self<span class="token punctuation">.</span>use_cache <span class="token operator">=</span> use_cache
+
+        self<span class="token punctuation">.</span>q_proj <span class="token operator">=</span> nn<span class="token punctuation">.</span>Linear<span class="token punctuation">(</span>self<span class="token punctuation">.</span>hidden_size<span class="token punctuation">,</span> self<span class="token punctuation">.</span>num_heads <span class="token operator">*</span> self<span class="token punctuation">.</span>head_dim<span class="token punctuation">)</span>
+
+        <span class="token comment"># different from the MHA/MQA</span>
+        self<span class="token punctuation">.</span>k_proj <span class="token operator">=</span> nn<span class="token punctuation">.</span>Linear<span class="token punctuation">(</span>self<span class="token punctuation">.</span>hidden_size<span class="token punctuation">,</span> self<span class="token punctuation">.</span>num_kv_heads <span class="token operator">*</span> self<span class="token punctuation">.</span>head_dim<span class="token punctuation">)</span>
+        self<span class="token punctuation">.</span>v_proj <span class="token operator">=</span> nn<span class="token punctuation">.</span>Linear<span class="token punctuation">(</span>self<span class="token punctuation">.</span>hidden_size<span class="token punctuation">,</span> self<span class="token punctuation">.</span>num_kv_heads <span class="token operator">*</span> self<span class="token punctuation">.</span>head_dim<span class="token punctuation">)</span>
+
+        self<span class="token punctuation">.</span>o_proj <span class="token operator">=</span> nn<span class="token punctuation">.</span>Linear<span class="token punctuation">(</span>self<span class="token punctuation">.</span>num_heads <span class="token operator">*</span> self<span class="token punctuation">.</span>head_dim<span class="token punctuation">,</span> self<span class="token punctuation">.</span>hidden_size<span class="token punctuation">)</span>
+
+    <span class="token keyword">def</span> <span class="token function">forward</span><span class="token punctuation">(</span>
+        self<span class="token punctuation">,</span>
+        hidden_states<span class="token punctuation">:</span> torch<span class="token punctuation">.</span>Tensor<span class="token punctuation">,</span>
+        position_ids<span class="token punctuation">:</span> Optional<span class="token punctuation">[</span>torch<span class="token punctuation">.</span>LongTensor<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">None</span><span class="token punctuation">,</span>
+    <span class="token punctuation">)</span><span class="token punctuation">:</span>
+        bsz<span class="token punctuation">,</span> q_len<span class="token punctuation">,</span> _ <span class="token operator">=</span> hidden_states<span class="token punctuation">.</span>size<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+        <span class="token comment"># q: (bsz, num_heads, q_len, head_dim)</span>
+        query_states <span class="token operator">=</span> <span class="token punctuation">(</span>
+            self<span class="token punctuation">.</span>q_proj<span class="token punctuation">(</span>hidden_states<span class="token punctuation">)</span>
+            <span class="token punctuation">.</span>view<span class="token punctuation">(</span>bsz<span class="token punctuation">,</span> q_len<span class="token punctuation">,</span> self<span class="token punctuation">.</span>num_heads<span class="token punctuation">,</span> self<span class="token punctuation">.</span>head_dim<span class="token punctuation">)</span>
+            <span class="token punctuation">.</span>transpose<span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span>
+        <span class="token punctuation">)</span>
+        <span class="token comment"># k/v: (bsz, num_kv_heads, q_len, head_dim)</span>
+        key_states <span class="token operator">=</span> <span class="token punctuation">(</span>
+            self<span class="token punctuation">.</span>k_proj<span class="token punctuation">(</span>hidden_states<span class="token punctuation">)</span>
+            <span class="token punctuation">.</span>view<span class="token punctuation">(</span>bsz<span class="token punctuation">,</span> q_len<span class="token punctuation">,</span> self<span class="token punctuation">.</span>num_kv_heads<span class="token punctuation">,</span> self<span class="token punctuation">.</span>head_dim<span class="token punctuation">)</span>
+            <span class="token punctuation">.</span>transpose<span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span>
+        <span class="token punctuation">)</span>
+        value_states <span class="token operator">=</span> <span class="token punctuation">(</span>
+            self<span class="token punctuation">.</span>v_proj<span class="token punctuation">(</span>hidden_states<span class="token punctuation">)</span>
+            <span class="token punctuation">.</span>view<span class="token punctuation">(</span>bsz<span class="token punctuation">,</span> q_len<span class="token punctuation">,</span> self<span class="token punctuation">.</span>num_kv_heads<span class="token punctuation">,</span> self<span class="token punctuation">.</span>head_dim<span class="token punctuation">)</span>
+            <span class="token punctuation">.</span>transpose<span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span>
+        <span class="token punctuation">)</span>
+
+        <span class="token comment"># RoPE</span>
+        query_states <span class="token operator">=</span> apply_rope<span class="token punctuation">(</span>query_states<span class="token punctuation">)</span>
+        key_states <span class="token operator">=</span> apply_rope<span class="token punctuation">(</span>key_states<span class="token punctuation">)</span>
+
+        <span class="token keyword">if</span> self<span class="token punctuation">.</span>use_cache<span class="token punctuation">:</span>
+            <span class="token comment"># Update KV Cache and get full kv</span>
+            <span class="token comment"># k/v: (bsz, num_heads, kv_len, head_dim)</span>
+            key_states<span class="token punctuation">,</span> value_states <span class="token operator">=</span> update_kv_cache<span class="token punctuation">(</span>key_states<span class="token punctuation">,</span> value_states<span class="token punctuation">)</span>
+        kv_len <span class="token operator">=</span> key_states<span class="token punctuation">.</span>shape<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span>
+
+        <span class="token comment"># Repeat kv</span>
+        <span class="token comment"># k/v: (bsz, num_heads, q_len, head_dim)</span>
+        key_states <span class="token operator">=</span> repeat_kv<span class="token punctuation">(</span>key_states<span class="token punctuation">,</span> self<span class="token punctuation">.</span>num_groups<span class="token punctuation">)</span>
+        value_states <span class="token operator">=</span> repeat_kv<span class="token punctuation">(</span>value_states<span class="token punctuation">,</span> self<span class="token punctuation">.</span>num_groups<span class="token punctuation">)</span>
+
+        <span class="token comment"># Softmax(Q @ K^T / sqrt(d_k))</span>
+        <span class="token comment"># attn: (bsz, num_heads, q_len, kv_len)</span>
+        attn_weights <span class="token operator">=</span> <span class="token punctuation">(</span>
+            torch<span class="token punctuation">.</span>einsum<span class="token punctuation">(</span><span class="token string">"bhld, bhnd -> bhln"</span><span class="token punctuation">,</span> query_states<span class="token punctuation">,</span> key_states<span class="token punctuation">)</span> <span class="token operator">*</span> self<span class="token punctuation">.</span>scale
+        <span class="token punctuation">)</span>
+        attn_weights <span class="token operator">=</span> attn_weights<span class="token punctuation">.</span>softmax<span class="token punctuation">(</span>dim<span class="token operator">=</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span>
+
+        <span class="token comment"># A @ V</span>
+        <span class="token comment"># attn: (bsz, num_heads, q_len, head_dim)</span>
+        attn_weights <span class="token operator">=</span> torch<span class="token punctuation">.</span>einsum<span class="token punctuation">(</span><span class="token string">"bhln, bhnd -> bhld"</span><span class="token punctuation">,</span> attn_weights<span class="token punctuation">,</span> value_states<span class="token punctuation">)</span>
+
+        <span class="token comment"># output: (bsz, q_len, hidden_size)</span>
+        attn_output <span class="token operator">=</span> self<span class="token punctuation">.</span>o_proj<span class="token punctuation">(</span>
+            attn_weights<span class="token punctuation">.</span>transpose<span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span>
+            <span class="token punctuation">.</span>contiguous<span class="token punctuation">(</span><span class="token punctuation">)</span>
+            <span class="token punctuation">.</span>view<span class="token punctuation">(</span>bsz<span class="token punctuation">,</span> q_len<span class="token punctuation">,</span> self<span class="token punctuation">.</span>num_heads <span class="token operator">*</span> self<span class="token punctuation">.</span>head_dim<span class="token punctuation">)</span>
+        <span class="token punctuation">)</span>
+        <span class="token keyword">return</span> attn_output<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="mla-multi-head-latent-attention"><a class="markdownIt-Anchor" href="#mla-multi-head-latent-attention"></a> MLA (Multi-head Latent Attention)</h2>
+<img src="https://raw.githubusercontent.com/weikangqi/picgo/main/mla_cc.png" alt="mla_cc.png" style="zoom: 67%;" />
+<pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">import</span> torch
+<span class="token keyword">from</span> torch <span class="token keyword">import</span> nn
+<span class="token keyword">from</span> typing <span class="token keyword">import</span> Optional
+
+
+<span class="token keyword">def</span> <span class="token function">apply_rope</span><span class="token punctuation">(</span>x<span class="token punctuation">:</span> torch<span class="token punctuation">.</span>Tensor<span class="token punctuation">,</span> <span class="token operator">*</span>args<span class="token punctuation">,</span> <span class="token operator">**</span>kwargs<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token keyword">return</span> x
+
+
+<span class="token keyword">def</span> <span class="token function">update_compressed_kv_cache</span><span class="token punctuation">(</span>compressed_kv<span class="token punctuation">:</span> torch<span class="token punctuation">.</span>Tensor<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token keyword">return</span> compressed_kv<span class="token punctuation">.</span>repeat<span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span>
+
+<span class="token keyword">def</span> <span class="token function">repeat_kv</span><span class="token punctuation">(</span>hidden_states<span class="token punctuation">:</span> torch<span class="token punctuation">.</span>Tensor<span class="token punctuation">,</span> n_rep<span class="token punctuation">:</span> Optional<span class="token punctuation">[</span><span class="token builtin">int</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+    batch<span class="token punctuation">,</span> num_key_value_heads<span class="token punctuation">,</span> slen<span class="token punctuation">,</span> head_dim <span class="token operator">=</span> hidden_states<span class="token punctuation">.</span>shape
+    <span class="token keyword">if</span> n_rep <span class="token operator">==</span> <span class="token number">1</span><span class="token punctuation">:</span>
+        <span class="token keyword">return</span> hidden_states
+    hidden_states <span class="token operator">=</span> hidden_states<span class="token punctuation">[</span><span class="token punctuation">:</span><span class="token punctuation">,</span> <span class="token punctuation">:</span><span class="token punctuation">,</span> <span class="token boolean">None</span><span class="token punctuation">,</span> <span class="token punctuation">:</span><span class="token punctuation">,</span> <span class="token punctuation">:</span><span class="token punctuation">]</span><span class="token punctuation">.</span>expand<span class="token punctuation">(</span>
+        batch<span class="token punctuation">,</span> num_key_value_heads<span class="token punctuation">,</span> n_rep<span class="token punctuation">,</span> slen<span class="token punctuation">,</span> head_dim
+    <span class="token punctuation">)</span>
+    <span class="token keyword">return</span> hidden_states<span class="token punctuation">.</span>reshape<span class="token punctuation">(</span>batch<span class="token punctuation">,</span> num_key_value_heads <span class="token operator">*</span> n_rep<span class="token punctuation">,</span> slen<span class="token punctuation">,</span> head_dim<span class="token punctuation">)</span>
+
+<span class="token keyword">class</span> <span class="token class-name">MultiHeadLatentAttention</span><span class="token punctuation">(</span>nn<span class="token punctuation">.</span>Module<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token keyword">def</span> <span class="token function">__init__</span><span class="token punctuation">(</span>
+        self<span class="token punctuation">,</span>
+        hidden_size<span class="token punctuation">:</span> <span class="token builtin">int</span><span class="token punctuation">,</span>
+        num_heads<span class="token punctuation">:</span> <span class="token builtin">int</span><span class="token punctuation">,</span>
+        q_lora_rank<span class="token punctuation">:</span> <span class="token builtin">int</span><span class="token punctuation">,</span>
+        qk_rope_head_dim<span class="token punctuation">:</span> <span class="token builtin">int</span><span class="token punctuation">,</span>
+        qk_nope_head_dim<span class="token punctuation">:</span> <span class="token builtin">int</span><span class="token punctuation">,</span>
+        kv_lora_rank<span class="token punctuation">:</span> <span class="token builtin">int</span><span class="token punctuation">,</span>
+        v_head_dim<span class="token punctuation">:</span> <span class="token builtin">int</span><span class="token punctuation">,</span>
+        use_cache<span class="token punctuation">:</span> Optional<span class="token punctuation">[</span><span class="token builtin">bool</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">False</span><span class="token punctuation">,</span>
+    <span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token builtin">super</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span>__init__<span class="token punctuation">(</span><span class="token punctuation">)</span>
+        qk_head_dim <span class="token operator">=</span> qk_nope_head_dim <span class="token operator">+</span> qk_rope_head_dim
+        self<span class="token punctuation">.</span>hidden_size <span class="token operator">=</span> hidden_size
+        self<span class="token punctuation">.</span>num_heads <span class="token operator">=</span> num_heads
+        self<span class="token punctuation">.</span>q_lora_rank <span class="token operator">=</span> q_lora_rank
+        self<span class="token punctuation">.</span>qk_rope_head_dim <span class="token operator">=</span> qk_rope_head_dim
+        self<span class="token punctuation">.</span>qk_nope_head_dim <span class="token operator">=</span> qk_nope_head_dim
+        self<span class="token punctuation">.</span>kv_lora_rank <span class="token operator">=</span> kv_lora_rank
+        self<span class="token punctuation">.</span>qk_head_dim <span class="token operator">=</span> qk_head_dim
+        self<span class="token punctuation">.</span>v_head_dim <span class="token operator">=</span> v_head_dim
+        self<span class="token punctuation">.</span>scale <span class="token operator">=</span> self<span class="token punctuation">.</span>qk_head_dim<span class="token operator">**</span><span class="token operator">-</span><span class="token number">0.5</span>
+        self<span class="token punctuation">.</span>use_cache <span class="token operator">=</span> use_cache
+
+        self<span class="token punctuation">.</span>q_a_proj <span class="token operator">=</span> nn<span class="token punctuation">.</span>Linear<span class="token punctuation">(</span>hidden_size<span class="token punctuation">,</span> q_lora_rank<span class="token punctuation">)</span>
+        self<span class="token punctuation">.</span>q_b_proj <span class="token operator">=</span> nn<span class="token punctuation">.</span>Linear<span class="token punctuation">(</span>q_lora_rank<span class="token punctuation">,</span> num_heads <span class="token operator">*</span> qk_head_dim<span class="token punctuation">)</span>
+
+        self<span class="token punctuation">.</span>kv_a_proj <span class="token operator">=</span> nn<span class="token punctuation">.</span>Linear<span class="token punctuation">(</span>hidden_size<span class="token punctuation">,</span> qk_rope_head_dim <span class="token operator">+</span> kv_lora_rank<span class="token punctuation">)</span>
+        self<span class="token punctuation">.</span>kv_b_proj <span class="token operator">=</span> nn<span class="token punctuation">.</span>Linear<span class="token punctuation">(</span>
+            kv_lora_rank<span class="token punctuation">,</span> num_heads <span class="token operator">*</span> <span class="token punctuation">(</span>qk_nope_head_dim <span class="token operator">+</span> v_head_dim<span class="token punctuation">)</span>
+        <span class="token punctuation">)</span>
+
+        self<span class="token punctuation">.</span>o_proj <span class="token operator">=</span> nn<span class="token punctuation">.</span>Linear<span class="token punctuation">(</span>num_heads <span class="token operator">*</span> v_head_dim<span class="token punctuation">,</span> hidden_size<span class="token punctuation">)</span>
+
+    <span class="token keyword">def</span> <span class="token function">forward</span><span class="token punctuation">(</span>
+        self<span class="token punctuation">,</span>
+        hidden_states<span class="token punctuation">:</span> torch<span class="token punctuation">.</span>Tensor<span class="token punctuation">,</span>
+        position_ids<span class="token punctuation">:</span> Optional<span class="token punctuation">[</span>torch<span class="token punctuation">.</span>LongTensor<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">None</span><span class="token punctuation">,</span>
+    <span class="token punctuation">)</span><span class="token punctuation">:</span>
+        bsz<span class="token punctuation">,</span> q_len<span class="token punctuation">,</span> _ <span class="token operator">=</span> hidden_states<span class="token punctuation">.</span>size<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+        query_states <span class="token operator">=</span> self<span class="token punctuation">.</span>q_b_proj<span class="token punctuation">(</span>self<span class="token punctuation">.</span>q_a_proj<span class="token punctuation">(</span>hidden_states<span class="token punctuation">)</span><span class="token punctuation">)</span>
+        query_states <span class="token operator">=</span> query_states<span class="token punctuation">.</span>view<span class="token punctuation">(</span>
+            bsz<span class="token punctuation">,</span> q_len<span class="token punctuation">,</span> self<span class="token punctuation">.</span>num_heads<span class="token punctuation">,</span> self<span class="token punctuation">.</span>qk_head_dim
+        <span class="token punctuation">)</span><span class="token punctuation">.</span>transpose<span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span>
+
+        q_nope<span class="token punctuation">,</span> q_rope <span class="token operator">=</span> query_states<span class="token punctuation">.</span>split<span class="token punctuation">(</span>
+            <span class="token punctuation">[</span>self<span class="token punctuation">.</span>qk_nope_head_dim<span class="token punctuation">,</span> self<span class="token punctuation">.</span>qk_rope_head_dim<span class="token punctuation">]</span><span class="token punctuation">,</span> dim<span class="token operator">=</span><span class="token operator">-</span><span class="token number">1</span>
+        <span class="token punctuation">)</span>
+        q_rope <span class="token operator">=</span> apply_rope<span class="token punctuation">(</span>q_rope<span class="token punctuation">)</span>
+        query_states <span class="token operator">=</span> torch<span class="token punctuation">.</span>cat<span class="token punctuation">(</span><span class="token punctuation">[</span>q_nope<span class="token punctuation">,</span> q_rope<span class="token punctuation">]</span><span class="token punctuation">,</span> dim<span class="token operator">=</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span>
+
+        <span class="token comment"># compressed_kv: (bsz, q_len, qk_rope_head_dim + kv_lora_rank)</span>
+        compressed_kv <span class="token operator">=</span> self<span class="token punctuation">.</span>kv_a_proj<span class="token punctuation">(</span>hidden_states<span class="token punctuation">)</span>
+        k_rope<span class="token punctuation">,</span> kv_nope <span class="token operator">=</span> compressed_kv<span class="token punctuation">.</span>split<span class="token punctuation">(</span>
+            <span class="token punctuation">[</span>self<span class="token punctuation">.</span>qk_rope_head_dim<span class="token punctuation">,</span> self<span class="token punctuation">.</span>kv_lora_rank<span class="token punctuation">]</span><span class="token punctuation">,</span> dim<span class="token operator">=</span><span class="token operator">-</span><span class="token number">1</span>
+        <span class="token punctuation">)</span>
+        <span class="token comment"># k_rope: (bsz, num_heads, q_len, qk_rope_head_dim)</span>
+        k_rope <span class="token operator">=</span> repeat_kv<span class="token punctuation">(</span>k_rope<span class="token punctuation">.</span>unsqueeze<span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">,</span> self<span class="token punctuation">.</span>num_heads<span class="token punctuation">)</span>
+        k_rope <span class="token operator">=</span> apply_rope<span class="token punctuation">(</span>k_rope<span class="token punctuation">)</span>
+
+        <span class="token comment"># Store compressed kv as a whole</span>
+        <span class="token keyword">if</span> self<span class="token punctuation">.</span>use_cache<span class="token punctuation">:</span>
+            compressed_kv <span class="token operator">=</span> torch<span class="token punctuation">.</span>cat<span class="token punctuation">(</span><span class="token punctuation">[</span>k_rope<span class="token punctuation">[</span><span class="token punctuation">:</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token punctuation">:</span><span class="token punctuation">,</span> <span class="token punctuation">:</span><span class="token punctuation">]</span><span class="token punctuation">,</span> kv_nope<span class="token punctuation">]</span><span class="token punctuation">,</span> dim<span class="token operator">=</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span>
+            compressed_kv <span class="token operator">=</span> update_compressed_kv_cache<span class="token punctuation">(</span>compressed_kv<span class="token punctuation">)</span>
+            k_rope<span class="token punctuation">,</span> kv_nope <span class="token operator">=</span> compressed_kv<span class="token punctuation">.</span>split<span class="token punctuation">(</span>
+                <span class="token punctuation">[</span>self<span class="token punctuation">.</span>qk_rope_head_dim<span class="token punctuation">,</span> self<span class="token punctuation">.</span>kv_lora_rank<span class="token punctuation">]</span><span class="token punctuation">,</span> dim<span class="token operator">=</span><span class="token operator">-</span><span class="token number">1</span>
+            <span class="token punctuation">)</span>
+            k_rope <span class="token operator">=</span> repeat_kv<span class="token punctuation">(</span>k_rope<span class="token punctuation">.</span>unsqueeze<span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">,</span> self<span class="token punctuation">.</span>num_heads<span class="token punctuation">)</span>
+        kv_len <span class="token operator">=</span> compressed_kv<span class="token punctuation">.</span>shape<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span>
+        
+        kv <span class="token operator">=</span> <span class="token punctuation">(</span>
+            self<span class="token punctuation">.</span>kv_b_proj<span class="token punctuation">(</span>kv_nope<span class="token punctuation">)</span>
+            <span class="token punctuation">.</span>view<span class="token punctuation">(</span>bsz<span class="token punctuation">,</span> kv_len<span class="token punctuation">,</span> self<span class="token punctuation">.</span>num_heads<span class="token punctuation">,</span> self<span class="token punctuation">.</span>qk_nope_head_dim <span class="token operator">+</span> self<span class="token punctuation">.</span>v_head_dim<span class="token punctuation">)</span>
+            <span class="token punctuation">.</span>transpose<span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span>
+        <span class="token punctuation">)</span>
+        k_nope<span class="token punctuation">,</span> value_states <span class="token operator">=</span> kv<span class="token punctuation">.</span>split<span class="token punctuation">(</span>
+            <span class="token punctuation">[</span>self<span class="token punctuation">.</span>qk_nope_head_dim<span class="token punctuation">,</span> self<span class="token punctuation">.</span>v_head_dim<span class="token punctuation">]</span><span class="token punctuation">,</span> dim<span class="token operator">=</span><span class="token operator">-</span><span class="token number">1</span>
+        <span class="token punctuation">)</span>
+        key_states <span class="token operator">=</span> torch<span class="token punctuation">.</span>cat<span class="token punctuation">(</span><span class="token punctuation">[</span>k_rope<span class="token punctuation">,</span> k_nope<span class="token punctuation">]</span><span class="token punctuation">,</span> dim<span class="token operator">=</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span>
+
+        <span class="token comment"># Softmax(Q @ K^T / sqrt(d_k))</span>
+        <span class="token comment"># attn: (bsz, num_heads, q_len, kv_len)</span>
+        attn_weights <span class="token operator">=</span> <span class="token punctuation">(</span>
+            torch<span class="token punctuation">.</span>einsum<span class="token punctuation">(</span><span class="token string">"bhld, bhnd -> bhln"</span><span class="token punctuation">,</span> query_states<span class="token punctuation">,</span> key_states<span class="token punctuation">)</span> <span class="token operator">*</span> self<span class="token punctuation">.</span>scale
+        <span class="token punctuation">)</span>
+        attn_weights <span class="token operator">=</span> attn_weights<span class="token punctuation">.</span>softmax<span class="token punctuation">(</span>dim<span class="token operator">=</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span>
+
+        <span class="token comment"># A @ V</span>
+        <span class="token comment"># attn: (bsz, num_heads, q_len, head_dim)</span>
+        attn_weights <span class="token operator">=</span> torch<span class="token punctuation">.</span>einsum<span class="token punctuation">(</span><span class="token string">"bhln, bhnd -> bhld"</span><span class="token punctuation">,</span> attn_weights<span class="token punctuation">,</span> value_states<span class="token punctuation">)</span>
+
+        <span class="token comment"># output: (bsz, q_len, hidden_size)</span>
+        attn_output <span class="token operator">=</span> self<span class="token punctuation">.</span>o_proj<span class="token punctuation">(</span>
+            attn_weights<span class="token punctuation">.</span>transpose<span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span>
+            <span class="token punctuation">.</span>contiguous<span class="token punctuation">(</span><span class="token punctuation">)</span>
+            <span class="token punctuation">.</span>view<span class="token punctuation">(</span>bsz<span class="token punctuation">,</span> q_len<span class="token punctuation">,</span> self<span class="token punctuation">.</span>num_heads <span class="token operator">*</span> self<span class="token punctuation">.</span>v_head_dim<span class="token punctuation">)</span>
+        <span class="token punctuation">)</span>
+        <span class="token keyword">return</span> attn_output<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="mqa"><a class="markdownIt-Anchor" href="#mqa"></a> MQA</h2>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">import</span> torch
+<span class="token keyword">from</span> torch <span class="token keyword">import</span> nn
+<span class="token keyword">from</span> typing <span class="token keyword">import</span> Optional
+
+
+<span class="token keyword">def</span> <span class="token function">apply_rope</span><span class="token punctuation">(</span>x<span class="token punctuation">:</span> torch<span class="token punctuation">.</span>Tensor<span class="token punctuation">,</span> <span class="token operator">*</span>args<span class="token punctuation">,</span> <span class="token operator">**</span>kwargs<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token keyword">return</span> x
+
+
+<span class="token keyword">def</span> <span class="token function">update_kv_cache</span><span class="token punctuation">(</span>key_states<span class="token punctuation">:</span> torch<span class="token punctuation">.</span>Tensor<span class="token punctuation">,</span> value_states<span class="token punctuation">:</span> torch<span class="token punctuation">.</span>Tensor<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token keyword">return</span> key_states<span class="token punctuation">.</span>repeat<span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">,</span> value_states<span class="token punctuation">.</span>repeat<span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span>
+
+
+<span class="token keyword">def</span> <span class="token function">repeat_kv</span><span class="token punctuation">(</span>hidden_states<span class="token punctuation">:</span> torch<span class="token punctuation">.</span>Tensor<span class="token punctuation">,</span> n_rep<span class="token punctuation">:</span> <span class="token builtin">int</span> <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+    batch<span class="token punctuation">,</span> num_key_value_heads<span class="token punctuation">,</span> slen<span class="token punctuation">,</span> head_dim <span class="token operator">=</span> hidden_states<span class="token punctuation">.</span>shape
+    <span class="token keyword">if</span> n_rep <span class="token operator">==</span> <span class="token number">1</span><span class="token punctuation">:</span>
+        <span class="token keyword">return</span> hidden_states
+    hidden_states <span class="token operator">=</span> hidden_states<span class="token punctuation">[</span><span class="token punctuation">:</span><span class="token punctuation">,</span> <span class="token punctuation">:</span><span class="token punctuation">,</span> <span class="token boolean">None</span><span class="token punctuation">,</span> <span class="token punctuation">:</span><span class="token punctuation">,</span> <span class="token punctuation">:</span><span class="token punctuation">]</span><span class="token punctuation">.</span>expand<span class="token punctuation">(</span>
+        batch<span class="token punctuation">,</span> num_key_value_heads<span class="token punctuation">,</span> n_rep<span class="token punctuation">,</span> slen<span class="token punctuation">,</span> head_dim
+    <span class="token punctuation">)</span>
+    <span class="token keyword">return</span> hidden_states<span class="token punctuation">.</span>reshape<span class="token punctuation">(</span>batch<span class="token punctuation">,</span> num_key_value_heads <span class="token operator">*</span> n_rep<span class="token punctuation">,</span> slen<span class="token punctuation">,</span> head_dim<span class="token punctuation">)</span>
+
+
+<span class="token keyword">class</span> <span class="token class-name">MultiQueryAttention</span><span class="token punctuation">(</span>nn<span class="token punctuation">.</span>Module<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token keyword">def</span> <span class="token function">__init__</span><span class="token punctuation">(</span>
+        self<span class="token punctuation">,</span>
+        hidden_size<span class="token punctuation">:</span> <span class="token builtin">int</span><span class="token punctuation">,</span>
+        num_heads<span class="token punctuation">:</span> <span class="token builtin">int</span><span class="token punctuation">,</span>
+        head_dim<span class="token punctuation">:</span> Optional<span class="token punctuation">[</span><span class="token builtin">int</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">None</span><span class="token punctuation">,</span>
+        use_cache<span class="token punctuation">:</span> Optional<span class="token punctuation">[</span><span class="token builtin">bool</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">False</span><span class="token punctuation">,</span>
+    <span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token builtin">super</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span>__init__<span class="token punctuation">(</span><span class="token punctuation">)</span>
+        self<span class="token punctuation">.</span>hidden_size <span class="token operator">=</span> hidden_size
+        self<span class="token punctuation">.</span>num_heads <span class="token operator">=</span> num_heads
+        self<span class="token punctuation">.</span>head_dim <span class="token operator">=</span> head_dim <span class="token keyword">or</span> hidden_size <span class="token operator">//</span> num_heads
+        self<span class="token punctuation">.</span>scale <span class="token operator">=</span> self<span class="token punctuation">.</span>head_dim<span class="token operator">**</span><span class="token operator">-</span><span class="token number">0.5</span>
+        self<span class="token punctuation">.</span>use_cache <span class="token operator">=</span> use_cache
+
+        self<span class="token punctuation">.</span>q_proj <span class="token operator">=</span> nn<span class="token punctuation">.</span>Linear<span class="token punctuation">(</span>self<span class="token punctuation">.</span>hidden_size<span class="token punctuation">,</span> self<span class="token punctuation">.</span>num_heads <span class="token operator">*</span> self<span class="token punctuation">.</span>head_dim<span class="token punctuation">)</span>
+
+        <span class="token comment"># different from the MHA</span>
+        self<span class="token punctuation">.</span>k_proj <span class="token operator">=</span> nn<span class="token punctuation">.</span>Linear<span class="token punctuation">(</span>self<span class="token punctuation">.</span>hidden_size<span class="token punctuation">,</span> self<span class="token punctuation">.</span>head_dim<span class="token punctuation">)</span>
+        self<span class="token punctuation">.</span>v_proj <span class="token operator">=</span> nn<span class="token punctuation">.</span>Linear<span class="token punctuation">(</span>self<span class="token punctuation">.</span>hidden_size<span class="token punctuation">,</span> self<span class="token punctuation">.</span>head_dim<span class="token punctuation">)</span>
+
+        self<span class="token punctuation">.</span>o_proj <span class="token operator">=</span> nn<span class="token punctuation">.</span>Linear<span class="token punctuation">(</span>self<span class="token punctuation">.</span>num_heads <span class="token operator">*</span> self<span class="token punctuation">.</span>head_dim<span class="token punctuation">,</span> self<span class="token punctuation">.</span>hidden_size<span class="token punctuation">)</span>
+
+    <span class="token keyword">def</span> <span class="token function">forward</span><span class="token punctuation">(</span>
+        self<span class="token punctuation">,</span>
+        hidden_states<span class="token punctuation">:</span> torch<span class="token punctuation">.</span>Tensor<span class="token punctuation">,</span>
+        position_ids<span class="token punctuation">:</span> Optional<span class="token punctuation">[</span>torch<span class="token punctuation">.</span>LongTensor<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">None</span><span class="token punctuation">,</span>
+    <span class="token punctuation">)</span><span class="token punctuation">:</span>
+        bsz<span class="token punctuation">,</span> q_len<span class="token punctuation">,</span> _ <span class="token operator">=</span> hidden_states<span class="token punctuation">.</span>size<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+        <span class="token comment"># q: (bsz, num_heads, q_len, head_dim)</span>
+        query_states <span class="token operator">=</span> <span class="token punctuation">(</span>
+            self<span class="token punctuation">.</span>q_proj<span class="token punctuation">(</span>hidden_states<span class="token punctuation">)</span>
+            <span class="token punctuation">.</span>view<span class="token punctuation">(</span>bsz<span class="token punctuation">,</span> q_len<span class="token punctuation">,</span> self<span class="token punctuation">.</span>num_heads<span class="token punctuation">,</span> self<span class="token punctuation">.</span>head_dim<span class="token punctuation">)</span>
+            <span class="token punctuation">.</span>transpose<span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span>
+        <span class="token punctuation">)</span>
+        <span class="token comment"># k/v: (bsz, 1, q_len, head_dim)</span>
+        key_states <span class="token operator">=</span> self<span class="token punctuation">.</span>k_proj<span class="token punctuation">(</span>hidden_states<span class="token punctuation">)</span><span class="token punctuation">.</span>unsqueeze<span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span>
+        value_states <span class="token operator">=</span> self<span class="token punctuation">.</span>v_proj<span class="token punctuation">(</span>hidden_states<span class="token punctuation">)</span><span class="token punctuation">.</span>unsqueeze<span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span>
+
+        <span class="token comment"># RoPE</span>
+        query_states <span class="token operator">=</span> apply_rope<span class="token punctuation">(</span>query_states<span class="token punctuation">)</span>
+        key_states <span class="token operator">=</span> apply_rope<span class="token punctuation">(</span>key_states<span class="token punctuation">)</span>
+
+        <span class="token keyword">if</span> self<span class="token punctuation">.</span>use_cache<span class="token punctuation">:</span>
+            <span class="token comment"># Update KV Cache and get full kv</span>
+            <span class="token comment"># k/v: (bsz, num_heads, kv_len, head_dim)</span>
+            key_states<span class="token punctuation">,</span> value_states <span class="token operator">=</span> update_kv_cache<span class="token punctuation">(</span>key_states<span class="token punctuation">,</span> value_states<span class="token punctuation">)</span>
+        kv_len <span class="token operator">=</span> key_states<span class="token punctuation">.</span>shape<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span>
+
+        <span class="token comment"># Repeat kv</span>
+        <span class="token comment"># k/v: (bsz, num_heads, q_len, head_dim)</span>
+        key_states <span class="token operator">=</span> repeat_kv<span class="token punctuation">(</span>key_states<span class="token punctuation">,</span> self<span class="token punctuation">.</span>num_heads<span class="token punctuation">)</span>
+        value_states <span class="token operator">=</span> repeat_kv<span class="token punctuation">(</span>value_states<span class="token punctuation">,</span> self<span class="token punctuation">.</span>num_heads<span class="token punctuation">)</span>
+
+        <span class="token comment"># Softmax(Q @ K^T / sqrt(d_k))</span>
+        <span class="token comment"># attn: (bsz, num_heads, q_len, kv_len)</span>
+        attn_weights <span class="token operator">=</span> <span class="token punctuation">(</span>
+            torch<span class="token punctuation">.</span>einsum<span class="token punctuation">(</span><span class="token string">"bhld, bhnd -> bhln"</span><span class="token punctuation">,</span> query_states<span class="token punctuation">,</span> key_states<span class="token punctuation">)</span> <span class="token operator">*</span> self<span class="token punctuation">.</span>scale
+        <span class="token punctuation">)</span>
+        attn_weights <span class="token operator">=</span> attn_weights<span class="token punctuation">.</span>softmax<span class="token punctuation">(</span>dim<span class="token operator">=</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span>
+
+        <span class="token comment"># A @ V</span>
+        <span class="token comment"># attn: (bsz, num_heads, q_len, head_dim)</span>
+        attn_weights <span class="token operator">=</span> torch<span class="token punctuation">.</span>einsum<span class="token punctuation">(</span><span class="token string">"bhln, bhnd -> bhld"</span><span class="token punctuation">,</span> attn_weights<span class="token punctuation">,</span> value_states<span class="token punctuation">)</span>
+
+        <span class="token comment"># output: (bsz, q_len, hidden_size)</span>
+        attn_output <span class="token operator">=</span> self<span class="token punctuation">.</span>o_proj<span class="token punctuation">(</span>
+            attn_weights<span class="token punctuation">.</span>transpose<span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span>
+            <span class="token punctuation">.</span>contiguous<span class="token punctuation">(</span><span class="token punctuation">)</span>
+            <span class="token punctuation">.</span>view<span class="token punctuation">(</span>bsz<span class="token punctuation">,</span> q_len<span class="token punctuation">,</span> self<span class="token punctuation">.</span>num_heads <span class="token operator">*</span> self<span class="token punctuation">.</span>head_dim<span class="token punctuation">)</span>
+        <span class="token punctuation">)</span>
+        <span class="token keyword">return</span> attn_output<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/LLM/" rel="tag"># LLM</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/12/ARM%20%E7%B4%AF%E5%8A%A0%E4%B9%98/" rel="prev" title="ARM 中常用的乘累加（MAC）指令总结">
+      <i class="fa fa-chevron-left"></i> ARM 中常用的乘累加（MAC）指令总结
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/05/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%9F%BA%E7%A1%80/LLama3/" rel="next" title="LLama3 Python">
+      LLama3 Python <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#attention-mha-mla-gqamqa"><span class="nav-number">1.</span> <span class="nav-text"> Attention: MHA, MLA, GQA,MQA</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#mha"><span class="nav-number">1.1.</span> <span class="nav-text"> MHA</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#gqa-grouped-query-attention"><span class="nav-number">1.2.</span> <span class="nav-text"> GQA (Grouped-query Attention)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mla-multi-head-latent-attention"><span class="nav-number">1.3.</span> <span class="nav-text"> MLA (Multi-head Latent Attention)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mqa"><span class="nav-number">1.4.</span> <span class="nav-text"> MQA</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Klay"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">Klay</p>
+  <div class="site-description" itemprop="description">喜乐绷坏麻</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">21</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yourname" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yourname" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yourname@gmail.com" title="E-Mail → mailto:yourname@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Klay</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

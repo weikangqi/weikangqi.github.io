@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"weikangqi.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":300,"display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="ARM 中常用的乘累加（MAC）指令总结 在现代 CPU 和 AI 加速器的指令集中，乘-累加（Multiply-Accumulate, MAC） 是最核心的计算操作之一。 无论是 卷积、矩阵乘法 还是 深度学习中的 GEMM，其本质都是大量的 MAC 运算。 在 ARM 架构下，针对不同的数据类型和应用场景，演进出了多种 乘累加指令。本文将对常见的几类进行梳理，并配合伪代码展示它们的计算方式">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ARM 中常用的乘累加（MAC）指令总结">
+<meta property="og:url" content="https://weikangqi.github.io/2024/12/ARM%20%E7%B4%AF%E5%8A%A0%E4%B9%98/index.html">
+<meta property="og:site_name" content="Blog">
+<meta property="og:description" content="ARM 中常用的乘累加（MAC）指令总结 在现代 CPU 和 AI 加速器的指令集中，乘-累加（Multiply-Accumulate, MAC） 是最核心的计算操作之一。 无论是 卷积、矩阵乘法 还是 深度学习中的 GEMM，其本质都是大量的 MAC 运算。 在 ARM 架构下，针对不同的数据类型和应用场景，演进出了多种 乘累加指令。本文将对常见的几类进行梳理，并配合伪代码展示它们的计算方式">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2024-12-01T15:30:16.000Z">
+<meta property="article:modified_time" content="2025-10-03T03:33:09.851Z">
+<meta property="article:author" content="Klay">
+<meta property="article:tag" content="ARM">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://weikangqi.github.io/2024/12/ARM%20%E7%B4%AF%E5%8A%A0%E4%B9%98/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>ARM 中常用的乘累加（MAC）指令总结 | Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="/css/math/katex.min.css">
+
+<link rel="stylesheet" href="/css/math/style.css">
+<!-- hexo injector head_end end --><link rel="alternate" href="/atom.xml" title="Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Klay's Blog </p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://weikangqi.github.io/2024/12/ARM%20%E7%B4%AF%E5%8A%A0%E4%B9%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="Klay">
+      <meta itemprop="description" content="喜乐绷坏麻">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ARM 中常用的乘累加（MAC）指令总结
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2024-12-01 15:30:16" itemprop="dateCreated datePublished" datetime="2024-12-01T15:30:16+00:00">2024-12-01</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2025-10-03 03:33:09" itemprop="dateModified" datetime="2025-10-03T03:33:09+00:00">2025-10-03</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <hr />
+<h1 id="arm-中常用的乘累加mac指令总结"><a class="markdownIt-Anchor" href="#arm-中常用的乘累加mac指令总结"></a> ARM 中常用的乘累加（MAC）指令总结</h1>
+<p>在现代 CPU 和 AI 加速器的指令集中，<strong>乘-累加（Multiply-Accumulate, MAC）</strong> 是最核心的计算操作之一。<br />
+无论是 <strong>卷积</strong>、<strong>矩阵乘法</strong> 还是 <strong>深度学习中的 GEMM</strong>，其本质都是大量的 MAC 运算。</p>
+<p>在 ARM 架构下，针对不同的数据类型和应用场景，演进出了多种 <strong>乘累加指令</strong>。本文将对常见的几类进行梳理，并配合伪代码展示它们的计算方式。</p>
+<hr />
+<h2 id="1-fmla-基础乘累加"><a class="markdownIt-Anchor" href="#1-fmla-基础乘累加"></a> 1. FMLA —— 基础乘累加</h2>
+<p><strong>FMLA (Floating-point Multiply-Accumulate)</strong> 是最基础的向量乘累加指令。</p>
+<ul>
+<li>
+<p><strong>指令集</strong>：<code>&gt;= ARMv7 (float32)</code>，<code>&gt;= ARMv8 (float16)</code></p>
+</li>
+<li>
+<p><strong>常见 NEON 接口</strong>：</p>
+<ul>
+<li><code>float32x4_t vfmaq_f32(float32x4_t a, float32x4_t b, float32x4_t c)</code></li>
+<li><code>float16x8_t vfmaq_f16(float16x8_t a, float16x8_t b, float16x8_t c)</code></li>
+</ul>
+</li>
+<li>
+<p><strong>运算逻辑</strong>：逐元素乘加</p>
+<pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> N<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    dst<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">+=</span> src1<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">*</span> src2<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+</li>
+</ul>
+<blockquote>
+<p>典型用途：浮点向量加速，如卷积核点积、向量化计算。</p>
+</blockquote>
+<hr />
+<h2 id="2-dot-向量点积"><a class="markdownIt-Anchor" href="#2-dot-向量点积"></a> 2. DOT —— 向量点积</h2>
+<p>为了更高效地处理 <strong>int8 量化推理</strong>，ARM 在 <strong>ARMv8.2</strong> 中引入了 <strong>DOT (Dot Product)</strong> 指令。</p>
+<ul>
+<li>
+<p><strong>指令集</strong>：<code>&gt;= ARMv8.2</code></p>
+</li>
+<li>
+<p><strong>常见 NEON 接口</strong>：</p>
+<ul>
+<li><code>int32x4_t vdotq_s32(int32x4_t r, int8x16_t a, int8x16_t b)</code></li>
+<li><code>int32x4_t vusdotq_s32(int32x4_t r, uint8x16_t a, int8x16_t b)</code></li>
+</ul>
+</li>
+<li>
+<p><strong>运算逻辑</strong>：分块点积 (4 × 4 → int32)</p>
+<pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> <span class="token number">4</span><span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> j <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> j <span class="token operator">&lt;</span> <span class="token number">4</span><span class="token punctuation">;</span> j<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        dst<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">+=</span> src1<span class="token punctuation">[</span>i <span class="token operator">*</span> <span class="token number">4</span> <span class="token operator">+</span> j<span class="token punctuation">]</span> <span class="token operator">*</span> src2<span class="token punctuation">[</span>i <span class="token operator">*</span> <span class="token number">4</span> <span class="token operator">+</span> j<span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+</li>
+</ul>
+<blockquote>
+<p>典型用途：卷积、点积，特别适合 int8 量化模型。</p>
+</blockquote>
+<hr />
+<h2 id="3-mmla-矩阵乘累加"><a class="markdownIt-Anchor" href="#3-mmla-矩阵乘累加"></a> 3. MMLA —— 矩阵乘累加</h2>
+<p>在 <strong>ARMv8.6</strong> 之后，进一步推出了 <strong>MMLA (Matrix Multiply-Accumulate)</strong> 指令，可以直接把 <strong>小块向量视为矩阵</strong>，一次性完成 <strong>2×8 × 8×2</strong> 的矩阵乘法。</p>
+<ul>
+<li>
+<p><strong>指令集</strong>：<code>&gt;= ARMv8.6</code></p>
+</li>
+<li>
+<p><strong>常见 NEON 接口</strong>：</p>
+<ul>
+<li><code>int32x4_t vmmlaq_s32(int32x4_t r, int8x16_t a, int8x16_t b)</code></li>
+<li><code>int32x4_t vusmmlaq_s32(int32x4_t r, uint8x16_t a, int8x16_t b)</code></li>
+</ul>
+</li>
+<li>
+<p><strong>运算逻辑</strong>：小矩阵乘法</p>
+<pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> <span class="token number">2</span><span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> j <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> j <span class="token operator">&lt;</span> <span class="token number">2</span><span class="token punctuation">;</span> j<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> k <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> k <span class="token operator">&lt;</span> <span class="token number">8</span><span class="token punctuation">;</span> k<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            dst<span class="token punctuation">[</span>i <span class="token operator">*</span> <span class="token number">2</span> <span class="token operator">+</span> j<span class="token punctuation">]</span> <span class="token operator">+=</span> src1<span class="token punctuation">[</span>i <span class="token operator">*</span> <span class="token number">8</span> <span class="token operator">+</span> k<span class="token punctuation">]</span> <span class="token operator">*</span> src2<span class="token punctuation">[</span>j <span class="token operator">*</span> <span class="token number">8</span> <span class="token operator">+</span> k<span class="token punctuation">]</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+</li>
+</ul>
+<blockquote>
+<p>典型用途：高效的 int8 GEMM，加速深度学习推理。</p>
+</blockquote>
+<hr />
+<h2 id="4-bfmmla-bfloat16-矩阵乘累加"><a class="markdownIt-Anchor" href="#4-bfmmla-bfloat16-矩阵乘累加"></a> 4. BFMMLA —— BFloat16 矩阵乘累加</h2>
+<p>为了更好地支持 <strong>AI 训练与推理</strong>，ARMv8.6 又引入了 <strong>BFMMLA (BFloat16 Matrix Multiply-Accumulate)</strong>，专门处理 <strong>bfloat16 × bfloat16 → float32</strong>。</p>
+<ul>
+<li>
+<p><strong>指令集</strong>：<code>&gt;= ARMv8.6</code></p>
+</li>
+<li>
+<p><strong>常见 NEON 接口</strong>：</p>
+<ul>
+<li><code>float32x4_t vbfmmlaq_f32(float32x4_t r, bfloat16x8_t a, bfloat16x8_t b)</code></li>
+</ul>
+</li>
+<li>
+<p><strong>运算逻辑</strong>：小矩阵乘法</p>
+<pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> <span class="token number">2</span><span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> j <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> j <span class="token operator">&lt;</span> <span class="token number">2</span><span class="token punctuation">;</span> j<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> k <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> k <span class="token operator">&lt;</span> <span class="token number">4</span><span class="token punctuation">;</span> k<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            dst<span class="token punctuation">[</span>i <span class="token operator">*</span> <span class="token number">2</span> <span class="token operator">+</span> j<span class="token punctuation">]</span> <span class="token operator">+=</span> src1<span class="token punctuation">[</span>i <span class="token operator">*</span> <span class="token number">4</span> <span class="token operator">+</span> k<span class="token punctuation">]</span> <span class="token operator">*</span> src2<span class="token punctuation">[</span>j <span class="token operator">*</span> <span class="token number">4</span> <span class="token operator">+</span> k<span class="token punctuation">]</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+</li>
+</ul>
+<blockquote>
+<p>典型用途：深度学习训练（bfloat16 是目前主流 AI 训练精度格式）。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>指令</th>
+<th>指令集</th>
+<th>数据类型</th>
+<th>运算规模</th>
+<th>主要用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>FMLA</strong></td>
+<td>ARMv7/ARMv8</td>
+<td>FP16/FP32</td>
+<td>逐元素</td>
+<td>浮点向量运算</td>
+</tr>
+<tr>
+<td><strong>SDOT/USDOT</strong></td>
+<td>ARMv8.2</td>
+<td>int8/uint8 → int32</td>
+<td>4×4 点积</td>
+<td>int8 卷积、点积</td>
+</tr>
+<tr>
+<td><strong>SMMLA/USMMLA</strong></td>
+<td>ARMv8.6</td>
+<td>int8/uint8 → int32</td>
+<td>2×2×8 矩阵</td>
+<td>int8 GEMM</td>
+</tr>
+<tr>
+<td><strong>BFMMLA</strong></td>
+<td>ARMv8.6</td>
+<td>bfloat16 → float32</td>
+<td>2×2×4 矩阵</td>
+<td>深度学习 (bfloat16)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ARM/" rel="tag"># ARM</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/12/flashattention/" rel="prev" title="flash attention">
+      <i class="fa fa-chevron-left"></i> flash attention
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/02/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%9F%BA%E7%A1%80/attention%20%E6%9C%BA%E5%88%B6/" rel="next" title="Attention(MHA, MLA, GQA, MQA)">
+      Attention(MHA, MLA, GQA, MQA) <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#arm-%E4%B8%AD%E5%B8%B8%E7%94%A8%E7%9A%84%E4%B9%98%E7%B4%AF%E5%8A%A0mac%E6%8C%87%E4%BB%A4%E6%80%BB%E7%BB%93"><span class="nav-number">1.</span> <span class="nav-text"> ARM 中常用的乘累加（MAC）指令总结</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-fmla-%E5%9F%BA%E7%A1%80%E4%B9%98%E7%B4%AF%E5%8A%A0"><span class="nav-number">1.1.</span> <span class="nav-text"> 1. FMLA —— 基础乘累加</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-dot-%E5%90%91%E9%87%8F%E7%82%B9%E7%A7%AF"><span class="nav-number">1.2.</span> <span class="nav-text"> 2. DOT —— 向量点积</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-mmla-%E7%9F%A9%E9%98%B5%E4%B9%98%E7%B4%AF%E5%8A%A0"><span class="nav-number">1.3.</span> <span class="nav-text"> 3. MMLA —— 矩阵乘累加</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-bfmmla-bfloat16-%E7%9F%A9%E9%98%B5%E4%B9%98%E7%B4%AF%E5%8A%A0"><span class="nav-number">1.4.</span> <span class="nav-text"> 4. BFMMLA —— BFloat16 矩阵乘累加</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Klay"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">Klay</p>
+  <div class="site-description" itemprop="description">喜乐绷坏麻</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">21</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yourname" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yourname" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yourname@gmail.com" title="E-Mail → mailto:yourname@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Klay</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
