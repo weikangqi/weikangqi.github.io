@@ -1198,7 +1198,7 @@ pre .javascript .function {
 }
 .links-of-author a::before,
 .links-of-author span.exturl::before {
-  background: #668687;
+  background: #247d12;
   border-radius: 50%;
   content: ' ';
   display: inline-block;
@@ -1798,7 +1798,7 @@ pre .javascript .function {
   position: relative;
   vertical-align: top;
   text-align: left;
-  color: #0f54c4;
+  color: #1d1e1f;
 }
 .posts-expand .post-title-link::before {
   background: var(--link-color);
