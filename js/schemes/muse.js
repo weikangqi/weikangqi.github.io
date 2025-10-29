@@ -97,6 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // } : {
       //   'padding-left': 0
       // }));
+      
     }
   };
   sidebarToggleMotion.init();
