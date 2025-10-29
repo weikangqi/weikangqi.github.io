@@ -1198,7 +1198,7 @@ pre .javascript .function {
 }
 .links-of-author a::before,
 .links-of-author span.exturl::before {
-  background: #bb3e34;
+  background: #fff;
   border-radius: 50%;
   content: ' ';
   display: inline-block;
@@ -1301,27 +1301,6 @@ pre .javascript .function {
 }
 .sidebar-panel-active {
   display: block;
-}
-.sidebar-toggle {
-  background: #222;
-  bottom: 45px;
-  cursor: pointer;
-  height: 14px;
-  left: 30px;
-  padding: 5px;
-  position: fixed;
-  width: 14px;
-  z-index: 1300;
-}
-@media (max-width: 991px) {
-  .sidebar-toggle {
-    left: 20px;
-    opacity: 0.8;
-    display: none;
-  }
-}
-.sidebar-toggle:hover .toggle-line {
-  background: #87daff;
 }
 .post-toc {
   font-size: 0.875em;
@@ -1782,6 +1761,13 @@ pre .javascript .function {
 }
 .posts-expand .post-header {
   font-size: 1.125em;
+}
+.post-excerpt {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #6c6c6c;
+  margin-top: 8px;
+  margin-bottom: 12px;
 }
 .posts-expand .post-title {
   font-size: 1.5em;
