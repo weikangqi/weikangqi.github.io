@@ -84,19 +84,19 @@ document.addEventListener('DOMContentLoaded', () => {
       }));
     },
     hideSidebar: function() {
-      this.isSidebarVisible = false;
-      this.sidebarEl.classList.remove('sidebar-active');
+      // this.isSidebarVisible = false;
+      // this.sidebarEl.classList.remove('sidebar-active');
 
-      sidebarToggleLines.init();
-      NexT.utils.isDesktop() && window.anime(Object.assign({
-        targets : document.body,
-        duration: SIDEBAR_DISPLAY_DURATION,
-        easing  : 'linear'
-      }, isRight ? {
-        'padding-right': 0
-      } : {
-        'padding-left': 0
-      }));
+      // sidebarToggleLines.init();
+      // NexT.utils.isDesktop() && window.anime(Object.assign({
+      //   targets : document.body,
+      //   duration: SIDEBAR_DISPLAY_DURATION,
+      //   easing  : 'linear'
+      // }, isRight ? {
+      //   'padding-right': 0
+      // } : {
+      //   'padding-left': 0
+      // }));
     }
   };
   sidebarToggleMotion.init();
